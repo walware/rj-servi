@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+		version="1.2">
+	
+	<converter>
+		<converter-id>convertDuration</converter-id>
+		<converter-class>de.walware.rj.servi.webapp.DurationConverter</converter-class>
+	</converter>
+	
+	<managed-bean>
+		<managed-bean-name>otherConfig</managed-bean-name>
+		<managed-bean-class>de.walware.rj.servi.webapp.OtherConfigBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>poolConfig</managed-bean-name>
+		<managed-bean-class>de.walware.rj.servi.webapp.PoolConfigBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>rConfig</managed-bean-name>
+		<managed-bean-class>de.walware.rj.servi.webapp.NodeConfigBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>poolStatus</managed-bean-name>
+		<managed-bean-class>de.walware.rj.servi.webapp.PoolStatusBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>debug</managed-bean-name>
+		<managed-bean-class>de.walware.rj.servi.webapp.DebugBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<navigation-rule>
+		<display-name>welcome</display-name>
+		<from-view-id>/m/welcome.jsp</from-view-id>
+	</navigation-rule>
+	<navigation-rule>
+		<display-name>conf-pool</display-name>
+		<from-view-id>/m/conf-pool.jsp</from-view-id>
+		<navigation-case>
+			<from-outcome>conf-pool</from-outcome>
+			<to-view-id>/m/conf-pool.jsp</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<display-name>conf-r</display-name>
+		<from-view-id>/m/conf-r.jsp</from-view-id>
+		<navigation-case>
+			<from-outcome>conf-r</from-outcome>
+			<to-view-id>/m/conf-r.jsp</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>/m/*</from-view-id>
+		<navigation-case>
+			<from-outcome>status-pool</from-outcome>
+			<to-view-id>/m/status-poolnodes.jsp</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+</faces-config>

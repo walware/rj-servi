@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+	
+	<display-name>de.walware.rj.servi.webapp</display-name>
+	
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	
+	<servlet>
+		<servlet-name>FacesServlet</servlet-name>
+		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FacesServlet</servlet-name>
+		<url-pattern>/faces/*</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>RJServlet</servlet-name>
+		<servlet-class>de.walware.rj.servi.webapp.RJServlet</servlet-class>
+		<load-on-startup></load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RJServlet</servlet-name>
+		<url-pattern>/status</url-pattern>
+	</servlet-mapping>
+	
+	<filter>
+		<display-name>CheckingFilter</display-name>
+		<filter-name>CheckingFilter</filter-name>
+		<filter-class>de.walware.rj.servi.webapp.CheckingFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CheckingFilter</filter-name>
+		<url-pattern>/faces/m/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+	</filter-mapping>
+	
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+
+<!--
+	<security-constraint>
+		<web-resource-collection>
+		<web-resource-name>admin</web-resource-name>
+			<url-pattern>/m/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+-->
+
+</web-app>
