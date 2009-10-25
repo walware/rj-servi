@@ -35,9 +35,9 @@ public interface RServiPoolManager {
 	
 	String getId();
 	
-	void setRegistry(RMIRegistry rmiRegistry);
 	void setConfig(PoolConfig config);
 	PoolConfig getConfig();
+	void addNodeFactory(RServiNodeFactory nodeFactory);
 	RServiNodeFactory getFactories();
 	
 	void init() throws RjException;

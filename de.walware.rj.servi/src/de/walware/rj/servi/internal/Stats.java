@@ -35,10 +35,10 @@ public class Stats {
 	public void logServUsage(final int borrowTime, final int evalTime) {
 	}
 	
-	public void logNodeUsageBegin(final PoolObject poolObj) {
+	public void logNodeUsageBegin(final NodeHandler poolObj) {
 //		this.fTempList.add(poolObj.stats);
 	}
-	public void logNodeUsageEnd(final PoolObject poolObj) {
+	public void logNodeUsageEnd(final NodeHandler poolObj) {
 	}
 	
 	public void logServRequestFailed(final int reason) {

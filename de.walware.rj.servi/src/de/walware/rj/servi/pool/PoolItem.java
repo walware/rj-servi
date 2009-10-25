@@ -14,7 +14,7 @@ package de.walware.rj.servi.pool;
 import org.apache.commons.pool.ObjectPoolItem;
 
 import de.walware.rj.RjException;
-import de.walware.rj.servi.internal.PoolObject;
+import de.walware.rj.servi.internal.NodeHandler;
 
 
 public class PoolItem {
@@ -38,7 +38,7 @@ public class PoolItem {
 	private long usageCount;
 	private long usageDuration;
 	
-	private final PoolObject object;
+	private final NodeHandler object;
 	
 	private String client;
 	
@@ -69,7 +69,7 @@ public class PoolItem {
 			}
 			this.client = item.getClientLabel();
 		}
-		this.object = (PoolObject)item.getObject();
+		this.object = (NodeHandler)item.getObject();
 	}
 	
 	

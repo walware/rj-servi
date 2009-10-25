@@ -60,7 +60,6 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 	
 	public String activateObject(final ObjectPoolItem item, final Object arg) throws Exception {
 		final PoolObject poolObj = (PoolObject) item.getObject();
-		final StringBuilder sb = (arg != null) ? new StringBuilder((String) arg) : new StringBuilder();
 		String clientHost;
 		try {
 			clientHost = RemoteServer.getClientHost();
@@ -68,39 +67,30 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 		catch (final ServerNotActiveException e) {
 			clientHost = poolObj.node.getPoolHost();
 		}
-		sb.append('@');
-		sb.append(clientHost);
-		final String label = sb.toString();
-		poolObj.clientHandler = poolObj.node.bindClient(label);
-		return label;
+		return poolObj.bindClient((String) arg, clientHost);
 	}
 	
 	public void passivateObject(final ObjectPoolItem item) throws Exception {
 		final PoolObject poolObj = (PoolObject) item.getObject();
-		poolObj.node.unbindClient();
-		poolObj.clientHandler = null;
+		poolObj.unbindClient();
 	}
 	
 	public void destroyObject(final ObjectPoolItem item) throws Exception {
 		final PoolObject poolObj = (PoolObject) item.getObject();
 		this.stats.logNodeUsageEnd(poolObj);
-		if (poolObj.node != null) {
-			try {
-				poolObj.node.shutdown();
-			}
-			catch (final Throwable e) {
-				PoolManager.LOGGER.log(Level.WARNING, "An exception was thrown when trying to shutdown the node", e);
-			}
+		try {
+			poolObj.shutdown();
+		}
+		catch (final Throwable e) {
+			PoolManager.LOGGER.log(Level.WARNING, Messages.ShutdownNode_error_message, e);
 		}
 		try {
 			UnicastRemoteObject.unexportObject(poolObj, true);
 		}
 		catch (final Throwable e) {
-			PoolManager.LOGGER.log(Level.WARNING, "An exception was thrown when trying to unexport the node", e);
+			PoolManager.LOGGER.log(Level.WARNING, Messages.RmiUnexportNode_error_message, e);
 		}
 		this.nodeFactory.cleanupNode(poolObj);
-		poolObj.node = null;
-		poolObj.clientHandler = null;
 	}
 	
 	public boolean validateObject(final ObjectPoolItem item) {

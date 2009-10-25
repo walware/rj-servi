@@ -22,12 +22,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import de.walware.ecommons.ECommons;
+import de.walware.ecommons.net.RMIAddress;
+import de.walware.ecommons.net.RMIRegistry;
+import de.walware.ecommons.net.RMIUtil;
+
 import de.walware.rj.RjException;
+import de.walware.rj.RjInvalidConfigurationException;
 import de.walware.rj.server.srvext.ServerUtil;
-import de.walware.rj.servi.internal.LocalNodeFactory;
-import de.walware.rj.servi.internal.PoolManager;
-import de.walware.rj.servi.pool.RMIRegistry;
+import de.walware.rj.servi.pool.RServiImplS;
 import de.walware.rj.servi.pool.RServiNodeConfig;
+import de.walware.rj.servi.pool.RServiNodeFactory;
 import de.walware.rj.servi.pool.RServiPoolManager;
 
 
@@ -50,47 +58,48 @@ public class RJServlet extends HttpServlet {
 				id = id.substring(1);
 			}
 			getServletContext().setAttribute(RJWeb.POOLID_KEY, id);
+			
 			final String libPath = getServletContext().getRealPath("WEB-INF/lib");
-			
-			final PoolManager manager = new PoolManager(id);
-			
-			final PoolConfigBean poolConfig = (PoolConfigBean) Utils.loadFromFile(getServletContext(), new PoolConfigBean());
-			manager.setConfig(poolConfig);
 			
 			final String property = System.getProperty("java.rmi.server.codebase");
 			if (property == null) {
 				final String[] libs = ServerUtil.searchRJLibs(libPath,
-						new String[] { ServerUtil.RJ_SERVER, ServerUtil.RJ_SERVI });
+						new String[] { ServerUtil.RJ_SERVER_ID, ServerUtil.RJ_SERVI_ID });
 				System.setProperty("java.rmi.server.codebase", ServerUtil.concatCodebase(libs));
 			}
 			
 			final OtherConfigBean rmiConfig = (OtherConfigBean) Utils.loadFromFile(getServletContext(), new OtherConfigBean());
-			System.setProperty("java.rmi.server.hostname", rmiConfig.getEffectiveHostaddress());
-			Registry registry = LocateRegistry.getRegistry(rmiConfig.getEffectiveRegistryPort());
+			if (System.getProperty("java.rmi.server.hostname") == null) {
+				System.setProperty("java.rmi.server.hostname", rmiConfig.getEffectiveHostaddress());
+			}
+			final RMIAddress rmiRegistryAddress = new RMIAddress(rmiConfig.getEffectiveHostaddress(), rmiConfig.getEffectiveRegistryPort(), null);
+			Registry registry = LocateRegistry.getRegistry(rmiRegistryAddress.getPortNum());
+			RMIRegistry rmiRegistry = null;
 			if (rmiConfig.getRegistryEmbed()) {
 				try {
-					registry.list();
+					rmiRegistry = new RMIRegistry(rmiRegistryAddress, registry, true);
 				}
 				catch (final RemoteException e) {
-					try {
-						registry = LocateRegistry.createRegistry(rmiConfig.getEffectiveRegistryPort());
-					}
-					catch (final RemoteException e2) {
-						log("Failed to connect to registry - will try to start embedded.", e);
-						log("Failed to create embedded registry.", e2);
-						return;
-					}
+					ECommons.getEnv().log(new Status(IStatus.INFO, RJWeb.PLUGIN_ID, 0, "Failed to connect to registry - will try to start embedded.", e));
+					RMIUtil.INSTANCE.setEmbeddedPrivatePort(rmiConfig.getEffectiveRegistryPort());
+					rmiRegistry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry();
 				}
 			}
-			final RMIRegistry rmiRegistry = new RMIRegistry(rmiConfig.getEffectiveHostaddress(), rmiConfig.getEffectiveRegistryPort(), registry);
-			manager.setRegistry(rmiRegistry);
+			if (rmiRegistry == null) {
+				rmiRegistry = new RMIRegistry(rmiRegistryAddress, registry, true);
+			}
 			
-			final LocalNodeFactory nodeFactory = new LocalNodeFactory(rmiRegistry, id, libPath);
+			final RServiPoolManager manager = RServiImplS.createPool(id, rmiRegistry);
+			
+			final PoolConfigBean poolConfig = (PoolConfigBean) Utils.loadFromFile(getServletContext(), new PoolConfigBean());
+			manager.setConfig(poolConfig);
+			
+			final RServiNodeFactory nodeFactory = RServiImplS.createLocalNodeFactory(id, rmiRegistry, libPath);
 			final RServiNodeConfig factoryConfig = (RServiNodeConfig) Utils.loadFromFile(getServletContext(), new RServiNodeConfig());
 			try {
 				nodeFactory.setConfig(factoryConfig);
 			}
-			catch (final Exception exception) {}
+			catch (final RjInvalidConfigurationException e) {}
 			manager.addNodeFactory(nodeFactory);
 			
 			manager.init();

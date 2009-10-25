@@ -23,12 +23,14 @@ import org.apache.commons.pool.ObjectPoolItem;
 import org.apache.commons.pool.impl.ExtGenericObjectPool;
 import org.apache.commons.pool.impl.ExtGenericObjectPool.Config;
 
+import de.walware.ecommons.net.RMIRegistry;
+
 import de.walware.rj.RjException;
 import de.walware.rj.RjInitFailedException;
 import de.walware.rj.server.ServerLogin;
 import de.walware.rj.servi.RServi;
 import de.walware.rj.servi.pool.PoolConfig;
-import de.walware.rj.servi.pool.RMIRegistry;
+import de.walware.rj.servi.pool.RServiNodeFactory;
 import de.walware.rj.servi.pool.RServiPool;
 import de.walware.rj.servi.pool.RServiPoolManager;
 
@@ -41,19 +43,24 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	
 	private final String id;
 	
+	private RMIRegistry registry;
+	
 	private ExtGenericObjectPool pool;
 	private PoolObjectFactory poolFactory;
 	private PoolConfig poolConfig;
 	
-	private RMIRegistry registry;
 	
 	private NodeFactory nodeFactory;
 	
 	private final Stats stats;
 	
 	
-	public PoolManager(final String id) {
+	public PoolManager(final String id, final RMIRegistry registry) {
+		if (id == null || registry == null) {
+			throw new NullPointerException();
+		}
 		this.id = id;
+		this.registry = registry;
 		this.stats = new Stats();
 		this.poolConfig = new PoolConfig();
 	}
@@ -67,15 +74,8 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		return this.nodeFactory;
 	}
 	
-	public synchronized void addNodeFactory(final NodeFactory factory) {
-		this.nodeFactory = factory;
-	}
-	
-	public synchronized void setRegistry(final RMIRegistry rmiRegistry) {
-		if (this.pool != null) {
-			throw new IllegalStateException("Must be called before init.");
-		}
-		this.registry = rmiRegistry;
+	public synchronized void addNodeFactory(final RServiNodeFactory factory) {
+		this.nodeFactory = (NodeFactory) factory;
 	}
 	
 	public synchronized void setConfig(PoolConfig config) {
@@ -101,7 +101,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		if (this.registry != null) {
 			try {
 				final Remote remote = UnicastRemoteObject.exportObject(this, 0);
-				this.registry.registry.rebind(PoolConfig.getPoolName(this.id), remote);
+				this.registry.getRegistry().rebind(PoolConfig.getPoolName(this.id), remote);
 			}
 			catch (final Exception e) {
 				try {
@@ -121,7 +121,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	public synchronized void stop(final int mode) throws RjException {
 		if (this.registry != null) {
 			try {
-				this.registry.registry.unbind(PoolConfig.getPoolName(this.id));
+				this.registry.getRegistry().unbind(PoolConfig.getPoolName(this.id));
 			}
 			catch (final Exception e) {
 				if (mode != 8) {
@@ -179,12 +179,12 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		}
 		catch (final NoSuchElementException e) {
 			this.stats.logServRequestFailed(3);
-			throw new NoSuchElementException("Cannot provide RServi instance: No free node available.");
+			throw new NoSuchElementException(Messages.GetRServi_NoInstance_pub_Pool_message);
 		}
 		catch (final Exception e) {
 			this.stats.logServRequestFailed(4);
-			LOGGER.log(Level.SEVERE, "An unexpected error occurred when providing RServi instance.", e);
-			throw new RjException("Cannot provide RServi instance: Internal error occurred.");
+			LOGGER.log(Level.SEVERE, Messages.BindClient_error_message, e);
+			throw new RjException(Messages.GetRServi_pub_error_message);
 		}
 	}
 	

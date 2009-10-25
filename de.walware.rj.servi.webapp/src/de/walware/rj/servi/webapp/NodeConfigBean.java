@@ -21,7 +21,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 
 import de.walware.rj.RjException;
-import de.walware.rj.servi.internal.LocalNodeFactory;
 import de.walware.rj.servi.pool.RServiNodeConfig;
 import de.walware.rj.servi.pool.RServiNodeFactory;
 import de.walware.rj.servi.pool.RServiPoolManager;
@@ -82,7 +81,7 @@ public class NodeConfigBean extends RServiNodeConfig {
 			FacesUtils.addErrorMessage(null, "The pool is not available.");
 			return RJWeb.RCONFIG_NAV;
 		}
-		final LocalNodeFactory factory = (LocalNodeFactory) poolManager.getFactories();
+		final RServiNodeFactory factory = poolManager.getFactories();
 		load(factory.getConfig());
 		return RJWeb.RCONFIG_NAV;
 	}

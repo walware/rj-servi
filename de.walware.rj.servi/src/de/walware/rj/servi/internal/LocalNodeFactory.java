@@ -11,6 +11,9 @@
 
 package de.walware.rj.servi.internal;
 
+import static de.walware.rj.server.srvext.ServerUtil.RJ_SERVER_ID;
+import static de.walware.rj.server.srvext.ServerUtil.RJ_SERVI_ID;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,18 +25,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.walware.ecommons.net.RMIAddress;
+import de.walware.ecommons.net.RMIRegistry;
+
 import de.walware.rj.RjException;
 import de.walware.rj.RjInvalidConfigurationException;
 import de.walware.rj.server.Server;
 import de.walware.rj.server.ServerLogin;
 import de.walware.rj.server.srvext.ServerUtil;
-import de.walware.rj.servi.pool.RMIRegistry;
 import de.walware.rj.servi.pool.RServiNode;
 import de.walware.rj.servi.pool.RServiNodeConfig;
 
 
-public class LocalNodeFactory implements NodeFactory {
+public abstract class LocalNodeFactory implements NodeFactory {
 	
+	
+	public static final String[] CODEBASE_LIBS = new String[] {
+			RJ_SERVER_ID, RJ_SERVI_ID };
 	
 	private static class ProcessConfig {
 		final Map<String, String> addEnv = new HashMap<String, String>();
@@ -46,9 +54,8 @@ public class LocalNodeFactory implements NodeFactory {
 	
 	private final String poolId;
 	private RServiNodeConfig baseConfig;
-	private final String libPath;
+	private String[] libIds;
 	
-	private final String javaClassPath;
 	private final String securityPolicyPath;
 	private ProcessConfig processConfig;
 	
@@ -59,17 +66,19 @@ public class LocalNodeFactory implements NodeFactory {
 	private boolean verbose;
 	
 	
-	public LocalNodeFactory(final RMIRegistry registry, final String poolId, final String libPath) throws RjInvalidConfigurationException {
+	protected LocalNodeFactory(final String poolId, final RMIRegistry registry, String[] libIds) throws RjInvalidConfigurationException {
 		this.nodeRegistry = registry;
 		this.poolId = poolId;
+		this.libIds = libIds;
 		this.baseConfig = new RServiNodeConfig();
-		this.libPath = libPath;
 		
-		final String[] libs = ServerUtil.searchRJLibs(libPath,
-				new String[] { ServerUtil.RJ_DATA, ServerUtil.RJ_SERVER, ServerUtil.RJ_SERVI, "de.walware.rj.services.eruntime" });
-		this.javaClassPath = ServerUtil.concatPathVar(libs);
-		this.securityPolicyPath = libPath + File.separatorChar + "security.policy";
+		this.securityPolicyPath = getPolicyFile();
 	}
+	
+	
+	protected abstract String[] getRJLibs(String[] libIds) throws RjInvalidConfigurationException;
+	
+	protected abstract String getPolicyFile() throws RjInvalidConfigurationException;
 	
 	
 	public void setConfig(final RServiNodeConfig config) throws RjInvalidConfigurationException {
@@ -84,8 +93,17 @@ public class LocalNodeFactory implements NodeFactory {
 		
 		p.command.add(javaHome + File.separatorChar + "bin" + File.separatorChar + "java");
 		
-		p.command.add("-classpath");
-		p.command.add(this.javaClassPath);
+		{	p.command.add("-classpath");
+			final String[] libs;
+			try {
+				libs = getRJLibs(this.libIds);
+			}
+			catch (RjInvalidConfigurationException e) {
+				this.errorMessage = e.getMessage();
+				throw e;
+			}
+			p.command.add(ServerUtil.concatPathVar(libs));
+		}
 		
 		String javaArgs = config.getJavaArgs();
 		if (javaArgs != null && (javaArgs = javaArgs.trim()).length() > 0) {
@@ -106,8 +124,14 @@ public class LocalNodeFactory implements NodeFactory {
 			p.command.add(sb.toString());
 		}
 		if (!javaArgs.contains("-Djava.rmi.server.codebase=")) {
-			final String[] libs = ServerUtil.searchRJLibs(this.libPath,
-					new String[] { ServerUtil.RJ_SERVER, ServerUtil.RJ_SERVI });
+			final String[] libs;
+			try {
+				libs = getRJLibs(CODEBASE_LIBS);
+			}
+			catch (RjInvalidConfigurationException e) {
+				this.errorMessage = e.getMessage();
+				throw e;
+			}
 			sb.setLength(0);
 			sb.append("-Djava.rmi.server.codebase=");
 			sb.append(ServerUtil.concatCodebase(libs));
@@ -117,7 +141,7 @@ public class LocalNodeFactory implements NodeFactory {
 			sb.setLength(0);
 			sb.append("-Xss");
 			sb.append(config.getBits()*256);
-			sb.append("k"); //$NON-NLS-1$ 
+			sb.append("k"); 
 			p.command.add(sb.toString());
 		}
 		
@@ -175,10 +199,12 @@ public class LocalNodeFactory implements NodeFactory {
 	}
 	
 	
-	public void createNode(final PoolObject poolObj) throws RjException {
+	public void createNode(final NodeHandler poolObj) throws RjException {
 		final ProcessConfig p = this.processConfig;
 		if (p == null) {
-			throw new RjInvalidConfigurationException(this.errorMessage);
+			String message = this.errorMessage;
+			throw new RjInvalidConfigurationException((message != null) ? message :
+					"Missing configuration.");
 		}
 		ProcessBuilder pBuilder;
 		String id;
@@ -196,8 +222,8 @@ public class LocalNodeFactory implements NodeFactory {
 			}
 			command = new ArrayList<String>(p.command.size());
 			command.addAll(p.command);
-			poolObj.address = this.nodeRegistry.getItemAddress(id);
-			command.set(p.nameCommandIdx, poolObj.address);
+			poolObj.address = new RMIAddress(this.nodeRegistry.getAddress(), id);
+			command.set(p.nameCommandIdx, poolObj.address.getAddress());
 			if (this.verbose) {
 				command.add("-verbose");
 			}
@@ -216,7 +242,7 @@ public class LocalNodeFactory implements NodeFactory {
 			
 			for (int i = 1; ; i++) {
 				try {
-					final Server server = (Server) this.nodeRegistry.registry.lookup(id);
+					final Server server = (Server) this.nodeRegistry.getRegistry().lookup(id);
 					final ServerLogin login = server.createLogin(Server.C_RSERVI_NODECONTROL);
 					final RServiNode node = (RServiNode) server.execute(Server.C_RSERVI_NODECONTROL, null, login);
 					
@@ -316,7 +342,7 @@ public class LocalNodeFactory implements NodeFactory {
 		}
 	}
 	
-	public void cleanupNode(final PoolObject poolObj) {
+	public void cleanupNode(final NodeHandler poolObj) {
 		if (!this.verbose && poolObj.dir != null
 				&& poolObj.dir.exists() && poolObj.dir.isDirectory()) {
 			try {

@@ -15,6 +15,8 @@ package de.walware.rj.servi.webapp;
 public class RJWeb {
 	
 	
+	public static final String PLUGIN_ID = "de.walware.rj.servi.webapp";
+	
 	public static final String POOLMANAGER_KEY = "pool.manager";
 	public static final String POOLID_KEY = "pool.id";
 	

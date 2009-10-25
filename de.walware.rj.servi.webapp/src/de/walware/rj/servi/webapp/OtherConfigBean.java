@@ -12,14 +12,16 @@
 package de.walware.rj.servi.webapp;
 
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 
+import de.walware.ecommons.net.RMIAddress;
+
 import de.walware.rj.servi.pool.PoolConfig;
 import de.walware.rj.servi.pool.PropertiesBean;
-import de.walware.rj.servi.pool.RMIRegistry;
 
 
 public class OtherConfigBean implements PropertiesBean {
@@ -124,11 +126,17 @@ public class OtherConfigBean implements PropertiesBean {
 	}
 	
 	public String getEffectivePoolAddress() {
-		if (!validate()) {
-			return "";
+		if (validate()) {
+			try {
+				return new RMIAddress(this.effectiveHostaddress, this.effectiveRegsitryPort,
+						PoolConfig.getPoolName(FacesUtils.getPoolId())).toString();
+			}
+			catch (UnknownHostException e) {}
+			catch (MalformedURLException e) {
+				// TODO 
+			}
 		}
-		return RMIRegistry.getItemAddress(this.effectiveHostaddress, this.effectiveRegsitryPort,
-				PoolConfig.getPoolName(FacesUtils.getPoolId()));
+		return "";
 	}
 	
 	private boolean validate() {

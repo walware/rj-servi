@@ -18,7 +18,7 @@ import de.walware.rj.servi.pool.RServiNodeFactory;
 public interface NodeFactory extends RServiNodeFactory {
 	
 	
-	void createNode(PoolObject poolObj) throws RjException;
-	void cleanupNode(PoolObject poolObj);
+	void createNode(NodeHandler poolObj) throws RjException;
+	void cleanupNode(NodeHandler poolObj);
 	
 }

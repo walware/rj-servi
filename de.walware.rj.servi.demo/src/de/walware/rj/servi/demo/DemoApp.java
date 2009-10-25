@@ -26,6 +26,7 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -71,8 +72,10 @@ public class DemoApp {
 	}
 	
 	
-	private Text fInputText;
-	private Button fInitButton;
+	private Text fInitRemoteText;
+	private Button fInitRemoteButton;
+	private Text fInitEmbeddedText;
+	private Button fInitEmbeddedButton;
 	private Button fCloseButton;
 	private Text fLogText;
 	
@@ -108,7 +111,7 @@ public class DemoApp {
 		
 		parent.getShell().addShellListener(new ShellAdapter() {
 			@Override
-			public void shellClosed(org.eclipse.swt.events.ShellEvent e) {
+			public void shellClosed(ShellEvent e) {
 				if (fRServi != null) {
 					close();
 				}
@@ -137,19 +140,36 @@ public class DemoApp {
 			fLogText.setLayoutData(gd);
 		}
 		{	addLabel(composite, "Pool:");
-			fInputText = new Text(composite, SWT.SINGLE | SWT.BORDER);
-			fInputText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			fInitRemoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
+			fInitRemoteText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			addDummy(composite);
-			fInitButton = new Button(composite, SWT.PUSH);
-			fInitButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			fInitButton.setText("Start");
-			fInitButton.addSelectionListener(new SelectionAdapter() {
+			fInitRemoteButton = new Button(composite, SWT.PUSH);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.widthHint = 300;
+			fInitRemoteButton.setLayoutData(gd);
+			fInitRemoteButton.setText("Start - Connect Remote");
+			fInitRemoteButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					init();
+					initRemote();
 				}
 			});
+			
+//			addLabel(composite, "R_HOME:");
+//			fInitEmbeddedText = new Text(composite, SWT.SINGLE | SWT.BORDER);
+//			fInitEmbeddedText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//			
+//			addDummy(composite);
+//			fInitEmbeddedButton = new Button(composite, SWT.PUSH);
+//			fInitEmbeddedButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//			fInitEmbeddedButton.setText("Start - Embedded");
+//			fInitEmbeddedButton.addSelectionListener(new SelectionAdapter() {
+//				@Override
+//				public void widgetSelected(SelectionEvent e) {
+//					initEmbedded();
+//				}
+//			});
 			addDummy(composite);
 			fCloseButton = new Button(composite, SWT.PUSH);
 			fCloseButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -324,7 +344,11 @@ public class DemoApp {
 			
 		form.setWeights(new int[] { 2, 3 });
 		
-		fInputText.setText("rmi://localhost/rservi-pool");
+		fInitRemoteText.setText("rmi://localhost/rservi-pool");
+		String rHome = System.getenv("R_HOME");
+		if (rHome != null) {
+			fInitEmbeddedText.setText(rHome);
+		}
 		
 		return composite;
 	}
@@ -372,7 +396,10 @@ public class DemoApp {
 	
 	private void checkedEnabled() {
 		boolean ok = (fRServi != null);
-		fInitButton.setEnabled(!ok);
+		fInitRemoteButton.setEnabled(!ok);
+		if (fInitEmbeddedButton != null) {
+			fInitEmbeddedButton.setEnabled(!ok);
+		}
 		fCloseButton.setEnabled(ok);
 		
 		fEvalVoidButton.setEnabled(ok);
@@ -392,11 +419,11 @@ public class DemoApp {
 		fFunctionEvalData.setEnabled(ok);
 	}
 	
-	private void init() {
+	private void initRemote() {
 		fLogText.setText("");
 		fLogText.append("Requesting RServi instance...");
 		try {
-			fRServi = RServiUtil.getRServi(fInputText.getText(), "demo/test");
+			fRServi = RServiUtil.getRServi(fInitRemoteText.getText(), "demo/test");
 			logOK();
 		}
 		catch (Exception e) {
@@ -405,6 +432,20 @@ public class DemoApp {
 		}
 		checkedEnabled();
 	}
+	
+//	private void initEmbedded() {
+//		fLogText.setText("");
+//		fLogText.append("Requesting RServi instance...");
+//		try {
+//			TODO
+//			logOK();
+//		}
+//		catch (Exception e) {
+//			fRServi = null;
+//			logError(e);
+//		}
+//		checkedEnabled();
+//	}
 	
 	private void close() {
 		fLogText.append("Closing RServi instance...");

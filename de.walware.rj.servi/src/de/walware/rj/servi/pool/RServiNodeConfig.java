@@ -14,6 +14,9 @@ package de.walware.rj.servi.pool;
 import java.util.Properties;
 
 
+/**
+ * Configuration for an R node (of pool or embedded).
+ */
 public class RServiNodeConfig implements PropertiesBean {
 	
 	

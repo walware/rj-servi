@@ -11,38 +11,25 @@
 
 package de.walware.rj.servi.internal;
 
-import static org.apache.commons.pool.ObjectPoolItem.State.LENT;
-
-import java.io.File;
 import java.rmi.server.Unreferenced;
 import java.util.logging.Level;
 
 import org.apache.commons.pool.ObjectPoolItem;
 
 import de.walware.rj.RjException;
-import de.walware.rj.servi.pool.RServiNode;
-import de.walware.rj.services.RPlatform;
 
 
-public class PoolObject implements RServiImpl.PoolRef, Unreferenced {
+public class PoolObject extends NodeHandler implements RServiImpl.PoolRef, Unreferenced {
+	
 	
 	final ObjectPoolItem item;
 	final Stats.NodeEntry stats = new Stats.NodeEntry();
 	
-	RServiNode node;
 	
-	String address;
-	File dir;
-	
-	RServiBackend clientHandler;
-	RPlatform rInfo;
-	
-	boolean isConsoleEnabled;
-	
-	
-	public PoolObject(final ObjectPoolItem item) {
+	public PoolObject(ObjectPoolItem item) {
 		this.item = item;
 	}
+	
 	
 	public long getAccessId() {
 		final long clientId = this.item.getClientId();
@@ -70,7 +57,7 @@ public class PoolObject implements RServiImpl.PoolRef, Unreferenced {
 	
 	public void unreferenced() {
 		synchronized (this.item) {
-			if (this.item.getState() != LENT
+			if (this.item.getState() != ObjectPoolItem.State.LENT
 					|| this.item.getClientId() == -1L) {
 				return;
 			}
@@ -83,28 +70,6 @@ public class PoolObject implements RServiImpl.PoolRef, Unreferenced {
 		catch (final Exception e) {
 			PoolManager.LOGGER.log(Level.SEVERE, "An unexpected error occurred when returning RServi instance.", e);
 		}
-	}
-	
-	public boolean isConsoleEnabled() {
-		return this.isConsoleEnabled;
-	}
-	
-	public void enableConsole(final String authConfig) throws RjException {
-		try {
-			this.isConsoleEnabled = this.node.setConsole(authConfig);
-		}
-		catch (final Exception e) {
-			PoolManager.LOGGER.log(Level.SEVERE, "An error occurred when configuring the debug console.", e);
-			throw new RjException("An error occurred when configuring the debug console. See server log for detail.");
-		}
-	}
-	
-	public void disableConsole() throws RjException {
-		enableConsole(null);
-	}
-	
-	public String getAddress() {
-		return this.address;
 	}
 	
 }

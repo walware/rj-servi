@@ -37,6 +37,11 @@
 		<dispatcher>REQUEST</dispatcher>
 	</filter-mapping>
 	
+	<listener>
+		<display-name>AppEnv for ECommons</display-name>
+		<listener-class>de.walware.rj.servi.webapp.EAppEnvDummy</listener-class>
+	</listener>
+	
 	<session-config>
 		<session-timeout>30</session-timeout>
 	</session-config>

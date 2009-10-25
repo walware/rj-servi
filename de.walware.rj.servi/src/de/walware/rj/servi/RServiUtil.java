@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import de.walware.rj.RjException;
+import de.walware.rj.servi.pool.EmbeddedRServiManager;
 import de.walware.rj.servi.pool.RServiPool;
 
 
@@ -67,11 +68,11 @@ public class RServiUtil {
 		}
 		catch (final NotBoundException e) {
 			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
-					"The address doesn't point to a valid RServi pool.", e));
+					"The address does not point to a valid RServi pool.", e));
 		}
 		catch (final ClassCastException e) {
 			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
-					"The address doesn't point to a valid RServi pool.", e));
+					"The address does not point to a valid/compatible RServi pool.", e));
 		}
 		catch (final RemoteException e) {
 			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
@@ -87,6 +88,37 @@ public class RServiUtil {
 		catch (final RemoteException e) {
 			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
 					"Failed looking for RServi pool in the RMI registry.", e));
+		}
+	}
+	
+	/**
+	 * Requests a {@link RServi} instance from the given manager. The manager must be
+	 * configured and started.
+	 * <p>
+	 * The R services returned by this method are available for exclusive usage
+	 * by the caller (consumer). The consumer is responsible to return it to the manager
+	 * by {@link RServi#close() closing} the RServi.
+	 * 
+	 * @param manager manager for embedded RServi
+	 * @param name a name which can be used to identify the client
+	 * @return a reference to the RServi instance
+	 * @throws CoreException if the operation was failed; the status
+	 *     of the exception contains detail about the cause
+	 * @throws NoSuchElementException if there is currently no free RServi
+	 *     instance available. A later call with the same configuration 
+	 *     can be successfully.
+	 */
+	public static RServi getRServi(final EmbeddedRServiManager manager, final String name) throws CoreException, NoSuchElementException {
+		if (manager == null) {
+			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+					"Embedded RServi instance is not available.", null));
+		}
+		try {
+			return manager.getRServi(name);
+		}
+		catch (final RjException e) {
+			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+					"Failed getting an embedded RServi instance.", e));
 		}
 	}
 	
