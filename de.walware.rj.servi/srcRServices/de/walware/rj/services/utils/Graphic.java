@@ -82,6 +82,22 @@ public abstract class Graphic {
 		service.downloadFile(out, filename, 0, monitor);
 	}
 	
+	public byte[] create(String plotCommand, RService service, IProgressMonitor monitor) throws CoreException {
+		String filename = "plot-"+System.nanoTime()+".plot";
+		prepare(filename, service, monitor);
+		service.evalVoid(plotCommand, monitor);
+		service.evalVoid("dev.off()", monitor);
+		return service.downloadFile(filename, 0, monitor);
+	}
+	
+	public void create(String plotCommand, OutputStream out, RService service, IProgressMonitor monitor) throws CoreException {
+		String filename = "plot-"+System.nanoTime()+".plot";
+		prepare(filename, service, monitor);
+		service.evalVoid(plotCommand, monitor);
+		service.evalVoid("dev.off()", monitor);
+		service.downloadFile(out, filename, 0, monitor);
+	}
+	
 	protected abstract void prepare(String filename, RService service, IProgressMonitor monitor) throws CoreException;
 	
 }
