@@ -166,7 +166,7 @@ public class FunctionCallImpl implements FunctionCall {
 					else if (value instanceof RObject) {
 						final String tmp = "rjfctmp"+i;
 						this.service.assignData(tmp, (RObject) value, monitor);
-						call.append(".rj_eval.getTmp(\"");
+						call.append(".rj.getTmp(\"");
 						call.append(tmp);
 						call.append("\")");
 					}

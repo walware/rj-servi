@@ -230,13 +230,13 @@ public class NodeServer extends DefaultServerImpl {
 		this.resetCommand = "{" +
 				"rm(list=ls());" +
 				"gc();" +
-				".rj_eval.getTmp<-function(o){x<-get(o,pos=.GlobalEnv);rm(list=o,pos=.GlobalEnv);x};" +
-				".rj_eval.wd<-\""+this.workingDirectory.replace("\\", "\\\\")+"\";" +
-				"setwd(.rj_eval.wd);" +
+				".rj.getTmp<-function(o){x<-get(o,pos=.GlobalEnv);rm(list=o,pos=.GlobalEnv);x};" +
+				".rj.wd<-\""+this.workingDirectory.replace("\\", "\\\\")+"\";" +
+				"setwd(.rj.wd);" +
 		"}";
 		BinExchange.setPathResolver(this);
 		
-		Map<String, Object> properties = new HashMap<String, Object>();
+		final Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("args", new String[0]);
 		this.internalEngine.start(this.consoleDummyClient, properties);
 		
@@ -244,7 +244,7 @@ public class NodeServer extends DefaultServerImpl {
 			synchronized (this.serviRunLock) {
 				runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0, this.resetCommand));
 				
-				RList rPlatformData = (RList) runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_DATA, 0, "list(.Platform$OS.type, .Platform$file.sep, .Platform$path.sep, paste(version$major, version$minor, sep=\".\"))"));
+				final RList rPlatformData = (RList) runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_DATA, 0, "list(.Platform$OS.type, .Platform$file.sep, .Platform$path.sep, paste(version$major, version$minor, sep=\".\"))"));
 				this.rPlatform = new RPlatform(
 						rPlatformData.get(0).getData().getChar(0),
 						rPlatformData.get(1).getData().getChar(0),
@@ -252,7 +252,7 @@ public class NodeServer extends DefaultServerImpl {
 						rPlatformData.get(3).getData().getChar(0) );
 			}
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			throw new RjException("An error occurred while preparing initially the workspace.", e);
 		}
 	}
@@ -321,7 +321,7 @@ public class NodeServer extends DefaultServerImpl {
 						ServerUtil.cleanDir(new File(this.workingDirectory), "out.log");
 					}
 				}
-				catch (Exception e) {
+				catch (final Exception e) {
 					throw new RemoteException("An error occurred while resetting the workspace.", e);
 				}
 			}

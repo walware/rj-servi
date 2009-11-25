@@ -26,7 +26,7 @@ public class PoolObject extends NodeHandler implements RServiImpl.PoolRef, Unref
 	final Stats.NodeEntry stats = new Stats.NodeEntry();
 	
 	
-	public PoolObject(ObjectPoolItem item) {
+	public PoolObject(final ObjectPoolItem item) {
 		this.item = item;
 	}
 	

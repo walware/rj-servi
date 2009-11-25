@@ -11,6 +11,8 @@
 
 package de.walware.rj.servi.internal;
 
+import static de.walware.rj.server.srvext.ServerUtil.MISSING_ANSWER_STATUS;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -24,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import de.walware.rj.RjException;
-import de.walware.rj.RjOperationFailedException;
 import de.walware.rj.data.RObject;
 import de.walware.rj.data.RObjectFactory;
 import de.walware.rj.data.RReference;
@@ -63,10 +64,10 @@ public class RServiImpl implements RServi, Serializable {
 	private final ReentrantLock runMainLock = new ReentrantLock();
 	private final MainCmdC2SList runMainC2SList = new MainCmdC2SList();
 	
-	private RPlatform rPlatform;
+	private final RPlatform rPlatform;
 	
 	
-	public RServiImpl(final long accessId, final PoolRef ref, final RServiBackend backend, RPlatform rPlatform) {
+	public RServiImpl(final long accessId, final PoolRef ref, final RServiBackend backend, final RPlatform rPlatform) {
 		this.accessId = accessId;
 		this.poolRef = ref;
 		this.backend = backend;
@@ -121,7 +122,7 @@ public class RServiImpl implements RServi, Serializable {
 						}
 						break COM_TYPE;
 					default:
-						throw new RjOperationFailedException(status.getMessage());
+						throw new RjException(status.getMessage());
 					}
 				case RjsComObject.T_MAIN_LIST:
 					final MainCmdS2CList list = (MainCmdS2CList) receivedCom;
@@ -172,11 +173,15 @@ public class RServiImpl implements RServi, Serializable {
 	
 	public void evalVoid(final String command, final IProgressMonitor monitor) throws CoreException {
 		final DataCmdItem answer = runMainLoop(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0, command), monitor);
-		if (answer == null || answer.getStatus() == RjsStatus.ERROR) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, "Evaluation failed."));
-		}
-		if (answer.getStatus() == RjsStatus.CANCEL) {
-			throw new CoreException(Status.CANCEL_STATUS);
+		if (answer == null || !answer.isOK()) {
+			final RjsStatus status = (answer != null) ? answer.getStatus() : MISSING_ANSWER_STATUS;
+			if (status.getSeverity() == RjsStatus.CANCEL) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
+			else {
+				throw new CoreException(new Status(status.getSeverity(), Utils.PLUGIN_ID, status.getCode(),
+						"Evaluation failed: " + status.getMessage(), null));
+			}
 		}
 	}
 	
@@ -188,11 +193,15 @@ public class RServiImpl implements RServi, Serializable {
 		final byte checkedDepth = (depth < Byte.MAX_VALUE) ? (byte) depth : Byte.MAX_VALUE;
 		final DataCmdItem answer = runMainLoop(null, new DataCmdItem(((options & RObjectFactory.F_ONLY_STRUCT) == RObjectFactory.F_ONLY_STRUCT) ?
 				DataCmdItem.EVAL_STRUCT : DataCmdItem.EVAL_DATA, 0, checkedDepth, command, factoryId), monitor);
-		if (answer == null || answer.getStatus() == RjsStatus.ERROR) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, "Evaluation failed."));
-		}
-		if (answer.getStatus() == RjsStatus.CANCEL) {
-			throw new CoreException(Status.CANCEL_STATUS);
+		if (answer == null || !answer.isOK()) {
+			final RjsStatus status = (answer != null) ? answer.getStatus() : MISSING_ANSWER_STATUS;
+			if (status.getSeverity() == RjsStatus.CANCEL) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
+			else {
+				throw new CoreException(new Status(status.getSeverity(), Utils.PLUGIN_ID, status.getCode(),
+						"Evaluation failed: " + status.getMessage(), null));
+			}
 		}
 		return answer.getData();
 	}
@@ -206,22 +215,30 @@ public class RServiImpl implements RServi, Serializable {
 		final long handle = reference.getHandle();
 		final DataCmdItem answer = runMainLoop(null, new DataCmdItem(((options & RObjectFactory.F_ONLY_STRUCT) == RObjectFactory.F_ONLY_STRUCT) ?
 				DataCmdItem.RESOLVE_STRUCT : DataCmdItem.RESOLVE_DATA, 0, checkedDepth, Long.toString(handle), factoryId), monitor);
-		if (answer == null || answer.getStatus() == RjsStatus.ERROR) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, "Evaluation failed."));
-		}
-		if (answer.getStatus() == RjsStatus.CANCEL) {
-			throw new CoreException(Status.CANCEL_STATUS);
+		if (answer == null || !answer.isOK()) {
+			final RjsStatus status = (answer != null) ? answer.getStatus() : MISSING_ANSWER_STATUS;
+			if (status.getSeverity() == RjsStatus.CANCEL) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
+			else {
+				throw new CoreException(new Status(status.getSeverity(), Utils.PLUGIN_ID, status.getCode(),
+						"Evaluation failed: " + status.getMessage(), null));
+			}
 		}
 		return answer.getData();
 	}
 	
 	public void assignData(final String expression, final RObject data, final IProgressMonitor monitor) throws CoreException {
 		final DataCmdItem answer = runMainLoop(null, new DataCmdItem(DataCmdItem.ASSIGN_DATA, 0, expression, data), monitor);
-		if (answer == null || answer.getStatus() == RjsStatus.ERROR) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, "Assignment failed."));
-		}
-		if (answer.getStatus() == RjsStatus.CANCEL) {
-			throw new CoreException(Status.CANCEL_STATUS);
+		if (answer == null || !answer.isOK()) {
+			final RjsStatus status = (answer != null) ? answer.getStatus() : MISSING_ANSWER_STATUS;
+			if (status.getSeverity() == RjsStatus.CANCEL) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
+			else {
+				throw new CoreException(new Status(status.getSeverity(), Utils.PLUGIN_ID, status.getCode(),
+						"Assignment failed: " + status.getMessage(), null));
+			}
 		}
 	}
 	
@@ -234,11 +251,15 @@ public class RServiImpl implements RServi, Serializable {
 		finally {
 			request.clear();
 		}
-		if (answer == null || answer.getStatus().getSeverity() == RjsStatus.ERROR) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, "Downloading file failed: " + answer.getStatus().getMessage()));
-		}
-		if (answer.getStatus().getSeverity() == RjsStatus.CANCEL) {
-			throw new CoreException(Status.CANCEL_STATUS);
+		if (answer == null || !answer.isOK()) {
+			final RjsStatus status = (answer != null) ? answer.getStatus() : MISSING_ANSWER_STATUS;
+			if (status.getSeverity() == RjsStatus.CANCEL) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
+			else {
+				throw new CoreException(new Status(status.getSeverity(), Utils.PLUGIN_ID, status.getCode(),
+						"Downloading file failed: " + status.getMessage(), null));
+			}
 		}
 	}
 	
@@ -251,11 +272,15 @@ public class RServiImpl implements RServi, Serializable {
 		finally {
 			request.clear();
 		}
-		if (answer == null || answer.getStatus().getSeverity() == RjsStatus.ERROR) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, "Downloading file failed: " + answer.getStatus().getMessage()));
-		}
-		if (answer.getStatus().getSeverity() == RjsStatus.CANCEL) {
-			throw new CoreException(Status.CANCEL_STATUS);
+		if (answer == null || !answer.isOK()) {
+			final RjsStatus status = (answer != null) ? answer.getStatus() : MISSING_ANSWER_STATUS;
+			if (status.getSeverity() == RjsStatus.CANCEL) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
+			else {
+				throw new CoreException(new Status(status.getSeverity(), Utils.PLUGIN_ID, status.getCode(),
+						"Downloading file failed: " + status.getMessage(), null));
+			}
 		}
 		return answer.getBytes();
 	}
@@ -269,11 +294,15 @@ public class RServiImpl implements RServi, Serializable {
 		finally {
 			request.clear();
 		}
-		if (answer == null || answer.getStatus().getSeverity() == RjsStatus.ERROR) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, "Uploading file failed: " + answer.getStatus().getMessage()));
-		}
-		if (answer.getStatus().getSeverity() == RjsStatus.CANCEL) {
-			throw new CoreException(Status.CANCEL_STATUS);
+		if (answer == null || !answer.isOK()) {
+			final RjsStatus status = (answer != null) ? answer.getStatus() : MISSING_ANSWER_STATUS;
+			if (status.getSeverity() == RjsStatus.CANCEL) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
+			else {
+				throw new CoreException(new Status(status.getSeverity(), Utils.PLUGIN_ID, status.getCode(),
+						"Uploading file failed: " + status.getMessage(), null));
+			}
 		}
 	}
 	

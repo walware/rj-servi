@@ -69,7 +69,7 @@ public abstract class NodeHandler {
 		}
 		sb.append('@');
 		sb.append(host);
-		String client = sb.toString();
+		final String client = sb.toString();
 		this.clientHandler = this.node.bindClient(client);
 		return client;
 	}

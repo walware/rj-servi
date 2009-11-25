@@ -43,7 +43,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	
 	private final String id;
 	
-	private RMIRegistry registry;
+	private final RMIRegistry registry;
 	
 	private ExtGenericObjectPool pool;
 	private PoolObjectFactory poolFactory;

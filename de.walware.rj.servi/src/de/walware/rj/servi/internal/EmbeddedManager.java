@@ -34,18 +34,18 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 	
 	private class EmbeddedObject extends NodeHandler implements RServiImpl.PoolRef {
 		
-		public void returnObject(long accessId) throws RjException, RemoteException {
+		public void returnObject(final long accessId) throws RjException, RemoteException {
 			returnRServi(accessId);
 		}
 		
 	}
 	
 	
-	private String id;
+	private final String id;
 	
-	private RMIRegistry registry;
+	private final RMIRegistry registry;
 	
-	private LocalNodeFactory factory;
+	private final LocalNodeFactory factory;
 	
 	private EmbeddedObject handler;
 	
@@ -53,7 +53,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 	private long accessId;
 	
 	
-	public EmbeddedManager(final String id, final RMIRegistry registry, RServiNodeFactory factory) {
+	public EmbeddedManager(final String id, final RMIRegistry registry, final RServiNodeFactory factory) {
 		if (id == null || registry == null) {
 			throw new NullPointerException();
 		}
@@ -76,13 +76,13 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 	}
 	
 	public synchronized void start() throws RjException {
-		EmbeddedObject poolObj = new EmbeddedObject();
+		final EmbeddedObject poolObj = new EmbeddedObject();
 		try {
 			this.factory.createNode(poolObj);
 			this.handler = poolObj;
 			ECommons.getEnv().addStoppingListener(this);
 		}
-		catch (Throwable e) {
+		catch (final Throwable e) {
 			ECommons.getEnv().log(new Status(IStatus.ERROR, ServerUtil.RJ_SERVI_ID, Messages.StartNode_error_message, e));
 			throw new RjInitFailedException(Messages.StartEmbedded_pub_error_message,
 					(e instanceof RjException) ? e : null);
@@ -100,7 +100,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 		try {
 			this.handler.shutdown();
 		}
-		catch (Throwable e) {
+		catch (final Throwable e) {
 			ECommons.getEnv().log(new Status(IStatus.ERROR, ServerUtil.RJ_SERVI_ID, Messages.ShutdownNode_error_message, e));
 		}
 		this.factory.cleanupNode(this.handler);
@@ -117,7 +117,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 		try {
 			this.handler.bindClient(name, "embedded");
 		}
-		catch (Throwable e) {
+		catch (final Throwable e) {
 			ECommons.getEnv().log(new Status(IStatus.ERROR, ServerUtil.RJ_SERVI_ID, Messages.BindClient_error_message, e));
 			throw new RjException(Messages.GetRServi_pub_error_message);
 		}
@@ -137,7 +137,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 		try {
 			this.handler.unbindClient();
 		}
-		catch (Throwable e) {
+		catch (final Throwable e) {
 			ECommons.getEnv().log(new Status(IStatus.ERROR, ServerUtil.RJ_SERVI_ID, Messages.UnbindClient_error_message, e));
 			stop();
 		}

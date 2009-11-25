@@ -66,7 +66,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	private boolean verbose;
 	
 	
-	protected LocalNodeFactory(final String poolId, final RMIRegistry registry, String[] libIds) throws RjInvalidConfigurationException {
+	protected LocalNodeFactory(final String poolId, final RMIRegistry registry, final String[] libIds) throws RjInvalidConfigurationException {
 		this.nodeRegistry = registry;
 		this.poolId = poolId;
 		this.libIds = libIds;
@@ -98,7 +98,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 			try {
 				libs = getRJLibs(this.libIds);
 			}
-			catch (RjInvalidConfigurationException e) {
+			catch (final RjInvalidConfigurationException e) {
 				this.errorMessage = e.getMessage();
 				throw e;
 			}
@@ -128,7 +128,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 			try {
 				libs = getRJLibs(CODEBASE_LIBS);
 			}
-			catch (RjInvalidConfigurationException e) {
+			catch (final RjInvalidConfigurationException e) {
 				this.errorMessage = e.getMessage();
 				throw e;
 			}
@@ -202,7 +202,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	public void createNode(final NodeHandler poolObj) throws RjException {
 		final ProcessConfig p = this.processConfig;
 		if (p == null) {
-			String message = this.errorMessage;
+			final String message = this.errorMessage;
 			throw new RjInvalidConfigurationException((message != null) ? message :
 					"Missing configuration.");
 		}
@@ -280,7 +280,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 				final InputStream stdout = process.getInputStream();
 				{
 					sb.append("\n<STDOUT>\n");
-					InputStreamReader reader = new InputStreamReader(stdout);
+					final InputStreamReader reader = new InputStreamReader(stdout);
 					try { // read non-blocking
 						int n;
 						while (reader.ready() && (n = reader.read(buffer, 0, buffer.length)) >= 0) {
