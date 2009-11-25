@@ -58,17 +58,17 @@ public class NodeConfigBean extends RServiNodeConfig {
 		boolean valid = true;
 		final String rHome = getRHome();
 		if (rHome != null && !new File(rHome).exists()) {
-			FacesUtils.addErrorMessage(R_HOME_UI, "The directory does not exists.");
+			FacesUtils.addErrorMessage(R_HOME_UI, "The directory does not exist.");
 			valid = false;
 		}
 		final String javaHome = getJavaHome();
 		if (javaHome != null && !new File(javaHome).exists()) {
-			FacesUtils.addErrorMessage(JAVA_HOME_UI, "The directory does not exists.");
+			FacesUtils.addErrorMessage(JAVA_HOME_UI, "The directory does not exist.");
 			valid = false;
 		}
 		final String baseWd = getBaseWorkingDirectory();
 		if (baseWd != null && !new File(baseWd).exists()) {
-			FacesUtils.addErrorMessage(BASE_WD_UI, "The directory does not exists.");
+			FacesUtils.addErrorMessage(BASE_WD_UI, "The directory does not exist.");
 			valid = false;
 		}
 		return valid;

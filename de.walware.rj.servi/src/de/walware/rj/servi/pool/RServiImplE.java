@@ -36,14 +36,30 @@ import de.walware.rj.servi.internal.LocalNodeFactory;
 public class RServiImplE {
 	
 	
-	public static RServiNodeFactory createLocalNodeFactory(final String poolId, final RMIRegistry registry) 
+	/**
+	 * @deprecated use {@link #createLocalhostNodeFactory(String, RMIRegistry)}
+	 */
+	@Deprecated
+	public static RServiNodeFactory createLocalNodeFactory(final String poolId, final RMIRegistry registry) {
+		return createLocalNodeFactory(poolId, registry);
+	}
+	
+	/**
+	 * Creates a node factory establishing RServi nodes on the local system for the local host.
+	 * 
+	 * @param poolId the id of the pool or application
+	 * @param registry a handler for the RMI registry to use
+	 * @return a node factory
+	 * @throws RjInvalidConfigurationException
+	 */
+	public static RServiNodeFactory createLocalhostNodeFactory(final String poolId, final RMIRegistry registry) 
 			throws RjInvalidConfigurationException {
 		final String[] libIds = new String[] {
 				RJ_DATA_ID, RJ_SERVER_ID, RJ_SERVI_ID, "org.eclipse.equinox.common", "org.eclipse.osgi" };
 		
 		return new LocalNodeFactory(poolId, registry, libIds) {
 			@Override
-			protected String[] getRJLibs(String[] libIds) throws RjInvalidConfigurationException {
+			protected String[] getRJLibs(final String[] libIds) throws RjInvalidConfigurationException {
 				return EServerUtil.searchRJLibsInPlatform(libIds, (getConfig().getBits() == 64));
 			}
 			@Override
@@ -60,17 +76,25 @@ public class RServiImplE {
 				throw new RjInvalidConfigurationException("RJ Server bundle ('"+RJ_SERVER_ID+"') is missing.");
 			}
 			final URL intern = bundle.getEntry("/localhost.policy"); 
-			URL java = FileLocator.resolve(intern);
-			String path = java.toExternalForm();
+			final URL java = FileLocator.resolve(intern);
+			final String path = java.toExternalForm();
 			return path;
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			throw new RjInvalidConfigurationException("Failed to resolve path to 'localhost.policy'.", e);
 		}
 	}
 	
-	public static EmbeddedRServiManager createEmbeddedRServi(final String poolId, final RMIRegistry registry, final RServiNodeFactory factory) {
-		return new EmbeddedManager(poolId, registry, factory);
+	/**
+	 * Creates an embedded RServi.
+	 * 
+	 * @param id the id (like the poolId)
+	 * @param registry a handler for the RMI registry to use
+	 * @param factory the node factory to use to establish the node
+	 * @return the manager for the RServi instance
+	 */
+	public static EmbeddedRServiManager createEmbeddedRServi(final String id, final RMIRegistry registry, final RServiNodeFactory factory) {
+		return new EmbeddedManager(id, registry, factory);
 	}
 	
 }

@@ -77,7 +77,7 @@ public class RServiManager {
 			
 			RMIUtil.INSTANCE.setEmbeddedPrivateMode(true);
 			final RMIRegistry registry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry();
-			final RServiNodeFactory nodeFactory = RServiImplE.createLocalNodeFactory(this.name, registry);
+			final RServiNodeFactory nodeFactory = RServiImplE.createLocalhostNodeFactory(this.name, registry);
 			final RServiNodeConfig rConfig = new RServiNodeConfig();
 			rConfig.setRHome(rHome);
 			rConfig.setEnableVerbose(true);
