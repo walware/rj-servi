@@ -50,7 +50,7 @@ public class PoolObject extends NodeHandler implements RServiImpl.PoolRef, Unref
 			this.item.getPool().returnObject(this.item);
 		}
 		catch (final Exception e) {
-			PoolManager.LOGGER.log(Level.SEVERE, "An unexpected error occurred when returning RServi instance.", e);
+			Utils.LOGGER.log(Level.SEVERE, "An unexpected error occurred when returning RServi instance.", e);
 			throw new RjException("An unexpected error occurred when closing RServi instance. See server log for detail.");
 		}
 	}
@@ -63,12 +63,12 @@ public class PoolObject extends NodeHandler implements RServiImpl.PoolRef, Unref
 			}
 			this.item.invalidateClient();
 		}
-		PoolManager.LOGGER.log(Level.INFO, "The RServi instance is lent and unreferenced. It will returnted now.");
+		Utils.LOGGER.log(Level.INFO, "The RServi instance is lent and unreferenced. It will returnted now.");
 		try {
 			this.item.getPool().returnObject(this.item);
 		}
 		catch (final Exception e) {
-			PoolManager.LOGGER.log(Level.SEVERE, "An unexpected error occurred when returning RServi instance.", e);
+			Utils.LOGGER.log(Level.SEVERE, "An unexpected error occurred when returning RServi instance.", e);
 		}
 	}
 	

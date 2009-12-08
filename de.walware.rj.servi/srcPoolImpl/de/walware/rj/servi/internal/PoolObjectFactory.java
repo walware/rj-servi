@@ -82,13 +82,13 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 			poolObj.shutdown();
 		}
 		catch (final Throwable e) {
-			PoolManager.LOGGER.log(Level.WARNING, Messages.ShutdownNode_error_message, e);
+			Utils.LOGGER.log(Level.WARNING, Messages.ShutdownNode_error_message, e);
 		}
 		try {
 			UnicastRemoteObject.unexportObject(poolObj, true);
 		}
 		catch (final Throwable e) {
-			PoolManager.LOGGER.log(Level.WARNING, Messages.RmiUnexportNode_error_message, e);
+			Utils.LOGGER.log(Level.WARNING, Messages.RmiUnexportNode_error_message, e);
 		}
 		this.nodeFactory.cleanupNode(poolObj);
 	}

@@ -17,7 +17,6 @@ import java.util.NoSuchElementException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.commons.pool.ObjectPoolItem;
 import org.apache.commons.pool.impl.ExtGenericObjectPool;
@@ -36,9 +35,6 @@ import de.walware.rj.servi.pool.RServiPoolManager;
 
 
 public class PoolManager implements RServiPool, RServiPoolManager {
-	
-	
-	static final Logger LOGGER = Logger.getLogger("de.walware.rj.servi");
 	
 	
 	private final String id;
@@ -108,7 +104,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 					stop(8);
 				}
 				catch (final Exception ignore) {}
-				LOGGER.log(Level.SEVERE, "An error occurred when binding the pool from the registry.", e);
+				Utils.LOGGER.log(Level.SEVERE, "An error occurred when binding the pool from the registry.", e);
 				throw new RjInitFailedException("An error occurred when publishing the pool in the registry.");
 			}
 		}
@@ -125,7 +121,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 			}
 			catch (final Exception e) {
 				if (mode != 8) {
-					LOGGER.log(Level.SEVERE, "An error occurred when unbinding the pool from the registry.", e);
+					Utils.LOGGER.log(Level.SEVERE, "An error occurred when unbinding the pool from the registry.", e);
 				}
 			}
 		}
@@ -142,7 +138,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 						PoolManager.this.pool.close();
 					}
 					catch (final Exception e) {
-						PoolManager.LOGGER.log(Level.SEVERE, "An error occurred when closing the pool.", e);
+						Utils.LOGGER.log(Level.SEVERE, "An error occurred when closing the pool.", e);
 					}
 				}
 			}
@@ -183,7 +179,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		}
 		catch (final Exception e) {
 			this.stats.logServRequestFailed(4);
-			LOGGER.log(Level.SEVERE, Messages.BindClient_error_message, e);
+			Utils.LOGGER.log(Level.SEVERE, Messages.BindClient_error_message, e);
 			throw new RjException(Messages.GetRServi_pub_error_message);
 		}
 	}

@@ -12,9 +12,24 @@
 package de.walware.ecommons;
 
 
+/**
+ * The interface indicates that the object (service) which implements that
+ * interface must be disposed if it is no longer required.
+ * 
+ * This is a common interface and the responsibility calling the 
+ * {@link #dispose() dispose method} must be documented in the more concrete
+ * context.
+ */
 public interface IDisposable {
 	
 	
+	/**
+	 * Disposes of this object.
+	 * 
+	 * All resources must be freed.  All listeners must be detached.  All
+	 * states must be saved. Dispose will only be called once during the life
+	 * cycle of a service.
+	 */
 	public void dispose();
 	
 }

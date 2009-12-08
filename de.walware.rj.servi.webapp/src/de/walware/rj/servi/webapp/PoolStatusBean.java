@@ -18,6 +18,7 @@ import javax.annotation.PostConstruct;
 
 import de.walware.rj.servi.pool.RServiPoolManager;
 
+
 public class PoolStatusBean {
 	
 	

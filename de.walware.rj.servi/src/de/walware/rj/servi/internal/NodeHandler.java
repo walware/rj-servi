@@ -49,7 +49,7 @@ public abstract class NodeHandler {
 			this.isConsoleEnabled = this.node.setConsole(authConfig);
 		}
 		catch (final Exception e) {
-			PoolManager.LOGGER.log(Level.SEVERE, "An error occurred when configuring the debug console.", e);
+			Utils.LOGGER.log(Level.SEVERE, "An error occurred when configuring the debug console.", e);
 			throw new RjException("An error occurred when configuring the debug console. See server log for detail.");
 		}
 	}

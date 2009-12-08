@@ -13,14 +13,17 @@ package de.walware.rj.servi.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class Utils {
 	
 	
-	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().startsWith("win");
-	
 	public static final String PLUGIN_ID = "de.walware.rj.serv";
+	
+	public static final Logger LOGGER = Logger.getLogger("de.walware.rj.servi");
+	
+	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().startsWith("win");
 	
 	
 	/**

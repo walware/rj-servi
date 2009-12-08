@@ -23,7 +23,9 @@ public class RServiNodeConfig implements PropertiesBean {
 	public static final String R_HOME_ID = "r_home.path";
 	public static final String BITS_ID = "bits.num";
 	public static final String JAVA_HOME_ID = "java_home.path";
-	public static final String JAVA_ARGS_ID = "java_args.path";
+	public static final String JAVA_ARGS_ID = "java_cmd.args";
+	private static final String JAVA_ARGS_OLD_ID = "java_args.path";
+	public static final String NODE_ARGS_ID = "node_cmd.args";
 	public static final String BASE_WD_ID = "base_wd.path";
 	public static final String CONSOLE_ENABLED_ID = "debug_console.enabled";
 	public static final String VERBOSE_ENABLED_ID = "debug_verbose.enabled";
@@ -35,6 +37,8 @@ public class RServiNodeConfig implements PropertiesBean {
 	private String javaHome;
 	private String javaArgs;
 	
+	private String nodeArgs;
+	
 	private String baseWd;
 	
 	private boolean enableConsole;
@@ -45,6 +49,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.rHome = System.getenv("R_HOME");
 		this.bits = 64;
 		this.javaArgs = "-server";
+		this.nodeArgs = "";
 	}
 	
 	
@@ -57,6 +62,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.bits = templ.bits;
 		this.javaHome = templ.javaHome;
 		this.javaArgs = templ.javaArgs;
+		this.nodeArgs = templ.nodeArgs;
 		this.baseWd = templ.baseWd;
 		this.enableConsole = templ.enableConsole;
 		this.enableVerbose = templ.enableVerbose;
@@ -67,6 +73,10 @@ public class RServiNodeConfig implements PropertiesBean {
 		setBits(Integer.parseInt(map.getProperty(BITS_ID, "64")));
 		setJavaHome(map.getProperty(JAVA_HOME_ID));
 		setJavaArgs(map.getProperty(JAVA_ARGS_ID));
+		if (this.javaArgs.length() == 0) {
+			setJavaArgs(map.getProperty(JAVA_ARGS_OLD_ID));
+		}
+		setNodeArgs(map.getProperty(NODE_ARGS_ID));
 		setBaseWorkingDirectory(map.getProperty(BASE_WD_ID));
 		setEnableConsole(Boolean.parseBoolean(map.getProperty(CONSOLE_ENABLED_ID)));
 		setEnableVerbose(Boolean.parseBoolean(map.getProperty(VERBOSE_ENABLED_ID)));
@@ -77,6 +87,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		map.setProperty(BITS_ID, Integer.toString(this.bits));
 		map.setProperty(JAVA_HOME_ID, (this.javaHome != null) ? this.javaHome : "");
 		map.setProperty(JAVA_ARGS_ID, this.javaArgs);
+		map.setProperty(NODE_ARGS_ID, this.nodeArgs);
 		map.setProperty(BASE_WD_ID, (this.baseWd != null) ? this.baseWd : "");
 		map.setProperty(CONSOLE_ENABLED_ID, Boolean.toString(this.enableConsole));
 		map.setProperty(VERBOSE_ENABLED_ID, Boolean.toString(this.enableVerbose));
@@ -120,6 +131,14 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public void setJavaArgs(final String args) {
 		this.javaArgs = (args != null) ? args : "";
+	}
+	
+	public String getNodeArgs() {
+		return this.nodeArgs;
+	}
+	
+	public void setNodeArgs(final String args) {
+		this.nodeArgs = (args != null) ? args : "";
 	}
 	
 	public boolean getEnableConsole() {

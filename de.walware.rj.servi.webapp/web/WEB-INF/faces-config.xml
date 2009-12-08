@@ -38,30 +38,30 @@
 	
 	<navigation-rule>
 		<display-name>welcome</display-name>
-		<from-view-id>/m/welcome.jsp</from-view-id>
+		<from-view-id>/resources/welcome.jsp</from-view-id>
 	</navigation-rule>
 	<navigation-rule>
 		<display-name>conf-pool</display-name>
-		<from-view-id>/m/conf-pool.jsp</from-view-id>
+		<from-view-id>/resources/conf-pool.jsp</from-view-id>
 		<navigation-case>
 			<from-outcome>conf-pool</from-outcome>
-			<to-view-id>/m/conf-pool.jsp</to-view-id>
+			<to-view-id>/resources/conf-pool.jsp</to-view-id>
 		</navigation-case>
 	</navigation-rule>
 	<navigation-rule>
 		<display-name>conf-r</display-name>
-		<from-view-id>/m/conf-r.jsp</from-view-id>
+		<from-view-id>/resources/conf-r.jsp</from-view-id>
 		<navigation-case>
 			<from-outcome>conf-r</from-outcome>
-			<to-view-id>/m/conf-r.jsp</to-view-id>
+			<to-view-id>/resources/conf-r.jsp</to-view-id>
 		</navigation-case>
 	</navigation-rule>
 	
 	<navigation-rule>
-		<from-view-id>/m/*</from-view-id>
+		<from-view-id>/resources/*</from-view-id>
 		<navigation-case>
 			<from-outcome>status-pool</from-outcome>
-			<to-view-id>/m/status-poolnodes.jsp</to-view-id>
+			<to-view-id>/resources/status-poolnodes.jsp</to-view-id>
 		</navigation-case>
 	</navigation-rule>
 	

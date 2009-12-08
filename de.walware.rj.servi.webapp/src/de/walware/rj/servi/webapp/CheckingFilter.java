@@ -49,7 +49,7 @@ public class CheckingFilter implements Filter {
 				&& httpRequest.getRequestedSessionId() != null
 				&& ((session == null) || session.isNew() || !session.getId().equals(httpRequest.getRequestedSessionId()))
 				) {
-			httpResponse.sendRedirect(httpRequest.getContextPath()+"/faces/m/sessionexpired.jsp");
+			httpResponse.sendRedirect(httpRequest.getContextPath()+"/faces/resources/sessionexpired.jsp");
 			return;
 		}
 		chain.doFilter(request, response);

@@ -1,1 +1,1 @@
-<% response.sendRedirect(request.getContextPath()+"/faces/m/"); %>
+<% response.sendRedirect(request.getContextPath()+"/faces/resources/"); %>

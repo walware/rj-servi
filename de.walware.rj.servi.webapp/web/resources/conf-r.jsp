@@ -21,7 +21,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
-<link rel="stylesheet" type="text/css" href="style.css" />
+<link rel="stylesheet" type="text/css" href="css/style.css" />
 
 <title>(RJ) Configuration: R/RJ Nodes</title>
 </head>
@@ -40,8 +40,8 @@
 	<h:inputText id="java_home_path" label="Java home (1)" value="#{rConfig.javaHome}" required="false" size="80" />
 	<h:outputText>(empty &#x21d2; same as the server)</h:outputText>
 	
-	<h:outputLabel for="java_args" value="(2) Java arguments:" accesskey="2" />
-	<h:inputTextarea id="java_args" label="Java arguments (2)" value="#{rConfig.javaArgs}" required="false" cols="76" rows="4" />
+	<h:outputLabel for="java_cmd_args" value="(2) Java arguments:" accesskey="2" />
+	<h:inputTextarea id="java_cmd_args" label="Java arguments (2)" value="#{rConfig.javaArgs}" required="false" cols="76" rows="4" />
 	<h:outputText></h:outputText>
 	
 	<h:outputLabel for="r_home_path" value="(3) R home (path):" accesskey="3" />

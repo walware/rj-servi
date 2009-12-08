@@ -33,6 +33,7 @@ import de.walware.ecommons.net.RMIUtil;
 import de.walware.rj.RjException;
 import de.walware.rj.RjInvalidConfigurationException;
 import de.walware.rj.server.srvext.ServerUtil;
+import de.walware.rj.servi.internal.PoolManager;
 import de.walware.rj.servi.pool.RServiImplS;
 import de.walware.rj.servi.pool.RServiNodeConfig;
 import de.walware.rj.servi.pool.RServiNodeFactory;
@@ -89,7 +90,7 @@ public class RJServlet extends HttpServlet {
 				rmiRegistry = new RMIRegistry(rmiRegistryAddress, registry, true);
 			}
 			
-			final RServiPoolManager manager = RServiImplS.createPool(id, rmiRegistry);
+			final RServiPoolManager manager = new PoolManager(id, rmiRegistry);
 			
 			final PoolConfigBean poolConfig = (PoolConfigBean) Utils.loadFromFile(getServletContext(), new PoolConfigBean());
 			manager.setConfig(poolConfig);

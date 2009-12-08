@@ -150,6 +150,11 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		p.nameCommandIdx = p.command.size();
 		p.command.add("");
 		
+		String nodeArgs = config.getNodeArgs();
+		if (nodeArgs != null && (nodeArgs = nodeArgs.trim()).length() > 0) {
+			p.command.addAll(Utils.parseArguments(nodeArgs));
+		}
+		
 		final String rHome = config.getRHome();
 		if (rHome == null || rHome.length() == 0) {
 			this.errorMessage = "Missing value for R_HOME.";
@@ -220,7 +225,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 					}
 				}
 			}
-			command = new ArrayList<String>(p.command.size());
+			command = new ArrayList<String>(p.command.size() + 2);
 			command.addAll(p.command);
 			poolObj.address = new RMIAddress(this.nodeRegistry.getAddress(), id);
 			command.set(p.nameCommandIdx, poolObj.address.getAddress());
