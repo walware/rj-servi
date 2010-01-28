@@ -21,7 +21,7 @@
 
 <table class="grid">
 <tr><th colspan="2" scope="colgroup">Links</th></tr>
-<tr><td>WalWare.de OpenSource</td><td><a href="http://www.walware.de/opensource">www.walware.de/opensource</a></td></tr>
+<tr><td>WalWare.de OpenSource</td><td><a href="http://www.walware.de/goto/opensource">www.walware.de/goto/opensource</a></td></tr>
 <tr><td>R-Project</td><td><a href="http://www.r-project.org">www.r-project.org</a></td></tr>
 </table>
 
@@ -34,7 +34,7 @@
 <hr/>
 
 <p>
-Copyright (c) 2007-2009 WalWare/RJ-Project (www.walware.de/opensource) contributors
+Copyright (c) 2007-2010 WalWare/RJ-Project (www.walware.de/goto/opensource) contributors
 and others.</p>
 <p>
 This product includes software developed by The Apache Software Foundation

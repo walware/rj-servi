@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 WalWare/RJ-Project (www.walware.de/opensource).
+ * Copyright (c) 2009-2010 WalWare/RJ-Project (www.walware.de/goto/opensource).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,11 +27,11 @@ import javax.security.auth.login.LoginException;
 
 import de.walware.rj.RjException;
 import de.walware.rj.data.RList;
-import de.walware.rj.server.BinExchange;
 import de.walware.rj.server.DataCmdItem;
 import de.walware.rj.server.MainCmdC2SList;
 import de.walware.rj.server.MainCmdItem;
 import de.walware.rj.server.MainCmdS2CList;
+import de.walware.rj.server.RjsComConfig;
 import de.walware.rj.server.RjsComObject;
 import de.walware.rj.server.RjsStatus;
 import de.walware.rj.server.Server;
@@ -92,9 +92,11 @@ public class NodeServer extends DefaultServerImpl {
 							MainCmdItem tmp;
 							ITER_ITEMS : for (; (item != null); tmp = item, item = item.next, tmp.next = null) {
 								switch (item.getCmdType()) {
-								case MainCmdItem.T_CONSOLE_WRITE_ITEM:
-									this.out.println(((item.getCmdOption() == RjsComObject.V_OK) ? "R-OUT: " : "R-ERR: ") +
-											item.getDataText());
+								case MainCmdItem.T_CONSOLE_WRITE_ERR_ITEM:
+									this.out.println("R-ERR: " + item.getDataText());
+									break;
+								case MainCmdItem.T_CONSOLE_WRITE_OUT_ITEM:
+									this.out.println("R-OUT: " + item.getDataText());
 									break;
 								case MainCmdItem.T_CONSOLE_READ_ITEM:
 									this.out.println("R-PROMPT: " + item.getDataText());
@@ -234,7 +236,7 @@ public class NodeServer extends DefaultServerImpl {
 				".rj.wd<-\""+this.workingDirectory.replace("\\", "\\\\")+"\";" +
 				"setwd(.rj.wd);" +
 		"}";
-		BinExchange.setPathResolver(this);
+		RjsComConfig.setServerPathResolver(this);
 		
 		final Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("args", new String[0]);

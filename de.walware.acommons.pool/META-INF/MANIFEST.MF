@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: ACommons Pool Library
+Bundle-Name: Pool Library for RServi
 Bundle-SymbolicName: de.walware.acommons.pool
 Bundle-Version: 1.4.0.qualifier
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

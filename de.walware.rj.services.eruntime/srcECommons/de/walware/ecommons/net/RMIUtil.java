@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2009-2010 WalWare/StatET-Project (www.walware.de/goto/statet)
+ * and others. All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Stephan Wahlbrink - initial API and implementation
+ *******************************************************************************/
+
 package de.walware.ecommons.net;
 
 import java.io.File;
@@ -19,7 +30,7 @@ import org.eclipse.core.runtime.Status;
 
 import de.walware.ecommons.ECommons;
 import de.walware.ecommons.IDisposable;
-import de.walware.ecommons.internal.net.Messages;
+import de.walware.ecommons.net.internal.Messages;
 
 
 /**
@@ -280,7 +291,7 @@ public class RMIUtil {
 			catch (final IllegalThreadStateException e) {
 			}
 			try {
-				final Registry registry = LocateRegistry.getRegistry(address.getPortNum());
+				final Registry registry = LocateRegistry.getRegistry(address.getHost(), address.getPortNum());
 				final ManagedRegistry r = new ManagedRegistry(new RMIRegistry(address, registry, true),
 						(stopRule != null) ? stopRule : StopRule.IF_EMPTY);
 				r.process = process;

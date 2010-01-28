@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 WalWare/RJ-Project (www.walware.de/opensource).
+ * Copyright (c) 2009-2010 WalWare/RJ-Project (www.walware.de/goto/opensource).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -187,7 +187,7 @@ public class FunctionCallImpl implements FunctionCall {
 					message.append(")");
 				}
 				message.append('.');
-				throw new CoreException(new Status(IStatus.ERROR, RServiUtil.PLUGIN_ID, -1, message.toString(), e));
+				throw new CoreException(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, -1, message.toString(), e));
 			}
 		}
 		call.append(')');

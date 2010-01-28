@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 WalWare/RJ-Project (www.walware.de/opensource).
+ * Copyright (c) 2009-2010 WalWare/RJ-Project (www.walware.de/goto/opensource).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,6 @@
  *******************************************************************************/
 
 package de.walware.rj.servi.internal;
-
-import static de.walware.rj.server.srvext.ServerUtil.RJ_SERVER_ID;
-import static de.walware.rj.server.srvext.ServerUtil.RJ_SERVI_ID;
 
 import java.io.File;
 import java.io.FileReader;
@@ -33,6 +30,7 @@ import de.walware.rj.RjInvalidConfigurationException;
 import de.walware.rj.server.Server;
 import de.walware.rj.server.ServerLogin;
 import de.walware.rj.server.srvext.ServerUtil;
+import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.servi.pool.RServiNode;
 import de.walware.rj.servi.pool.RServiNodeConfig;
 
@@ -41,7 +39,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	
 	
 	public static final String[] CODEBASE_LIBS = new String[] {
-			RJ_SERVER_ID, RJ_SERVI_ID };
+			ServerUtil.RJ_SERVER_ID, RServiUtil.RJ_SERVI_ID };
 	
 	private static class ProcessConfig {
 		final Map<String, String> addEnv = new HashMap<String, String>();

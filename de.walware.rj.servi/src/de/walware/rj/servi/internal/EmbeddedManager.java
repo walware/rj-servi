@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 WalWare/RJ-Project (www.walware.de/opensource).
+ * Copyright (c) 2009-2010 WalWare/RJ-Project (www.walware.de/goto/opensource).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,8 @@ import de.walware.ecommons.net.RMIRegistry;
 
 import de.walware.rj.RjException;
 import de.walware.rj.RjInitFailedException;
-import de.walware.rj.server.srvext.ServerUtil;
 import de.walware.rj.servi.RServi;
+import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.servi.pool.EmbeddedRServiManager;
 import de.walware.rj.servi.pool.RServiNodeFactory;
 
@@ -83,7 +83,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 			ECommons.getEnv().addStoppingListener(this);
 		}
 		catch (final Throwable e) {
-			ECommons.getEnv().log(new Status(IStatus.ERROR, ServerUtil.RJ_SERVI_ID, Messages.StartNode_error_message, e));
+			ECommons.getEnv().log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, Messages.StartNode_error_message, e));
 			throw new RjInitFailedException(Messages.StartEmbedded_pub_error_message,
 					(e instanceof RjException) ? e : null);
 		}
@@ -101,7 +101,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 			this.handler.shutdown();
 		}
 		catch (final Throwable e) {
-			ECommons.getEnv().log(new Status(IStatus.ERROR, ServerUtil.RJ_SERVI_ID, Messages.ShutdownNode_error_message, e));
+			ECommons.getEnv().log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, Messages.ShutdownNode_error_message, e));
 		}
 		this.factory.cleanupNode(this.handler);
 		this.handler = null;
@@ -118,7 +118,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 			this.handler.bindClient(name, "embedded");
 		}
 		catch (final Throwable e) {
-			ECommons.getEnv().log(new Status(IStatus.ERROR, ServerUtil.RJ_SERVI_ID, Messages.BindClient_error_message, e));
+			ECommons.getEnv().log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, Messages.BindClient_error_message, e));
 			throw new RjException(Messages.GetRServi_pub_error_message);
 		}
 		this.inUse = true;
@@ -138,7 +138,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 			this.handler.unbindClient();
 		}
 		catch (final Throwable e) {
-			ECommons.getEnv().log(new Status(IStatus.ERROR, ServerUtil.RJ_SERVI_ID, Messages.UnbindClient_error_message, e));
+			ECommons.getEnv().log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, Messages.UnbindClient_error_message, e));
 			stop();
 		}
 	}

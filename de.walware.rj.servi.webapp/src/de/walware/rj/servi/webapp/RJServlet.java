@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 WalWare/RJ-Project (www.walware.de/opensource).
+ * Copyright (c) 2009-2010 WalWare/RJ-Project (www.walware.de/goto/opensource).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import de.walware.ecommons.net.RMIUtil;
 import de.walware.rj.RjException;
 import de.walware.rj.RjInvalidConfigurationException;
 import de.walware.rj.server.srvext.ServerUtil;
+import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.servi.internal.PoolManager;
 import de.walware.rj.servi.pool.RServiImplS;
 import de.walware.rj.servi.pool.RServiNodeConfig;
@@ -65,7 +66,7 @@ public class RJServlet extends HttpServlet {
 			final String property = System.getProperty("java.rmi.server.codebase");
 			if (property == null) {
 				final String[] libs = ServerUtil.searchRJLibs(libPath,
-						new String[] { ServerUtil.RJ_SERVER_ID, ServerUtil.RJ_SERVI_ID });
+						new String[] { ServerUtil.RJ_SERVER_ID, RServiUtil.RJ_SERVI_ID });
 				System.setProperty("java.rmi.server.codebase", ServerUtil.concatCodebase(libs));
 			}
 			

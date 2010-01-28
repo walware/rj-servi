@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 WalWare/RJ-Project (www.walware.de/opensource).
+ * Copyright (c) 2009-2010 WalWare/RJ-Project (www.walware.de/goto/opensource).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@ package de.walware.rj.servi.pool;
 
 import static de.walware.rj.server.srvext.ServerUtil.RJ_DATA_ID;
 import static de.walware.rj.server.srvext.ServerUtil.RJ_SERVER_ID;
-import static de.walware.rj.server.srvext.ServerUtil.RJ_SERVI_ID;
+import static de.walware.rj.servi.RServiUtil.RJ_SERVI_ID;
 
 import java.io.IOException;
 import java.net.URL;

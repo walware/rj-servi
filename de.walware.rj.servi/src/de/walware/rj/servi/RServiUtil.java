@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 WalWare/RJ-Project (www.walware.de/opensource).
+ * Copyright (c) 2009-2010 WalWare/RJ-Project (www.walware.de/goto/opensource).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ import de.walware.rj.servi.pool.RServiPool;
 public class RServiUtil {
 	
 	
-	public static final String PLUGIN_ID = "de.walware.rj.servi";
+	public static final String RJ_SERVI_ID = "de.walware.rj.servi";
 	
 	
 	/**
@@ -63,30 +63,30 @@ public class RServiUtil {
 			pool = (RServiPool) Naming.lookup(address);
 		}
 		catch (final MalformedURLException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 					"Invalid address for the RServi pool.", e));
 		}
 		catch (final NotBoundException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 					"The address does not point to a valid RServi pool.", e));
 		}
 		catch (final ClassCastException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 					"The address does not point to a valid/compatible RServi pool.", e));
 		}
 		catch (final RemoteException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 					"Failed looking for RServi pool in the RMI registry.", e));
 		}
 		try {
 			return pool.getRServi(name, null);
 		}
 		catch (final RjException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 					"Failed getting an RServi instance from the RServi pool.", e));
 		}
 		catch (final RemoteException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 					"Failed looking for RServi pool in the RMI registry.", e));
 		}
 	}
@@ -110,14 +110,14 @@ public class RServiUtil {
 	 */
 	public static RServi getRServi(final EmbeddedRServiManager manager, final String name) throws CoreException, NoSuchElementException {
 		if (manager == null) {
-			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 					"Embedded RServi instance is not available.", null));
 		}
 		try {
 			return manager.getRServi(name);
 		}
 		catch (final RjException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 					"Failed getting an embedded RServi instance.", e));
 		}
 	}
