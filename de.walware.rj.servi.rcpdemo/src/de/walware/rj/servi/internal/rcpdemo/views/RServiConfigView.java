@@ -29,6 +29,8 @@ public class RServiConfigView extends ViewPart {
 	private Text remoteAddressControl;
 	private Button embeddedSelectControl;
 	private Text embeddedRhomeControl;
+	private Button rsetupSelectControl;
+	private Text rsetupIdControl;
 	
 	
 	public RServiConfigView() {
@@ -76,6 +78,16 @@ public class RServiConfigView extends ViewPart {
 			});
 		}
 		
+		rsetupSelectControl = new Button(composite, SWT.RADIO);
+		rsetupSelectControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		rsetupSelectControl.setText("Predefined R Setup - Id:");
+		
+		{	rsetupIdControl = new Text(composite, SWT.BORDER);
+			final GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
+			gd.horizontalIndent = 10; 
+			rsetupIdControl.setLayoutData(gd);
+		}
+		
 		final Label label = new Label(composite, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -92,6 +104,7 @@ public class RServiConfigView extends ViewPart {
 		remoteSelectControl.setSelection(true);
 		remoteAddressControl.setText("rmi://localhost/rservi-pool");
 		embeddedRhomeControl.setText("D:\\R\\R-2.10.1");
+		rsetupIdControl.setText("org.rproject.r.DefaultSetup");
 	}
 	
 	@Override
@@ -107,6 +120,10 @@ public class RServiConfigView extends ViewPart {
 			}
 			if (embeddedSelectControl.getSelection()) {
 				manager.setEmbedded(embeddedRhomeControl.getText());
+				return;
+			}
+			if (rsetupSelectControl.getSelection()) {
+				manager.setRSetup(rsetupIdControl.getText());
 				return;
 			}
 		}

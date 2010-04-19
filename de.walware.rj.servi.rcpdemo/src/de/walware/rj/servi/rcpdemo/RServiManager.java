@@ -1,5 +1,7 @@
 package de.walware.rj.servi.rcpdemo;
 
+import java.io.File;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import javax.security.auth.login.LoginException;
@@ -13,6 +15,8 @@ import de.walware.ecommons.net.RMIRegistry;
 import de.walware.ecommons.net.RMIUtil;
 import de.walware.rj.RjException;
 import de.walware.rj.eclient.graphics.ERGraphicFactory;
+import de.walware.rj.rsetups.RSetup;
+import de.walware.rj.rsetups.RSetupUtil;
 import de.walware.rj.server.RjsComConfig;
 import de.walware.rj.servi.RServi;
 import de.walware.rj.servi.RServiUtil;
@@ -27,6 +31,7 @@ public class RServiManager {
 	
 	private static final int EMBEDDED = 1;
 	private static final int POOL = 2;
+	private static final int RSETUP = 3;
 	
 	private static class Config {
 		
@@ -70,6 +75,53 @@ public class RServiManager {
 		config.address = rHome;
 		this.config = config;
 		
+		final RServiNodeConfig rConfig = new RServiNodeConfig();
+		rConfig.setRHome(rHome);
+		rConfig.setEnableVerbose(true);
+		
+		startEmbedded(rConfig);
+	}
+	
+	public void setPool(final String poolAddress) {
+		final Config config = new Config();
+		config.mode = POOL;
+		config.address = poolAddress;
+		this.config = config;
+	}
+	
+	public void setRSetup(final String setupId) throws CoreException {
+		final Config config = new Config();
+		config.mode = RSETUP;
+		config.address = setupId;
+		this.config = config;
+		
+		final RSetup setup = RSetupUtil.loadSetup(setupId, null);
+		if (setup == null) {
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "No R setup with specified id found."));
+		}
+		
+		final RServiNodeConfig rConfig = new RServiNodeConfig();
+		rConfig.setRHome(setup.getRHome());
+		setLibs(setup.getRLibsSite(), rConfig, "R_LIBS_SITE");
+		setLibs(setup.getRLibs(), rConfig, "R_LIBS");
+		setLibs(setup.getRLibsUser(), rConfig, "R_LIBS_USER");
+		rConfig.setEnableVerbose(true);
+		
+		startEmbedded(rConfig);
+	}
+	
+	private void setLibs(final List<String> locations, final RServiNodeConfig rConfig, final String varName) {
+		if (locations != null && locations.size() > 0) {
+			final StringBuilder sb = new StringBuilder(locations.get(0));
+			for (int i = 0; i < locations.size(); i++) {
+				sb.append(File.pathSeparatorChar);
+				sb.append(locations.get(i));
+			}
+			rConfig.getEnvironmentVariables().put(varName, sb.toString());
+		}
+	}
+	
+	private void startEmbedded(final RServiNodeConfig rConfig) throws CoreException {
 		try {
 			if (System.getSecurityManager() == null) {
 				if (System.getProperty("java.security.policy") == null) {
@@ -82,9 +134,6 @@ public class RServiManager {
 			RMIUtil.INSTANCE.setEmbeddedPrivateMode(true);
 			final RMIRegistry registry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry();
 			final RServiNodeFactory nodeFactory = RServiImplE.createLocalhostNodeFactory(this.name, registry);
-			final RServiNodeConfig rConfig = new RServiNodeConfig();
-			rConfig.setRHome(rHome);
-			rConfig.setEnableVerbose(true);
 			nodeFactory.setConfig(rConfig);
 			
 			final EmbeddedRServiManager newEmbeddedR = RServiImplE.createEmbeddedRServi(this.name, registry, nodeFactory);
@@ -100,13 +149,6 @@ public class RServiManager {
 		}
 	}
 	
-	public void setPool(final String poolAddress) {
-		final Config config = new Config();
-		config.mode = POOL;
-		config.address = poolAddress;
-		this.config = config;
-	}
-	
 	
 	public RServi getRServi(final String task) throws CoreException {
 		final Config config = this.config;
@@ -115,6 +157,7 @@ public class RServiManager {
 		try {
 			switch (config.mode) {
 			case EMBEDDED:
+			case RSETUP:
 				return RServiUtil.getRServi(embeddedR, key);
 			case POOL:
 				return RServiUtil.getRServi(config.address, key);
