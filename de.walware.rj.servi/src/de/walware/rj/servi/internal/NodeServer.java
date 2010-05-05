@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import javax.security.auth.login.LoginException;
 
 import de.walware.rj.RjException;
-import de.walware.rj.data.RList;
 import de.walware.rj.server.DataCmdItem;
 import de.walware.rj.server.MainCmdC2SList;
 import de.walware.rj.server.MainCmdItem;
@@ -43,7 +42,6 @@ import de.walware.rj.server.srvext.ServerAuthMethod;
 import de.walware.rj.server.srvext.ServerUtil;
 import de.walware.rj.server.srvstdext.NoAuthMethod;
 import de.walware.rj.servi.pool.RServiNode;
-import de.walware.rj.services.RPlatform;
 
 
 public class NodeServer extends DefaultServerImpl {
@@ -133,16 +131,15 @@ public class NodeServer extends DefaultServerImpl {
 	
 	class Node implements RServiNode {
 		
-		public RPlatform getPlatform() throws RemoteException {
-			return NodeServer.this.rPlatform;
-		}
-		
 		public boolean setConsole(final String authConfig) throws RemoteException, RjException {
 			LOGGER.entering("NodeServer", "setConsole", authConfig);
 			final boolean enabled;
 			synchronized (NodeServer.this.internalEngine) {
 //				LOGGER.fine("enter lock");
-				NodeServer.this.internalEngine.disconnect(null);
+				final Client currentClient = NodeServer.this.internalEngine.getCurrentClient();
+				if (currentClient != null) {
+					NodeServer.this.internalEngine.disconnect(currentClient);
+				}
 //				LOGGER.fine("disconnect");
 				if (authConfig != null) {
 					NodeServer.this.consoleAuthMethod = NodeServer.this.control.createServerAuth(authConfig);
@@ -193,12 +190,36 @@ public class NodeServer extends DefaultServerImpl {
 	
 	class Backend implements RServiBackend {
 		
+		public Server getPublic() throws RemoteException {
+			return null;
+		}
+		
+		public Map<String, Object> getPlatformData() {
+			return NodeServer.this.internalEngine.getPlatformData();
+		}
+		
+		public void setProperties(final Map<String, ? extends Object> properties) throws RemoteException {
+			NodeServer.this.setProperties(properties, this);
+		}
+		
+		public boolean interrupt() throws RemoteException {
+			throw new UnsupportedOperationException();
+		}
+		
+		public void disconnect() throws RemoteException {
+			throw new UnsupportedOperationException();
+		}
+		
 		public RjsComObject runMainLoop(final RjsComObject com) throws RemoteException {
 			return NodeServer.this.runMainLoop(com, this);
 		}
 		
 		public RjsComObject runAsync(final RjsComObject com) throws RemoteException {
 			return NodeServer.this.runAsync(com, this);
+		}
+		
+		public boolean isClosed() throws RemoteException {
+			return (NodeServer.this.currentClientBackend != this);
 		}
 		
 	}
@@ -218,8 +239,6 @@ public class NodeServer extends DefaultServerImpl {
 	
 	private String resetCommand;
 	
-	private RPlatform rPlatform;
-	
 	
 	public NodeServer(final String name, final AbstractServerControl control) {
 		super(name, control, new NoAuthMethod("<internal>"));
@@ -235,6 +254,7 @@ public class NodeServer extends DefaultServerImpl {
 				".rj.getTmp<-function(o){x<-get(o,pos=.GlobalEnv);rm(list=o,pos=.GlobalEnv);x};" +
 				".rj.wd<-\""+this.workingDirectory.replace("\\", "\\\\")+"\";" +
 				"setwd(.rj.wd);" +
+				"graphics.off();" +
 		"}";
 		RjsComConfig.setServerPathResolver(this);
 		
@@ -244,14 +264,8 @@ public class NodeServer extends DefaultServerImpl {
 		
 		try {
 			synchronized (this.serviRunLock) {
+				runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0, "library(rj)"));
 				runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0, this.resetCommand));
-				
-				final RList rPlatformData = (RList) runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_DATA, 0, "list(.Platform$OS.type, .Platform$file.sep, .Platform$path.sep, paste(version$major, version$minor, sep=\".\"))"));
-				this.rPlatform = new RPlatform(
-						rPlatformData.get(0).getData().getChar(0),
-						rPlatformData.get(1).getData().getChar(0),
-						rPlatformData.get(2).getData().getChar(0),
-						rPlatformData.get(3).getData().getChar(0) );
 			}
 		}
 		catch (final Exception e) {
@@ -314,9 +328,7 @@ public class NodeServer extends DefaultServerImpl {
 				this.currentClientId = null;
 				this.currentClientBackend = null;
 				this.currentClientExp = null;
-				if (previous != null) {
-					UnicastRemoteObject.unexportObject(previous, true);
-				}
+				UnicastRemoteObject.unexportObject(previous, true);
 				try {
 					synchronized (this.serviRunLock) {
 						runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0, this.resetCommand));
@@ -344,6 +356,15 @@ public class NodeServer extends DefaultServerImpl {
 				System.exit(0);
 			}
 		}, 500L);
+	}
+	
+	public void setProperties(final Map<String, ? extends Object> properties, final Object caller) throws RemoteException {
+		synchronized (this.serviRunLock) {
+			if (caller != null && this.currentClientBackend != caller) {
+				throw new IllegalAccessError();
+			}
+			this.internalEngine.setProperties(this.serverClient, properties);
+		}
 	}
 	
 	@Override

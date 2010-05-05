@@ -37,6 +37,7 @@ public class RServiUtil {
 	
 	
 	public static final String RJ_SERVI_ID = "de.walware.rj.servi";
+	public static final String RJ_CLIENT_ID = "de.walware.rj.client";
 	
 	
 	/**

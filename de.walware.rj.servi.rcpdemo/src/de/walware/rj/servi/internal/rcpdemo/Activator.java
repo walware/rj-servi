@@ -3,6 +3,7 @@ package de.walware.rj.servi.internal.rcpdemo;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import de.walware.rj.eclient.graphics.ERGraphicFactory;
 import de.walware.rj.servi.rcpdemo.RServiManager;
 
 
@@ -29,6 +30,8 @@ public class Activator extends AbstractUIPlugin {
 	
 	private RServiManager rserviManager;
 	
+	private ERGraphicFactory graphicFactory;
+	
 	
 	/**
 	 * The constructor
@@ -37,12 +40,14 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 	
-	public void start(BundleContext context) throws Exception {
+	@Override
+	public void start(final BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
 	}
 	
-	public void stop(BundleContext context) throws Exception {
+	@Override
+	public void stop(final BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
 	}
@@ -50,9 +55,16 @@ public class Activator extends AbstractUIPlugin {
 	
 	public synchronized RServiManager getRServiManager() {
 		if (rserviManager == null) {
-			rserviManager = new RServiManager("RCPDemo");
+			rserviManager = new RServiManager("RCPDemo", getRGraphicFactory());
 		}
 		return rserviManager;
+	}
+	
+	public synchronized ERGraphicFactory getRGraphicFactory() {
+		if (graphicFactory == null) {
+			graphicFactory = new ERGraphicFactory();
+		}
+		return graphicFactory;
 	}
 	
 }

@@ -12,6 +12,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import de.walware.ecommons.net.RMIRegistry;
 import de.walware.ecommons.net.RMIUtil;
 import de.walware.rj.RjException;
+import de.walware.rj.eclient.graphics.ERGraphicFactory;
+import de.walware.rj.server.RjsComConfig;
 import de.walware.rj.servi.RServi;
 import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.servi.internal.rcpdemo.Activator;
@@ -41,18 +43,20 @@ public class RServiManager {
 	private EmbeddedRServiManager embeddedR;
 	
 	private ISchedulingRule schedulingRule = new ISchedulingRule() {
-		public boolean contains(ISchedulingRule rule) {
+		public boolean contains(final ISchedulingRule rule) {
 			return (rule == this);
 		}
-		public boolean isConflicting(ISchedulingRule rule) {
+		public boolean isConflicting(final ISchedulingRule rule) {
 			// if concurrent remote instances are desired, return false here
 			return (rule == this);
 		}
 	};
 	
 	
-	public RServiManager(final String appId) {
+	public RServiManager(final String appId, final ERGraphicFactory graphicFactory) {
 		this.name = appId;
+		
+		RjsComConfig.setProperty("rj.servi.graphicFactory", graphicFactory);
 	}
 	
 	
@@ -69,7 +73,7 @@ public class RServiManager {
 		try {
 			if (System.getSecurityManager() == null) {
 				if (System.getProperty("java.security.policy") == null) {
-					String policyFile = RServiImplE.getLocalhostPolicyFile();
+					final String policyFile = RServiImplE.getLocalhostPolicyFile();
 					System.setProperty("java.security.policy", policyFile);
 				}
 				System.setSecurityManager(new SecurityManager());
@@ -83,7 +87,7 @@ public class RServiManager {
 			rConfig.setEnableVerbose(true);
 			nodeFactory.setConfig(rConfig);
 			
-			EmbeddedRServiManager newEmbeddedR = RServiImplE.createEmbeddedRServi(this.name, registry, nodeFactory);
+			final EmbeddedRServiManager newEmbeddedR = RServiImplE.createEmbeddedRServi(this.name, registry, nodeFactory);
 			newEmbeddedR.start();
 			if (embeddedR != null) {
 				embeddedR.stop();
@@ -91,7 +95,7 @@ public class RServiManager {
 			}
 			embeddedR = newEmbeddedR;
 		}
-		catch (RjException e) {
+		catch (final RjException e) {
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Embedded R instance could not created.", e));
 		}
 	}
@@ -104,9 +108,9 @@ public class RServiManager {
 	}
 	
 	
-	public RServi getRServi(String task) throws CoreException {
+	public RServi getRServi(final String task) throws CoreException {
 		final Config config = this.config;
-		String key = name + "-" + task;
+		final String key = name + "-" + task;
 		
 		try {
 			switch (config.mode) {
@@ -116,13 +120,13 @@ public class RServiManager {
 				return RServiUtil.getRServi(config.address, key);
 			}
 		}
-		catch (CoreException e) {
+		catch (final CoreException e) {
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "R not available, please check the configuration.", e));
 		}
-		catch (LoginException e) {
+		catch (final LoginException e) {
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "R not available, please check the configuration.", e));
 		}
-		catch (NoSuchElementException e) {
+		catch (final NoSuchElementException e) {
 			throw new CoreException(new Status(IStatus.INFO, Activator.PLUGIN_ID, "R currently not available, please try again later.", e));
 		}
 		throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "R is not configured, please check the configuration."));

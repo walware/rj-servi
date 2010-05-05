@@ -13,6 +13,7 @@ package de.walware.rj.servi.pool;
 
 import static de.walware.rj.server.srvext.ServerUtil.RJ_DATA_ID;
 import static de.walware.rj.server.srvext.ServerUtil.RJ_SERVER_ID;
+import static de.walware.rj.servi.RServiUtil.RJ_CLIENT_ID;
 import static de.walware.rj.servi.RServiUtil.RJ_SERVI_ID;
 
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class RServiImplE {
 	public static RServiNodeFactory createLocalhostNodeFactory(final String poolId, final RMIRegistry registry) 
 			throws RjInvalidConfigurationException {
 		final String[] libIds = new String[] {
-				RJ_DATA_ID, RJ_SERVER_ID, RJ_SERVI_ID, "org.eclipse.equinox.common", "org.eclipse.osgi" };
+				RJ_DATA_ID, RJ_SERVER_ID, RJ_SERVI_ID, RJ_CLIENT_ID, "org.eclipse.equinox.common", "org.eclipse.osgi" };
 		
 		return new LocalNodeFactory(poolId, registry, libIds) {
 			@Override

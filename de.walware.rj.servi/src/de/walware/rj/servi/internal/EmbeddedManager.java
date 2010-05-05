@@ -122,7 +122,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 			throw new RjException(Messages.GetRServi_pub_error_message);
 		}
 		this.inUse = true;
-		return new RServiImpl(this.accessId, this.handler, this.handler.clientHandler, this.handler.rInfo);
+		return new RServiImpl(this.accessId, this.handler, this.handler.clientHandler);
 	}
 	
 	private synchronized void returnRServi(final long accessId) {

@@ -11,7 +11,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
@@ -37,7 +36,7 @@ public class RServiConfigView extends ViewPart {
 	
 	
 	@Override
-	public void createPartControl(Composite parent) {
+	public void createPartControl(final Composite parent) {
 		final Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		
@@ -66,7 +65,7 @@ public class RServiConfigView extends ViewPart {
 			button.setText("Select...");
 			button.addSelectionListener(new SelectionAdapter() {
 				@Override
-				public void widgetSelected(SelectionEvent e) {
+				public void widgetSelected(final SelectionEvent e) {
 					final DirectoryDialog dialog = new DirectoryDialog(button.getShell());
 					dialog.setMessage("Select R_HOME directory:");
 					final String path = dialog.open();
@@ -77,22 +76,22 @@ public class RServiConfigView extends ViewPart {
 			});
 		}
 		
-		Label label = new Label(composite, SWT.NONE);
+		final Label label = new Label(composite, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Button applyControl = new Button(composite, SWT.PUSH);
+		final Button applyControl = new Button(composite, SWT.PUSH);
 		applyControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		applyControl.setText("Apply");
 		applyControl.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(final SelectionEvent e) {
 				applyConfig();
 			}
 		});
 		
 		remoteSelectControl.setSelection(true);
 		remoteAddressControl.setText("rmi://localhost/rservi-pool");
-		embeddedRhomeControl.setText("D:\\R\\R-2.9.1");
+		embeddedRhomeControl.setText("D:\\R\\R-2.10.1");
 	}
 	
 	@Override
@@ -111,7 +110,7 @@ public class RServiConfigView extends ViewPart {
 				return;
 			}
 		}
-		catch (CoreException e) {
+		catch (final CoreException e) {
 			StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
 					"Could not apply RServi configuration.", e),
 					StatusManager.SHOW | StatusManager.LOG);

@@ -16,7 +16,6 @@ import java.rmi.RemoteException;
 
 import de.walware.rj.RjException;
 import de.walware.rj.servi.internal.RServiBackend;
-import de.walware.rj.services.RPlatform;
 
 
 public interface RServiNode extends Remote {
@@ -26,7 +25,6 @@ public interface RServiNode extends Remote {
 	
 	void ping() throws RemoteException;
 	
-	RPlatform getPlatform() throws RemoteException;
 	String getPoolHost() throws RemoteException;
 	RServiBackend bindClient(String client) throws RemoteException;
 	void unbindClient() throws RemoteException;

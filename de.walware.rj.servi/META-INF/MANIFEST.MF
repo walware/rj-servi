@@ -9,6 +9,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Require-Bundle: de.walware.rj.data;bundle-version="[0.5.0,0.6.0)",
  de.walware.rj.server;bundle-version="[0.5.0,0.6.0)",
+ de.walware.rj.client;bundle-version="[0.5.0,0.6.0)";visibility:=reexport,
  de.walware.acommons.pool;bundle-version="[1.4.0,1.5.0)";resolution:=optional
 Import-Package: de.walware.ecommons,
  de.walware.ecommons.net,
@@ -16,6 +17,4 @@ Import-Package: de.walware.ecommons,
  org.osgi.framework
 Export-Package: de.walware.rj.servi;version="0.5.0",
  de.walware.rj.servi.internal;x-friends:="de.walware.rj.tests",
- de.walware.rj.servi.pool,
- de.walware.rj.services,
- de.walware.rj.services.utils
+ de.walware.rj.servi.pool

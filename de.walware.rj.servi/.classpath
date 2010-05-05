@@ -4,7 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="srcPoolImpl"/>
-	<classpathentry kind="src" path="srcRServices"/>
 	<classpathentry kind="src" path="srcEExtensions"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

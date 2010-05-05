@@ -250,7 +250,6 @@ public abstract class LocalNodeFactory implements NodeFactory {
 					final RServiNode node = (RServiNode) server.execute(Server.C_RSERVI_NODECONTROL, null, login);
 					
 					poolObj.isConsoleEnabled = node.setConsole(p.authConfig);
-					poolObj.rInfo = node.getPlatform();
 					poolObj.node = node;
 					
 					return;
@@ -320,6 +319,9 @@ public abstract class LocalNodeFactory implements NodeFactory {
 						int n;
 						while ((n = reader.read(buffer, 0, buffer.length)) >= 0) {
 							sb.append(buffer, 0, n);
+							if (sb.length() > 100000) {
+								break;
+							}
 						}
 					}
 					catch (final IOException ignore) {

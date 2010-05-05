@@ -12,14 +12,9 @@
 package de.walware.rj.servi.internal;
 
 import java.rmi.Remote;
-import java.rmi.RemoteException;
 
-import de.walware.rj.server.RjsComObject;
+import de.walware.rj.server.ConsoleEngine;
 
 
-public interface RServiBackend extends Remote {
-	
-	RjsComObject runMainLoop(RjsComObject com) throws RemoteException;
-	RjsComObject runAsync(RjsComObject com) throws RemoteException;
-	
+public interface RServiBackend extends ConsoleEngine, Remote {
 }

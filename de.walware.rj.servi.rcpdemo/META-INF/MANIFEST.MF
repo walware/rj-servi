@@ -11,7 +11,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  de.walware.rj.data;bundle-version="0.5.0",
  de.walware.rj.server;bundle-version="0.5.0",
- de.walware.rj.servi;bundle-version="0.5.0"
+ de.walware.rj.servi;bundle-version="0.5.0",
+ de.walware.rj.eclient.graphics;bundle-version="0.5.0"
 Import-Package: de.walware.ecommons.net,
+ de.walware.rj.graphic,
  de.walware.rj.services,
  de.walware.rj.services.utils

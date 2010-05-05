@@ -13,6 +13,7 @@ package de.walware.rj.servi.pool;
 
 import static de.walware.rj.server.srvext.ServerUtil.RJ_DATA_ID;
 import static de.walware.rj.server.srvext.ServerUtil.RJ_SERVER_ID;
+import static de.walware.rj.servi.RServiUtil.RJ_CLIENT_ID;
 import static de.walware.rj.servi.RServiUtil.RJ_SERVI_ID;
 
 import java.io.File;
@@ -45,7 +46,7 @@ public class RServiImplS {
 	public static RServiNodeFactory createLocalNodeFactory(final String poolId, final RMIRegistry registry, final String libDirPath)
 			throws RjInvalidConfigurationException {
 		final String[] libIds = new String[] {
-				RJ_DATA_ID, RJ_SERVER_ID, RJ_SERVI_ID, "de.walware.rj.services.eruntime" };
+				RJ_DATA_ID, RJ_SERVER_ID, RJ_SERVI_ID, RJ_CLIENT_ID, "de.walware.rj.services.eruntime" };
 		ServerUtil.searchRJLibs(libDirPath, libIds);
 		
 		return new LocalNodeFactory(poolId, registry, libIds) {
@@ -74,7 +75,7 @@ public class RServiImplS {
 	public static RServiNodeFactory createLocalhostNodeFactory(final String poolId, final RMIRegistry registry, final String libDirPath)
 			throws RjInvalidConfigurationException {
 		final String[] libIds = new String[] {
-				RJ_DATA_ID, RJ_SERVER_ID, RJ_SERVI_ID, "de.walware.rj.services.eruntime" };
+				RJ_DATA_ID, RJ_SERVER_ID, RJ_SERVI_ID, RJ_CLIENT_ID, "de.walware.rj.services.eruntime" };
 		ServerUtil.searchRJLibs(libDirPath, libIds);
 		
 		return new LocalNodeFactory(poolId, registry, libIds) {

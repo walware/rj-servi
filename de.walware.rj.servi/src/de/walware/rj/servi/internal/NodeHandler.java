@@ -19,7 +19,6 @@ import de.walware.ecommons.net.RMIAddress;
 
 import de.walware.rj.RjException;
 import de.walware.rj.servi.pool.RServiNode;
-import de.walware.rj.services.RPlatform;
 
 
 public abstract class NodeHandler {
@@ -31,7 +30,6 @@ public abstract class NodeHandler {
 	File dir;
 	
 	RServiBackend clientHandler;
-	RPlatform rInfo;
 	
 	boolean isConsoleEnabled;
 	

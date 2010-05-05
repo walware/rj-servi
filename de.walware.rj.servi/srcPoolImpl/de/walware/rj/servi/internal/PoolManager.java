@@ -164,7 +164,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	
 	public RServi getRServi(final String name, final ServerLogin login) throws NoSuchElementException, RjException {
 		final PoolObject poolObject = getPoolObject(name);
-		return new RServiImpl(poolObject.getAccessId(), poolObject, poolObject.clientHandler, poolObject.rInfo);
+		return new RServiImpl(poolObject.getAccessId(), poolObject, poolObject.clientHandler);
 	}
 	
 	public PoolObject getPoolObject(final String client) throws NoSuchElementException, RjException {
