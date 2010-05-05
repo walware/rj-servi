@@ -9,8 +9,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Require-Bundle: de.walware.rj.data;bundle-version="[0.5.0,0.6.0)",
  de.walware.rj.server;bundle-version="[0.5.0,0.6.0)",
- de.walware.rj.client;bundle-version="[0.5.0,0.6.0)";visibility:=reexport,
- de.walware.acommons.pool;bundle-version="[1.4.0,1.5.0)";resolution:=optional
+ de.walware.rj.client;bundle-version="[0.5.0,0.6.0)";visibility:=reexport
 Import-Package: de.walware.ecommons,
  de.walware.ecommons.net,
  org.eclipse.core.runtime,
