@@ -11,6 +11,9 @@
 
 package de.walware.rj.servi.pool;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 
@@ -29,6 +32,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	public static final String JAVA_ARGS_ID = "java_cmd.args";
 	private static final String JAVA_ARGS_OLD_ID = "java_args.path";
 	
+	public static final String NODE_ENVIRONMENT_VARIABLES_PREFIX = "node_environment.variables.";
 	public static final String NODE_ARGS_ID = "node_cmd.args";
 	
 	public static final String BASE_WD_ID = "base_wd.path";
@@ -52,6 +56,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	private String javaHome;
 	private String javaArgs;
 	
+	private final Map<String, String> environmentVariables = new HashMap<String, String>();
 	private String nodeArgs;
 	
 	private String baseWd;
@@ -80,11 +85,13 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.bits = templ.bits;
 		this.javaHome = templ.javaHome;
 		this.javaArgs = templ.javaArgs;
+		this.environmentVariables.putAll(templ.environmentVariables);
 		this.nodeArgs = templ.nodeArgs;
 		this.baseWd = templ.baseWd;
 		this.rStartupSnippet = templ.rStartupSnippet;
 		this.enableConsole = templ.enableConsole;
 		this.enableVerbose = templ.enableVerbose;
+		this.environmentVariables.clear();
 	}
 	
 	public void load(final Properties map) {
@@ -94,6 +101,16 @@ public class RServiNodeConfig implements PropertiesBean {
 		setJavaArgs(map.getProperty(JAVA_ARGS_ID));
 		if (this.javaArgs.length() == 0) {
 			setJavaArgs(map.getProperty(JAVA_ARGS_OLD_ID));
+		}
+		this.environmentVariables.clear();
+		final int prefixLength = NODE_ENVIRONMENT_VARIABLES_PREFIX.length();
+		for (final Entry<Object, Object> p : map.entrySet()) {
+			final String name = (String) p.getKey();
+			if (name != null && name.length() > prefixLength
+					&& name.startsWith(NODE_ENVIRONMENT_VARIABLES_PREFIX)
+					&& p.getValue() instanceof String) {
+				this.environmentVariables.put(name.substring(prefixLength), (String) p.getValue());
+			}
 		}
 		setNodeArgs(map.getProperty(NODE_ARGS_ID));
 		setBaseWorkingDirectory(map.getProperty(BASE_WD_ID));
@@ -107,6 +124,9 @@ public class RServiNodeConfig implements PropertiesBean {
 		map.setProperty(BITS_ID, Integer.toString(this.bits));
 		map.setProperty(JAVA_HOME_ID, (this.javaHome != null) ? this.javaHome : "");
 		map.setProperty(JAVA_ARGS_ID, this.javaArgs);
+		for (final Entry<String, String> variable : this.environmentVariables.entrySet()) {
+			map.setProperty(NODE_ENVIRONMENT_VARIABLES_PREFIX + variable.getKey(), variable.getValue());
+		}
 		map.setProperty(NODE_ARGS_ID, this.nodeArgs);
 		map.setProperty(BASE_WD_ID, (this.baseWd != null) ? this.baseWd : "");
 		map.setProperty(R_STARTUP_SNIPPET_ID, this.rStartupSnippet);
@@ -144,6 +164,15 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public void setJavaArgs(final String args) {
 		this.javaArgs = (args != null) ? args : "";
+	}
+	
+	/**
+	 * Additional environment variables for the R process.
+	 * 
+	 * @return a name - value map of the environment variables
+	 */
+	public Map<String, String> getEnvironmentVariables() {
+		return this.environmentVariables;
 	}
 	
 	public String getNodeArgs() {

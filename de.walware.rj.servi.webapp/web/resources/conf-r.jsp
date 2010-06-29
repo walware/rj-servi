@@ -44,8 +44,8 @@
 	<h:inputTextarea id="java_cmd_args" label="Java arguments (2)" value="#{rConfig.javaArgs}" required="false" cols="76" rows="4" />
 	<h:outputText></h:outputText>
 	
-	<h:outputLabel for="r_home_path" value="(3) R home (path):" accesskey="3" />
-	<h:inputText id="r_home_path" label="R home (3)" value="#{rConfig.RHome}" required="true" size="80" />
+	<h:outputLabel for="r_home_path" value="(3) R home / R_HOME (path):" accesskey="3" />
+	<h:inputText id="r_home_path" label="R home / R_HOME (3)" value="#{rConfig.RHome}" required="true" size="80" />
 	<h:outputText></h:outputText>
 	
 	<h:outputLabel for="bits_num" value="(4) Bits of binaries:" accesskey="4" />
@@ -54,20 +54,24 @@
 	</h:selectOneListbox>
 	<h:outputText />
 	
-	<h:outputLabel for="base_wd_path" value="(5) Working directory (path):" accesskey="5" />
-	<h:inputText id="base_wd_path" label="Working directory (5)" value="#{rConfig.baseWorkingDirectory}" required="false" size="80" />
+	<h:outputLabel for="r_libs_path" value="(5) R libraries / R_LIBS (path):" accesskey="5" />
+	<h:inputText id="r_libs_path" label="R libraries / R_LIBS (5)" value="#{rConfig.RLibsVariable}" required="false" size="80" />
+	<h:outputText>(optional)</h:outputText>
+	
+	<h:outputLabel for="base_wd_path" value="(6) Working directory (path):" accesskey="6" />
+	<h:inputText id="base_wd_path" label="Working directory (6)" value="#{rConfig.baseWorkingDirectory}" required="false" size="80" />
 	<h:outputText>(empty &#x21d2; default temp dir)</h:outputText>
 	
-	<h:outputLabel for="r_startup_snippet" value="(6) R startup snippet (complete R command per line):" accesskey="6" />
-	<h:inputTextarea id="r_startup_snippet" label="R startup snippet (6)" value="#{rConfig.RStartupSnippet}" required="false" cols="76" rows="4" />
+	<h:outputLabel for="r_startup_snippet" value="(7) R startup snippet (complete R command per line):" accesskey="7" />
+	<h:inputTextarea id="r_startup_snippet" label="R startup snippet (7)" value="#{rConfig.RStartupSnippet}" required="false" cols="76" rows="4" />
 	<h:outputText />
 	
-	<h:outputLabel for="debug_console_enabled" value="(7) Enable debug console:" accesskey="7" />
-	<h:selectBooleanCheckbox id="debug_console_enabled" label="Enable debug console by default (7)" value="#{rConfig.enableConsole}" required="true" />
+	<h:outputLabel for="debug_console_enabled" value="(8) Enable debug console:" accesskey="8" />
+	<h:selectBooleanCheckbox id="debug_console_enabled" label="Enable debug console by default (8)" value="#{rConfig.enableConsole}" required="true" />
 	<h:outputText>Enables debug console automatically at startup (use only for development!)</h:outputText>
 	
-	<h:outputLabel for="verbose_console_enabled" value="(8) Enables verbose logging:" accesskey="8" />
-	<h:selectBooleanCheckbox id="verbose_console_enabled" label="Enables verbose logging (8)" value="#{rConfig.enableVerbose}" required="true" />
+	<h:outputLabel for="verbose_console_enabled" value="(9) Enables verbose logging:" accesskey="9" />
+	<h:selectBooleanCheckbox id="verbose_console_enabled" label="Enables verbose logging (9)" value="#{rConfig.enableVerbose}" required="true" />
 	<h:outputText>Enables verbose logging and prevents deletion of the node directory</h:outputText>
 	
 </h:panelGrid>

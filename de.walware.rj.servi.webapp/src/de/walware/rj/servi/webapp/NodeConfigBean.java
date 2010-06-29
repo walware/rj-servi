@@ -54,6 +54,19 @@ public class NodeConfigBean extends RServiNodeConfig {
 		return BITS_ITEMS;
 	}
 	
+	public String getRLibsVariable() {
+		return getEnvironmentVariables().get("R_LIBS");
+	}
+	
+	public void setRLibsVariable(String value) {
+		if (value != null && value.length() > 0) {
+			getEnvironmentVariables().put("R_LIBS", value);
+		}
+		else {
+			getEnvironmentVariables().remove("R_LIBS");
+		}
+	}
+	
 	public boolean validate() {
 		boolean valid = true;
 		final String rHome = getRHome();

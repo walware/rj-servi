@@ -153,10 +153,13 @@ public abstract class LocalNodeFactory implements NodeFactory {
 			p.command.addAll(Utils.parseArguments(nodeArgs));
 		}
 		
-		final String rHome = config.getRHome();
+		String rHome = config.getRHome();
 		if (rHome == null || rHome.length() == 0) {
-			this.errorMessage = "Missing value for R_HOME.";
-			throw new RjInvalidConfigurationException(this.errorMessage);
+			rHome = config.getEnvironmentVariables().get("R_HOME");
+			if (rHome == null || rHome.length() == 0) {
+				this.errorMessage = "Missing value for R_HOME.";
+				throw new RjInvalidConfigurationException(this.errorMessage);
+			}
 		}
 		p.addEnv.put("R_HOME", rHome);
 		{	final String rBinDir = rHome + File.separatorChar + "bin";
@@ -177,6 +180,8 @@ public abstract class LocalNodeFactory implements NodeFactory {
 			this.errorMessage = "Invalid working directory base path.";
 			throw new RjInvalidConfigurationException(this.errorMessage);
 		}
+		
+		p.addEnv.putAll(config.getEnvironmentVariables());
 		
 		p.authConfig = config.getEnableConsole() ? "none" : null;
 		
