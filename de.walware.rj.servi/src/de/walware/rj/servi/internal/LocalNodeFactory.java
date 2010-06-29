@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import de.walware.ecommons.net.RMIAddress;
 import de.walware.ecommons.net.RMIRegistry;
@@ -385,13 +386,18 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	public void cleanupNode(final NodeHandler poolObj) {
 		if (!this.verbose && poolObj.dir != null
 				&& poolObj.dir.exists() && poolObj.dir.isDirectory()) {
-			try {
-				Thread.sleep(500);
+			for (int i = 0; i < 4; i++) { // 3 seconds
+				try {
+					Thread.sleep(750);
+				}
+				catch (final InterruptedException e) {
+					Thread.interrupted();
+				}
+				if (ServerUtil.delDir(poolObj.dir)) {
+					return;
+				}
 			}
-			catch (final InterruptedException e) {
-				Thread.interrupted();
-			}
-			ServerUtil.delDir(poolObj.dir);
+			Utils.LOGGER.log(Level.WARNING, "Failed to delete the RServi node working directory '" + poolObj.dir.toString() + "'.");
 		}
 	}
 	

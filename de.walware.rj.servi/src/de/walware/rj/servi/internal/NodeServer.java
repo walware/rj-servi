@@ -13,6 +13,7 @@ package de.walware.rj.servi.internal;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
@@ -66,51 +67,73 @@ public class NodeServer extends DefaultServerImpl {
 		public void run() {
 			try {
 				synchronized (NodeServer.this.internalEngine) {
-					if (NodeServer.this.isConsoleEnabled) {
+					if (NodeServer.this.isConsoleEnabled || NodeServer.this.isConsoleDummyRunning) {
 						return;
 					}
 					NodeServer.this.internalEngine.connect(this.client, new HashMap<String, Object>());
+					NodeServer.this.isConsoleDummyRunning = true;
 				}
 				
 				RjsComObject sendCom = null;
+				boolean error = false;
 				while (true) {
-					if (sendCom == null) {
-						this.c2sList.setObjects(null);
-						sendCom = this.c2sList;
-					}
-					final RjsComObject receivedCom = NodeServer.this.internalEngine.runMainLoop(this.client, sendCom);
-					sendCom = null;
-					if (receivedCom != null) {
-						switch (receivedCom.getComType()) {
-						case RjsComObject.T_PING:
-							sendCom = RjsStatus.OK_STATUS;
-							break;
-						case RjsComObject.T_MAIN_LIST:
-							MainCmdItem item = ((MainCmdS2CList) receivedCom).getItems();
-							MainCmdItem tmp;
-							ITER_ITEMS : for (; (item != null); tmp = item, item = item.next, tmp.next = null) {
-								switch (item.getCmdType()) {
-								case MainCmdItem.T_CONSOLE_WRITE_ERR_ITEM:
-									this.out.println("R-ERR: " + item.getDataText());
-									break;
-								case MainCmdItem.T_CONSOLE_WRITE_OUT_ITEM:
-									this.out.println("R-OUT: " + item.getDataText());
-									break;
-								case MainCmdItem.T_CONSOLE_READ_ITEM:
-									this.out.println("R-PROMPT: " + item.getDataText());
-									break;
+					try {
+						if (sendCom == null) {
+							this.c2sList.setObjects(null);
+							sendCom = this.c2sList;
+						}
+						final RjsComObject receivedCom = NodeServer.this.internalEngine.runMainLoop(this.client, sendCom);
+						sendCom = null;
+						error = false;
+						if (receivedCom != null) {
+							switch (receivedCom.getComType()) {
+							case RjsComObject.T_PING:
+								sendCom = RjsStatus.OK_STATUS;
+								break;
+							case RjsComObject.T_MAIN_LIST:
+								MainCmdItem item = ((MainCmdS2CList) receivedCom).getItems();
+								MainCmdItem tmp;
+								ITER_ITEMS : for (; (item != null); tmp = item, item = item.next, tmp.next = null) {
+									switch (item.getCmdType()) {
+									case MainCmdItem.T_CONSOLE_WRITE_ERR_ITEM:
+										this.out.println("R-ERR: " + item.getDataText());
+										break;
+									case MainCmdItem.T_CONSOLE_WRITE_OUT_ITEM:
+										this.out.println("R-OUT: " + item.getDataText());
+										break;
+									case MainCmdItem.T_CONSOLE_READ_ITEM:
+										this.out.println("R-PROMPT: " + item.getDataText());
+										break;
+									}
+								}
+								break;
+							case RjsComObject.T_STATUS:
+								switch (((RjsStatus) receivedCom).getCode()) {
+								case Server.S_DISCONNECTED:
+									throw new ConnectException("");
+								case Server.S_LOST:
+								case Server.S_NOT_STARTED:
+								case Server.S_STOPPED:
+									return;
 								}
 							}
-							break;
-						case RjsComObject.T_STATUS:
-							switch (((RjsStatus) receivedCom).getCode()) {
-							case Server.S_NOT_STARTED:
-							case Server.S_DISCONNECTED:
-							case Server.S_LOST:
-							case Server.S_STOPPED:
+						}
+					}
+					catch (final ConnectException e) {
+						synchronized (NodeServer.this.internalEngine) {
+							if (NodeServer.this.isConsoleEnabled) {
+								NodeServer.this.isConsoleDummyRunning = false;
 								return;
 							}
+							NodeServer.this.internalEngine.connect(this.client, new HashMap<String, Object>());
 						}
+					}
+					catch (final Exception e) {
+						if (error) {
+							throw e;
+						}
+						LOGGER.log(Level.SEVERE, "An error occurred when running dummy R REPL. Trying to continue REPL.", e);
+						error = true;
 					}
 					if (sendCom == null) {
 						try {
@@ -123,7 +146,7 @@ public class NodeServer extends DefaultServerImpl {
 				}
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "An error occurred when running dummy R REPL.", e);
+				LOGGER.log(Level.SEVERE, "An error occurred when running dummy R REPL. Stopping REPL.", e);
 			}
 		}
 		
@@ -149,7 +172,9 @@ public class NodeServer extends DefaultServerImpl {
 					NodeServer.this.consoleAuthMethod = new NoAuthMethod("<internal>");
 					enabled = NodeServer.this.isConsoleEnabled = false;
 //					LOGGER.fine("before start");
-					new ConsoleDummy(NodeServer.this.consoleDummyClient).start();
+					if (!NodeServer.this.isConsoleDummyRunning) {
+						new ConsoleDummy(NodeServer.this.consoleDummyClient).start();
+					}
 //					LOGGER.fine("after start");
 				}
 				LOGGER.fine("exit lock");
@@ -230,6 +255,7 @@ public class NodeServer extends DefaultServerImpl {
 	
 	
 	private boolean isConsoleEnabled;
+	private boolean isConsoleDummyRunning;
 	
 	private final ServerAuthMethod rserviAuthMethod;
 	

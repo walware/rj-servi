@@ -58,7 +58,7 @@ public class PoolConfigBean extends PoolConfig {
 			valid = false;
 		}
 		if (getMinIdleCount() >= 0 && getMaxIdleCount() >= 0 && getMaxIdleCount() < getMinIdleCount()) {
-			FacesUtils.addErrorMessage(MAX_IDLE_COUNT_UI, (new StringBuilder("Value must be >= ")).append(FacesUtils.getLabel("poolConfig:minIdleCount")).append(".").toString());
+			FacesUtils.addErrorMessage(MAX_IDLE_COUNT_UI, (new StringBuilder("Value must be >= ")).append(FacesUtils.getLabel(MIN_IDLE_COUNT_UI)).append(".").toString());
 			valid = false;
 		}
 		if (getMinIdleTime() < 0L) {

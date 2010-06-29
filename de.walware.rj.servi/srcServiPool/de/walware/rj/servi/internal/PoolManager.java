@@ -104,7 +104,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 					stop(8);
 				}
 				catch (final Exception ignore) {}
-				Utils.LOGGER.log(Level.SEVERE, "An error occurred when binding the pool from the registry.", e);
+				Utils.LOGGER.log(Level.SEVERE, "An error occurred when binding the pool in the registry.", e);
 				throw new RjInitFailedException("An error occurred when publishing the pool in the registry.");
 			}
 		}
@@ -152,9 +152,10 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		poolConfig.testWhileIdle = false;
 		poolConfig.testOnBorrow = false;
 		poolConfig.whenExhaustedAction = 1;
+		poolConfig.maxActive = config.getMaxTotalCount();
 		poolConfig.maxWait = config.getMaxWaitTime();
 		poolConfig.minIdle = config.getMinIdleCount();
-		poolConfig.maxIdle = config.getMaxTotalCount();
+		poolConfig.maxIdle = config.getMaxIdleCount();
 		poolConfig.minEvictableIdleTimeMillis = 0L;
 		poolConfig.softMinEvictableIdleTimeMillis = config.getMinIdleTime();
 		poolConfig.timeBetweenEvictionRunsMillis = 7500L;
