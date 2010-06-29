@@ -21,8 +21,6 @@ import de.walware.rj.servi.internal.RServiBackend;
 public interface RServiNode extends Remote {
 	
 	
-	boolean setConsole(String authConfig) throws RjException, RemoteException;
-	
 	void ping() throws RemoteException;
 	
 	String getPoolHost() throws RemoteException;
@@ -32,5 +30,16 @@ public interface RServiNode extends Remote {
 	void shutdown() throws RemoteException;
 	
 	int getEvalTime() throws RemoteException;
+	
+	boolean setConsole(String authConfig) throws RjException, RemoteException;
+	
+	/**
+	 * Runs the given code in R
+	 * 
+	 * @param code the R code
+	 * @throws RjException if an R error occurred when running the snippet
+	 * @throws RemoteException if an RMI/communication error occurred
+	 */
+	void runSnippet(String code) throws RjException, RemoteException;
 	
 }

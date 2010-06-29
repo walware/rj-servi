@@ -157,7 +157,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		poolConfig.maxIdle = config.getMaxTotalCount();
 		poolConfig.minEvictableIdleTimeMillis = 0L;
 		poolConfig.softMinEvictableIdleTimeMillis = config.getMinIdleTime();
-		poolConfig.timeBetweenEvictionRunsMillis = 15000L;
+		poolConfig.timeBetweenEvictionRunsMillis = 7500L;
 		poolConfig.numTestsPerEvictionRun = -3;
 		return poolConfig;
 	}

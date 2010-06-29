@@ -58,12 +58,16 @@
 	<h:inputText id="base_wd_path" label="Working directory (5)" value="#{rConfig.baseWorkingDirectory}" required="false" size="80" />
 	<h:outputText>(empty &#x21d2; default temp dir)</h:outputText>
 	
-	<h:outputLabel for="debug_console_enabled" value="(6) Enable debug console:" accesskey="6" />
-	<h:selectBooleanCheckbox id="debug_console_enabled" label="Enable debug console by default (6)" value="#{rConfig.enableConsole}" required="true" />
+	<h:outputLabel for="r_startup_snippet" value="(6) R startup snippet (complete R command per line):" accesskey="6" />
+	<h:inputTextarea id="r_startup_snippet" label="R startup snippet (6)" value="#{rConfig.RStartupSnippet}" required="false" cols="76" rows="4" />
+	<h:outputText />
+	
+	<h:outputLabel for="debug_console_enabled" value="(7) Enable debug console:" accesskey="7" />
+	<h:selectBooleanCheckbox id="debug_console_enabled" label="Enable debug console by default (7)" value="#{rConfig.enableConsole}" required="true" />
 	<h:outputText>Enables debug console automatically at startup (use only for development!)</h:outputText>
 	
-	<h:outputLabel for="verbose_console_enabled" value="(7) Enables verbose logging:" accesskey="7" />
-	<h:selectBooleanCheckbox id="verbose_console_enabled" label="Enables verbose logging (7)" value="#{rConfig.enableVerbose}" required="true" />
+	<h:outputLabel for="verbose_console_enabled" value="(8) Enables verbose logging:" accesskey="8" />
+	<h:selectBooleanCheckbox id="verbose_console_enabled" label="Enables verbose logging (8)" value="#{rConfig.enableVerbose}" required="true" />
 	<h:outputText>Enables verbose logging and prevents deletion of the node directory</h:outputText>
 	
 </h:panelGrid>

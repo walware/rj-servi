@@ -174,6 +174,10 @@ public class NodeServer extends DefaultServerImpl {
 			}
 		}
 		
+		public void runSnippet(final String code) throws RemoteException, RjException {
+			NodeServer.this.runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0, code));
+		}
+		
 		public RServiBackend bindClient(final String client) throws RemoteException {
 			return NodeServer.this.bindClient(client);
 		}

@@ -21,13 +21,28 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	
 	public static final String R_HOME_ID = "r_home.path";
+	
 	public static final String BITS_ID = "bits.num";
+	
 	public static final String JAVA_HOME_ID = "java_home.path";
+	
 	public static final String JAVA_ARGS_ID = "java_cmd.args";
 	private static final String JAVA_ARGS_OLD_ID = "java_args.path";
+	
 	public static final String NODE_ARGS_ID = "node_cmd.args";
+	
 	public static final String BASE_WD_ID = "base_wd.path";
+	
+	/**
+	 * Property id for R startup snippet
+	 * 
+	 * @see #setRStartupSnippet(String)
+	 * @since 0.5
+	 */
+	public static final String R_STARTUP_SNIPPET_ID = "r_startup.snippet";
+	
 	public static final String CONSOLE_ENABLED_ID = "debug_console.enabled";
+	
 	public static final String VERBOSE_ENABLED_ID = "debug_verbose.enabled";
 	
 	
@@ -41,6 +56,8 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	private String baseWd;
 	
+	private String rStartupSnippet;
+	
 	private boolean enableConsole;
 	private boolean enableVerbose;
 	
@@ -50,6 +67,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.bits = 64;
 		this.javaArgs = "-server";
 		this.nodeArgs = "";
+		this.rStartupSnippet = "";
 	}
 	
 	
@@ -64,6 +82,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.javaArgs = templ.javaArgs;
 		this.nodeArgs = templ.nodeArgs;
 		this.baseWd = templ.baseWd;
+		this.rStartupSnippet = templ.rStartupSnippet;
 		this.enableConsole = templ.enableConsole;
 		this.enableVerbose = templ.enableVerbose;
 	}
@@ -78,6 +97,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		}
 		setNodeArgs(map.getProperty(NODE_ARGS_ID));
 		setBaseWorkingDirectory(map.getProperty(BASE_WD_ID));
+		setRStartupSnippet(map.getProperty(R_STARTUP_SNIPPET_ID));
 		setEnableConsole(Boolean.parseBoolean(map.getProperty(CONSOLE_ENABLED_ID)));
 		setEnableVerbose(Boolean.parseBoolean(map.getProperty(VERBOSE_ENABLED_ID)));
 	}
@@ -89,6 +109,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		map.setProperty(JAVA_ARGS_ID, this.javaArgs);
 		map.setProperty(NODE_ARGS_ID, this.nodeArgs);
 		map.setProperty(BASE_WD_ID, (this.baseWd != null) ? this.baseWd : "");
+		map.setProperty(R_STARTUP_SNIPPET_ID, this.rStartupSnippet);
 		map.setProperty(CONSOLE_ENABLED_ID, Boolean.toString(this.enableConsole));
 		map.setProperty(VERBOSE_ENABLED_ID, Boolean.toString(this.enableVerbose));
 	}
@@ -99,14 +120,6 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public String getRHome() {
 		return this.rHome;
-	}
-	
-	public void setBaseWorkingDirectory(final String path) {
-		this.baseWd = (path != null && path.trim().length() > 0) ? path : null;
-	}
-	
-	public String getBaseWorkingDirectory() {
-		return this.baseWd;
 	}
 	
 	public void setBits(final int bits) {
@@ -139,6 +152,37 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public void setNodeArgs(final String args) {
 		this.nodeArgs = (args != null) ? args : "";
+	}
+	
+	public void setBaseWorkingDirectory(final String path) {
+		this.baseWd = (path != null && path.trim().length() > 0) ? path : null;
+	}
+	
+	public String getBaseWorkingDirectory() {
+		return this.baseWd;
+	}
+	
+	/**
+	 * Returns the R code snippet to run at startup of a node.
+	 * 
+	 * @see #setRStartupSnippet(String)
+	 * @since 0.5
+	 */
+	public String getRStartupSnippet() {
+		return this.rStartupSnippet;
+	}
+	
+	/**
+	 * Sets the R code snippet to run at startup of a node.
+	 * <p>
+	 * Typical use case is to load required R packages. The default is an empty snippet.
+	 * If the execution of the code throws an error, the startup of the node is canceled.</p>
+	 * 
+	 * @param code the R code to run
+	 * @since 0.5
+	 */
+	public void setRStartupSnippet(final String code) {
+		this.rStartupSnippet = (code != null) ? code : "";
 	}
 	
 	public boolean getEnableConsole() {

@@ -30,7 +30,6 @@ import de.walware.rj.RjInvalidConfigurationException;
 import de.walware.rj.server.Server;
 import de.walware.rj.server.ServerLogin;
 import de.walware.rj.server.srvext.ServerUtil;
-import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.servi.pool.RServiNode;
 import de.walware.rj.servi.pool.RServiNodeConfig;
 
@@ -39,7 +38,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	
 	
 	public static final String[] CODEBASE_LIBS = new String[] {
-			ServerUtil.RJ_SERVER_ID, RServiUtil.RJ_SERVI_ID };
+			ServerUtil.RJ_SERVER_ID }; // RServiUtil.RJ_SERVI_ID, RServiUtil.RJ_CLIENT_ID
 	
 	private static class ProcessConfig {
 		final Map<String, String> addEnv = new HashMap<String, String>();
@@ -47,6 +46,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		int nameCommandIdx = -1;
 		String baseWd;
 		String authConfig;
+		String rStartupSnippet;
 	}
 	
 	
@@ -180,6 +180,8 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		
 		p.authConfig = config.getEnableConsole() ? "none" : null;
 		
+		p.rStartupSnippet = config.getRStartupSnippet();
+		
 		this.verbose = config.getEnableVerbose();
 		this.baseConfig = config;
 		this.processConfig = p;
@@ -249,9 +251,37 @@ public abstract class LocalNodeFactory implements NodeFactory {
 					final ServerLogin login = server.createLogin(Server.C_RSERVI_NODECONTROL);
 					final RServiNode node = (RServiNode) server.execute(Server.C_RSERVI_NODECONTROL, null, login);
 					
-					poolObj.isConsoleEnabled = node.setConsole(p.authConfig);
-					poolObj.node = node;
+					String line = null;
+					try {
+						if (p.rStartupSnippet != null && p.rStartupSnippet.length() > 0) {
+							final String[] lines = p.rStartupSnippet.split("\\p{Blank}*\\r[\\n]?|\\n\\p{Blank}*"); //$NON-NLS-1$
+							for (int j = 0; j < lines.length; j++) {
+								line = lines[j];
+								if (line.length() > 0) {
+									node.runSnippet(line);
+								}
+							}
+						}
+					}
+					catch (final RjException e) {
+						try {
+							node.shutdown();
+						}
+						catch (final Exception ignore) {}
+						throw new RjException("Running the R startup snippet failed in line '" + line + "'.", e);
+					}
+					try {
+						poolObj.isConsoleEnabled = node.setConsole(p.authConfig);
+					}
+					catch (final RjException e) {
+						try {
+							node.shutdown();
+						}
+						catch (final Exception ignore) {}
+						throw e;
+					}
 					
+					poolObj.node = node;
 					return;
 				}
 				catch (final NotBoundException e) {
