@@ -76,7 +76,7 @@ public class RServiImpl implements RServi, Externalizable {
 			case Server.S_STOPPED:
 				break;
 			case RjsStatus.ERROR:
-				throw new CoreException(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, "Server error."));
+				throw new CoreException(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, "Server or IO error."));
 			default:
 				throw new IllegalStateException();
 			}

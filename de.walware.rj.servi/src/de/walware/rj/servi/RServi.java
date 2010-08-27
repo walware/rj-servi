@@ -17,9 +17,9 @@ import de.walware.rj.services.RService;
 
 
 /**
- * A RServi provides {@link RService R services} as background computing engine
- * without an interactive R console. Usually a RServi is connected to
- * a server side R engine.
+ * A RServi provides {@link RService R services} as background computing engine without an 
+ * interactive R console. An RServi can be for example connected to a server side R engine or 
+ * an R engine embedded in the local application.
  * <p>
  * How to receive an RServi instance depends on the application.
  * The RServi framework includes a server side RServi 

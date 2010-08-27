@@ -63,7 +63,7 @@ public class PoolObject extends NodeHandler implements RServiImpl.PoolRef, Unref
 			}
 			this.item.invalidateClient();
 		}
-		Utils.LOGGER.log(Level.INFO, "The RServi instance is lent and unreferenced. It will returnted now.");
+		Utils.LOGGER.log(Level.INFO, "The RServi instance is lent and unreferenced. It will be returned now.");
 		try {
 			this.item.getPool().returnObject(this.item);
 		}
