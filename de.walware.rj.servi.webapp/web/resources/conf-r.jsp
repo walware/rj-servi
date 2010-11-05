@@ -48,7 +48,11 @@
 	<h:inputText id="r_home_path" label="R home / R_HOME (3)" value="#{rConfig.RHome}" required="true" size="80" />
 	<h:outputText></h:outputText>
 	
-	<h:outputLabel for="bits_num" value="(4) Bits of binaries:" accesskey="4" />
+	<h:outputLabel for="r_arch_code" value="(4a) Architecture of binaries / R_ARCH:" accesskey="4" />
+	<h:inputText id="r_arch_code" label="Architecture / R_ARCH (4a)" value="#{rConfig.RArch}" required="false" size="10" />
+	<h:outputText>(empty &#x21d2; autodetection)</h:outputText>
+	
+	<h:outputLabel for="bits_num" value="(4b) Bits of binaries:" />
 	<h:selectOneListbox id="bits_num" value="#{rConfig.bits}" required="true" size="1" >
 		<f:selectItems value="#{rConfig.bitsItems}" />
 	</h:selectOneListbox>

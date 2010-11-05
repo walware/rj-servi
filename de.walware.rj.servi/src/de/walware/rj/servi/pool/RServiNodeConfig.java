@@ -25,6 +25,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public static final String R_HOME_ID = "r_home.path";
 	
+	public static final String R_ARCH_ID = "r_arch.code";
 	public static final String BITS_ID = "bits.num";
 	
 	public static final String JAVA_HOME_ID = "java_home.path";
@@ -51,6 +52,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	
 	private String rHome;
+	private String rArch;
 	private int bits;
 	
 	private String javaHome;
@@ -69,6 +71,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public RServiNodeConfig() {
 		this.rHome = System.getenv("R_HOME");
+		this.rArch = System.getenv("R_ARCH");
 		this.bits = 64;
 		this.javaArgs = "-server";
 		this.nodeArgs = "";
@@ -82,6 +85,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	protected void load(final RServiNodeConfig templ) {
 		this.rHome = templ.rHome;
+		this.rArch = templ.rArch;
 		this.bits = templ.bits;
 		this.javaHome = templ.javaHome;
 		this.javaArgs = templ.javaArgs;
@@ -96,6 +100,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public void load(final Properties map) {
 		setRHome(map.getProperty(R_HOME_ID));
+		setRArch(map.getProperty(R_ARCH_ID));
 		setBits(Integer.parseInt(map.getProperty(BITS_ID, "64")));
 		setJavaHome(map.getProperty(JAVA_HOME_ID));
 		setJavaArgs(map.getProperty(JAVA_ARGS_ID));
@@ -121,6 +126,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public void save(final Properties map) {
 		map.setProperty(R_HOME_ID, this.rHome);
+		map.setProperty(R_ARCH_ID, this.rArch);
 		map.setProperty(BITS_ID, Integer.toString(this.bits));
 		map.setProperty(JAVA_HOME_ID, (this.javaHome != null) ? this.javaHome : "");
 		map.setProperty(JAVA_ARGS_ID, this.javaArgs);
@@ -140,6 +146,14 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public String getRHome() {
 		return this.rHome;
+	}
+	
+	public void setRArch(final String code) {
+		this.rArch = code;
+	}
+	
+	public String getRArch() {
+		return this.rArch;
 	}
 	
 	public void setBits(final int bits) {

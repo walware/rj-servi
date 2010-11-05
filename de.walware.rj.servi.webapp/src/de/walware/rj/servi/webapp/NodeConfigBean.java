@@ -32,6 +32,7 @@ public class NodeConfigBean extends RServiNodeConfig {
 	private static final String FORM_UI = "r_config";
 	
 	private static final String R_HOME_UI = FORM_UI + ':' + R_HOME_ID.replace('.', '_');
+	private static final String R_ARCH_UI = FORM_UI + ':' + R_ARCH_ID.replace('.', '_');
 	private static final String JAVA_HOME_UI = FORM_UI + ':' + JAVA_HOME_ID.replace('.', '_');
 	private static final String BASE_WD_UI = FORM_UI + ':' + BASE_WD_ID.replace('.', '_');
 	

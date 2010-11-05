@@ -103,7 +103,7 @@ public class RServiConfigView extends ViewPart {
 		
 		remoteSelectControl.setSelection(true);
 		remoteAddressControl.setText("rmi://localhost/rservi-pool");
-		embeddedRhomeControl.setText("D:\\R\\R-2.10.1");
+		embeddedRhomeControl.setText("D:\\R\\R-2.12.0");
 		rsetupIdControl.setText("org.rproject.r.DefaultSetup");
 	}
 	

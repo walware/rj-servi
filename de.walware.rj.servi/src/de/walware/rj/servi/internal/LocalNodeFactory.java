@@ -86,7 +86,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		
 		String javaHome = config.getJavaHome();
 		if (javaHome == null || javaHome.length() == 0) {
-			javaHome = System.getProperties().getProperty("java.home");
+			javaHome = System.getProperty("java.home");
 		}
 		p.addEnv.put("JAVA_HOME", javaHome);
 		
@@ -162,13 +162,101 @@ public abstract class LocalNodeFactory implements NodeFactory {
 				throw new RjInvalidConfigurationException(this.errorMessage);
 			}
 		}
+		final File rHomeFile = new File(rHome);
+		if (!rHomeFile.exists() || !rHomeFile.isDirectory()) {
+			this.errorMessage = "Invalid value for R_HOME (directory does not exists).";
+			throw new RjInvalidConfigurationException(this.errorMessage);
+		}
 		p.addEnv.put("R_HOME", rHome);
-		{	final String rBinDir = rHome + File.separatorChar + "bin";
+		
+		String rArch = config.getRArch();
+		if (rArch != null && rArch.length() == 0) {
+			rArch = null;
+		}
+		boolean rArchAuto = false;
+		if (rArch == null && javaHome.equals(System.getProperty("java.home"))) {
+			rArch = System.getProperty("os.arch");
+			if (rArch.equals("amd64")) {
+				rArch = "x86_64";
+			}
+			else if (rArch.equals("x86")) {
+				rArch = "i386";
+			}
+			rArchAuto = true;
+		}
+		if (rArch != null) {
+			// validate R_ARCH
+			if (Utils.IS_WINDOWS) {
+				if (rArch.equals("x86_64")) {
+					rArch = "x64";
+				}
+				if (!new File(new File(rHomeFile, "bin"), rArch).exists()) {
+					rArch = null;
+				}
+			}
+			else {
+				final File execDir = new File(new File(rHomeFile, "bin"), "exec");
+				if (!new File(execDir, rArch).exists()) {
+					if (execDir.exists() &&
+							(rArch.equals("i386") || rArch.equals("i586") || rArch.equals("i686")) ) {
+						if (new File(execDir, "i686").exists()) {
+							rArch = "i686";
+						}
+						else if (new File(execDir, "i586").exists()) {
+							rArch = "i586";
+						}
+						else if (new File(execDir, "i386").exists()) {
+							rArch = "i386";
+						}
+						else {
+							rArch = null;
+						}
+					}
+					else {
+						rArch = null;
+					}
+				}
+			}
+			if (rArch != null) {
+				p.addEnv.put("R_ARCH", '/'+rArch);
+			}
+			else if (!rArchAuto) {
+				Utils.logInfo("Failed to validate specified architecture, value is not used.");
+			}
+		}
+		
+		if (Utils.IS_WINDOWS) {
+			final String rBinDir;
+			if (rArch != null) {
+				rBinDir = rHome + File.separatorChar + "bin" + File.separatorChar + rArch;
+			}
+			else {
+				rBinDir = rHome + File.separatorChar + "bin";
+			}
 			final String pathEnv = System.getenv("PATH");
 			p.addEnv.put("PATH", (pathEnv != null) ? (rBinDir + File.pathSeparatorChar + pathEnv) : rBinDir);
 		}
-		if (!Utils.IS_WINDOWS) {
+		else if (Utils.IS_MAC) {
+			final String rBinDir = rHome + File.separatorChar + "bin";
+			final String pathEnv = System.getenv("PATH");
+			p.addEnv.put("PATH", (pathEnv != null) ? (rBinDir + File.pathSeparatorChar + pathEnv) : rBinDir);
+			
 			final String rLibDir = rHome + File.separatorChar + "lib";
+			final String libPathEnv = System.getenv("DYLD_LIBRARY_PATH");
+			p.addEnv.put("DYLD_LIBRARY_PATH", (libPathEnv != null) ? (rLibDir + File.pathSeparatorChar + libPathEnv) : rLibDir);
+		}
+		else {
+			final String rBinDir = rHome + File.separatorChar + "bin";
+			final String pathEnv = System.getenv("PATH");
+			p.addEnv.put("PATH", (pathEnv != null) ? (rBinDir + File.pathSeparatorChar + pathEnv) : rBinDir);
+			
+			final String rLibDir;
+			if (rArch != null) {
+				rLibDir = rHome + File.separatorChar + "lib" + File.separatorChar + rArch;
+			}
+			else {
+				rLibDir = rHome + File.separatorChar + "lib";
+			}
 			final String libPathEnv = System.getenv("LD_LIBRARY_PATH");
 			p.addEnv.put("LD_LIBRARY_PATH", (libPathEnv != null) ? (rLibDir + File.pathSeparatorChar + libPathEnv) : rLibDir);
 		}

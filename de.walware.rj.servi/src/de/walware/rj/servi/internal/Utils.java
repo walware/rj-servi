@@ -24,6 +24,7 @@ public class Utils {
 	public static final Logger LOGGER = Logger.getLogger("de.walware.rj.servi");
 	
 	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().startsWith("win");
+	public static final boolean IS_MAC = System.getProperty("os.name").toLowerCase().startsWith("mac");
 	
 	
 	/**
