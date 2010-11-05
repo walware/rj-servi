@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="de.walware.rj.servi.webapp">
+        <wb-resource deploy-path="/" source-path="/web"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <dependent-module archiveName="de.walware.rj.servi.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/de.walware.rj.servi/de.walware.rj.servi">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="de.walware.rj.client.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/de.walware.rj.client/de.walware.rj.client">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="de.walware.rj.services.eruntime.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/de.walware.rj.services.eruntime/de.walware.rj.services.eruntime">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="de.walware.rj.data.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/de.walware.rj.data/de.walware.rj.data">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="de.walware.rj.server.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/de.walware.rj.server/de.walware.rj.server">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="java-output-path"/>
+        <property name="context-root" value="rservi"/>
+    </wb-module>
+</project-modules>
