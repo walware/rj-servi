@@ -14,9 +14,6 @@ package de.walware.rj.servi.internal;
 import java.rmi.Remote;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.NoSuchElementException;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Level;
 
 import org.apache.commons.pool.ObjectPoolItem;
 import org.apache.commons.pool.impl.ExtGenericObjectPool;
@@ -41,6 +38,8 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	
 	private final RMIRegistry registry;
 	
+	private Remote thisRemote;
+	
 	private ExtGenericObjectPool pool;
 	private PoolObjectFactory poolFactory;
 	private PoolConfig poolConfig;
@@ -59,6 +58,8 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		this.registry = registry;
 		this.stats = new Stats();
 		this.poolConfig = new PoolConfig();
+		
+		Utils.preLoad();
 	}
 	
 	
@@ -94,17 +95,19 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	public synchronized void init() throws RjException {
 		this.poolFactory = new PoolObjectFactory(this.nodeFactory, this.stats, this.poolConfig);
 		this.pool = new ExtGenericObjectPool(this.poolFactory, createConfig(this.poolConfig));
+		
+		Utils.logInfo("Publishing pool in registry...");
 		if (this.registry != null) {
 			try {
-				final Remote remote = UnicastRemoteObject.exportObject(this, 0);
-				this.registry.getRegistry().rebind(PoolConfig.getPoolName(this.id), remote);
+				this.thisRemote = UnicastRemoteObject.exportObject(this, 0);
+				this.registry.getRegistry().rebind(PoolConfig.getPoolName(this.id), this.thisRemote);
 			}
 			catch (final Exception e) {
 				try {
 					stop(8);
 				}
 				catch (final Exception ignore) {}
-				Utils.LOGGER.log(Level.SEVERE, "An error occurred when binding the pool in the registry.", e);
+				Utils.logError("An error occurred when binding the pool in the registry.", e);
 				throw new RjInitFailedException("An error occurred when publishing the pool in the registry.");
 			}
 		}
@@ -115,34 +118,46 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	}
 	
 	public synchronized void stop(final int mode) throws RjException {
+		Utils.logInfo("Unpublishing pool...");
 		if (this.registry != null) {
 			try {
 				this.registry.getRegistry().unbind(PoolConfig.getPoolName(this.id));
 			}
 			catch (final Exception e) {
 				if (mode != 8) {
-					Utils.LOGGER.log(Level.SEVERE, "An error occurred when unbinding the pool from the registry.", e);
+					Utils.logError("An error occurred when unbinding the pool from the registry.", e);
 				}
 			}
 		}
-		try {
-			UnicastRemoteObject.unexportObject(this, true);
+		if (this.thisRemote != null) {
+			try {
+				this.thisRemote = null;
+				UnicastRemoteObject.unexportObject(this, true);
+			}
+			catch (final Exception e) {
+				if (mode != 8) {
+					Utils.logError("An error occurred when unexport the pool.", e);
+				}
+			}
 		}
-		catch (final Exception e) {}
 		
-		new Timer().schedule(new TimerTask() {
-			@Override
-			public void run() {
-				if (PoolManager.this.pool != null) {
-					try {
-						PoolManager.this.pool.close();
-					}
-					catch (final Exception e) {
-						Utils.LOGGER.log(Level.SEVERE, "An error occurred when closing the pool.", e);
-					}
-				}
+		try {
+			Thread.sleep(1000);
+		}
+		catch (InterruptedException e) {
+		}
+		if (PoolManager.this.pool != null) {
+			Utils.logInfo("Closing R nodes...");
+			try {
+				PoolManager.this.pool.close();
 			}
-		}, 1000L);
+			catch (final Exception e) {
+				Utils.logError("An error occurred when closing the pool.", e);
+			}
+			finally {
+				Runtime.getRuntime().gc();
+			}
+		}
 	}
 	
 	private Config createConfig(final PoolConfig config) {
@@ -180,7 +195,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		}
 		catch (final Exception e) {
 			this.stats.logServRequestFailed(4);
-			Utils.LOGGER.log(Level.SEVERE, Messages.BindClient_error_message, e);
+			Utils.logError(Messages.BindClient_error_message, e);
 			throw new RjException(Messages.GetRServi_pub_error_message);
 		}
 	}

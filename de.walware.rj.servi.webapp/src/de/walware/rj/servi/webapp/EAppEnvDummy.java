@@ -12,6 +12,9 @@
 package de.walware.rj.servi.webapp;
 
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -30,6 +33,8 @@ public class EAppEnvDummy implements ServletContextListener, ECommons.IAppEnviro
 	
 	private ServletContext context;
 	
+	private Logger logger;
+	
 	
 	public EAppEnvDummy() {
 	}
@@ -38,6 +43,8 @@ public class EAppEnvDummy implements ServletContextListener, ECommons.IAppEnviro
 	public void contextInitialized(final ServletContextEvent sce) {
 		this.context = sce.getServletContext();
 		ECommons.init("de.walware.rj.services.eruntime", this);
+		
+		this.logger = Logger.getLogger("de.walware.rj.servi.pool");
 	}
 	
 	public void contextDestroyed(final ServletContextEvent sce) {
@@ -60,33 +67,69 @@ public class EAppEnvDummy implements ServletContextListener, ECommons.IAppEnviro
 		this.stopListeners.remove(listener);
 	}
 	
+//	public void log(final IStatus status) {
+//		final StringBuilder sb = new StringBuilder();
+//		switch (status.getSeverity()) {
+//		case IStatus.OK:
+//			sb.append("[OK] ");
+//			break;
+//		case IStatus.ERROR:
+//			sb.append("[ERROR] ");
+//			break;
+//		case IStatus.WARNING:
+//			sb.append("[WARNING] ");
+//			break;
+//		case IStatus.INFO:
+//			sb.append("[INFO] ");
+//			break;
+//		case IStatus.CANCEL:
+//			sb.append("[CANCEL] ");
+//			break;
+//		default:
+//			sb.append("[severity=");
+//			sb.append(status.getSeverity());
+//			sb.append(']');
+//			break;
+//		}
+//		sb.append(status.getMessage());
+//		
+//		this.context.log(sb.toString(), status.getException());
+//	}
+	
 	public void log(final IStatus status) {
-		final StringBuilder sb = new StringBuilder();
+		final Level level;
 		switch (status.getSeverity()) {
-		case IStatus.OK:
-			sb.append("[OK] ");
-			break;
-		case IStatus.ERROR:
-			sb.append("[ERROR] ");
+		case IStatus.INFO:
+			level = Level.INFO;
 			break;
 		case IStatus.WARNING:
-			sb.append("[WARNING] ");
+			level = Level.WARNING;
 			break;
-		case IStatus.INFO:
-			sb.append("[INFO] ");
-			break;
-		case IStatus.CANCEL:
-			sb.append("[CANCEL] ");
+		case IStatus.ERROR:
+			level = Level.SEVERE;
 			break;
 		default:
-			sb.append("[severity=");
-			sb.append(status.getSeverity());
-			sb.append(']');
-			break;
+			level = Level.FINE;
 		}
-		sb.append(status.getMessage());
+		final LogRecord record = new LogRecord(level, status.getMessage());
+		if (status.getException() != null) {
+			record.setThrown(status.getException());
+		}
 		
-		this.context.log(sb.toString(), status.getException());
+		// set correct caller
+		try {
+			final StackTraceElement[] stackTrace = new Exception().getStackTrace();
+			for (int i = 1; i < stackTrace.length; i++) {
+				if (!stackTrace[i].getMethodName().startsWith("log")) {
+					record.setSourceClassName(stackTrace[i].getClassName());
+					record.setSourceMethodName(stackTrace[i].getMethodName());
+					break;
+				}
+			}
+		}
+		catch (Exception ignore) {}
+		
+		this.logger.log(record);
 	}
 	
 }

@@ -140,7 +140,6 @@ public class NodeServer extends DefaultServerImpl {
 							sleep(5000);
 						}
 						catch (final InterruptedException e) {
-							Thread.interrupted();
 						}
 					}
 				}
@@ -155,7 +154,6 @@ public class NodeServer extends DefaultServerImpl {
 	class Node implements RServiNode {
 		
 		public boolean setConsole(final String authConfig) throws RemoteException, RjException {
-			LOGGER.entering("NodeServer", "setConsole", authConfig);
 			final boolean enabled;
 			synchronized (NodeServer.this.internalEngine) {
 //				LOGGER.fine("enter lock");
@@ -177,9 +175,7 @@ public class NodeServer extends DefaultServerImpl {
 					}
 //					LOGGER.fine("after start");
 				}
-				LOGGER.fine("exit lock");
 			}
-			LOGGER.exiting("NodeServer", "setConsole", enabled);
 			return enabled;
 		}
 		
@@ -294,7 +290,9 @@ public class NodeServer extends DefaultServerImpl {
 		
 		try {
 			synchronized (this.serviRunLock) {
+				LOGGER.log(Level.FINE, "Initializing R node: Loading R package 'rj'...");
 				runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0, "library(rj)"));
+				LOGGER.log(Level.FINE, "Initializing R node: Preparing R workspace for first client...");
 				runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0, this.resetCommand));
 			}
 		}

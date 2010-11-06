@@ -151,7 +151,7 @@ public class RServiImpl implements RServi, Externalizable {
 	
 	public synchronized void close() throws CoreException {
 		if (this.rjs.isClosed()) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, 0,
 					"RServi is already closed.", null));
 		}
 		try {
@@ -159,7 +159,7 @@ public class RServiImpl implements RServi, Externalizable {
 			this.poolRef.returnObject(this.accessId);
 		}
 		catch (final Exception e) {
-			throw new CoreException(new Status(IStatus.ERROR, Utils.PLUGIN_ID, 0,
+			throw new CoreException(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, 0,
 					"An error occurred when closing RServi instance.", e));
 		}
 		finally {

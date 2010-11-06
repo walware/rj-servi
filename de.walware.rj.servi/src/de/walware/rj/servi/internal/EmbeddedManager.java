@@ -60,6 +60,8 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 		this.id = id;
 		this.registry = registry;
 		this.factory = (LocalNodeFactory) factory;
+		
+		Utils.preLoad();
 	}
 	
 	

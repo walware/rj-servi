@@ -14,7 +14,6 @@ package de.walware.rj.servi.internal;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.logging.Level;
 
 import org.apache.commons.pool.ObjectPoolItem;
 import org.apache.commons.pool.PoolableObjectFactory;
@@ -52,7 +51,7 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 		// start
 		final PoolObject poolObj = new PoolObject(item);
 		this.nodeFactory.createNode(poolObj);
-		UnicastRemoteObject.exportObject(poolObj, 0);
+		poolObj.thisRemote = UnicastRemoteObject.exportObject(poolObj, 0);
 		this.stats.logNodeUsageBegin(poolObj);
 		item.setObject(poolObj);
 	}
@@ -82,13 +81,16 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 			poolObj.shutdown();
 		}
 		catch (final Throwable e) {
-			Utils.LOGGER.log(Level.WARNING, Messages.ShutdownNode_error_message, e);
+			Utils.logWarning(Messages.ShutdownNode_error_message, e);
 		}
-		try {
-			UnicastRemoteObject.unexportObject(poolObj, true);
-		}
-		catch (final Throwable e) {
-			Utils.LOGGER.log(Level.WARNING, Messages.RmiUnexportNode_error_message, e);
+		if (poolObj.thisRemote != null) {
+			try {
+				poolObj.thisRemote = null;
+				UnicastRemoteObject.unexportObject(poolObj, true);
+			}
+			catch (final Throwable e) {
+				Utils.logWarning(Messages.RmiUnexportNode_error_message, e);
+			}
 		}
 		this.nodeFactory.cleanupNode(poolObj);
 	}

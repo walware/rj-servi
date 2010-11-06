@@ -13,19 +13,27 @@ package de.walware.rj.servi.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import de.walware.ecommons.ECommons;
+import de.walware.ecommons.ECommons.IAppEnvironment;
+
+import de.walware.rj.servi.RServiUtil;
 
 
 public class Utils {
 	
 	
-	public static final String PLUGIN_ID = "de.walware.rj.serv";
-	
-	public static final Logger LOGGER = Logger.getLogger("de.walware.rj.servi");
-	
 	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().startsWith("win");
 	public static final boolean IS_MAC = System.getProperty("os.name").toLowerCase().startsWith("mac");
 	
+	
+	public static void preLoad() {
+		// Load class for errors
+		new Status(IStatus.INFO, RServiUtil.RJ_SERVI_ID, Messages.StartNode_error_message);
+	}
 	
 	/**
 	 * Utility class to parse command line arguments.
@@ -150,6 +158,41 @@ public class Utils {
 		else {
 			final ArgumentParser parser = new ArgumentParser(args);
 			return parser.parseArguments();
+		}
+	}
+	
+	public static void logInfo(final String message) {
+		final IAppEnvironment env = ECommons.getEnv();
+		if (env != null) {
+			env.log(new Status(IStatus.INFO, RServiUtil.RJ_SERVI_ID, message));
+		}
+	}
+	
+	public static void logWarning(final String message) {
+		final IAppEnvironment env = ECommons.getEnv();
+		if (env != null) {
+			env.log(new Status(IStatus.WARNING, RServiUtil.RJ_SERVI_ID, message));
+		}
+	}
+	
+	public static void logWarning(final String message, final Throwable exception) {
+		final IAppEnvironment env = ECommons.getEnv();
+		if (env != null) {
+			env.log(new Status(IStatus.WARNING, RServiUtil.RJ_SERVI_ID, message, exception));
+		}
+	}
+	
+	public static void logError(final String message) {
+		final IAppEnvironment env = ECommons.getEnv();
+		if (env != null) {
+			env.log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, message));
+		}
+	}
+	
+	public static void logError(final String message, final Throwable exception) {
+		final IAppEnvironment env = ECommons.getEnv();
+		if (env != null) {
+			env.log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, message, exception));
 		}
 	}
 	

@@ -30,18 +30,20 @@ public class NodeController extends AbstractServerControl {
 		else {
 			try {
 				final File file = new File("out.log");
-				file.createNewFile();
 				final PrintStream stream = new PrintStream(file);
+				stream.println("(RServi) R node log");
+				stream.flush();
 				System.setOut(stream);
 				System.setErr(stream);
 			}
-			catch (final Throwable _ex) {
-				System.exit(EXIT_INIT_PROBLEM | 1);
+			catch (final Throwable e) {
+				e.printStackTrace();
+				exit(EXIT_INIT_LOGGING_ERROR);
 			}
 		}
 		
 		if (args == null || args.length < 1) {
-			System.exit(EXIT_INVALID_ARGS | 1);
+			System.exit(EXIT_ARGS_MISSING);
 		}
 		new NodeController(args[0], cliGetArgs(args, 1)).start();
 	}
@@ -53,21 +55,23 @@ public class NodeController extends AbstractServerControl {
 	
 	
 	public void start() {
-		LOGGER.log(Level.INFO, "{0} initialize server...", this.logPrefix);
+		LOGGER.log(Level.INFO, "{0} Initializing R node...", this.logPrefix);
 		final NodeServer server = new NodeServer(this.name, this);
 		if (!initREngine(server)) {
-			System.exit(EXIT_INIT_RENGINE_ERROR | 1);
+			exit(EXIT_INIT_RENGINE_ERROR);
 		}
 		try {
 			server.start1();
+			LOGGER.log(Level.FINE, "{0} Initializing R node: R engine started and initialized.", this.logPrefix);
 		}
 		catch (final Exception e) {
-			final LogRecord record = new LogRecord(Level.SEVERE, "{0} init JRI/Rengine and Node failed.");
+			final LogRecord record = new LogRecord(Level.SEVERE, "{0} Initializing R node failed.");
 			record.setParameters(new Object[] { this.logPrefix });
 			record.setThrown(e);
 			LOGGER.log(record);
-			System.exit(EXIT_INIT_RENGINE_ERROR | 2);
+			exit(EXIT_START_RENGINE_ERROR);
 		}
+		LOGGER.log(Level.FINE, "{0} Initializing R node: Publishing in registry...", this.logPrefix);
 		publishServer(server);
 	}
 	

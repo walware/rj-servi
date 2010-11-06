@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import de.walware.ecommons.net.RMIAddress;
 import de.walware.ecommons.net.RMIRegistry;
@@ -310,12 +309,14 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		List<String> command = null;
 		try {
 			synchronized (this) {
-				while (true) {
+				for (int i = 0; ; i++) {
 					id = this.poolId + '-' + System.currentTimeMillis();
 					poolObj.dir = new File(p.baseWd + File.separatorChar + id);
-					if (!poolObj.dir.exists()) {
-						poolObj.dir.mkdirs();
+					if (!poolObj.dir.exists() && poolObj.dir.mkdirs()) {
 						break;
+					}
+					if (i >= 20) {
+						throw new RjException("Failed to create working directory (parent="+p.baseWd+").");
 					}
 				}
 			}
@@ -339,11 +340,14 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		try {
 			process = pBuilder.start();
 			
+			long t = System.nanoTime();
 			for (int i = 1; ; i++) {
 				try {
 					final Server server = (Server) this.nodeRegistry.getRegistry().lookup(id);
 					final ServerLogin login = server.createLogin(Server.C_RSERVI_NODECONTROL);
 					final RServiNode node = (RServiNode) server.execute(Server.C_RSERVI_NODECONTROL, null, login);
+					
+					Utils.logInfo("New R node started (t="+((System.nanoTime()-t)/1000000)+"ms).");
 					
 					String line = null;
 					try {
@@ -379,19 +383,18 @@ public abstract class LocalNodeFactory implements NodeFactory {
 					return;
 				}
 				catch (final NotBoundException e) {
-//					System.out.println(Arrays.toString(this.nodeRegistry.registry.list()));
-					if (i == 50) {
-						throw e;
+					if (i >= 80) { // >= 20 seconds
+						throw new RjException("Start of R node aborted because of timeout (t="+((System.nanoTime()-t)/1000000)+"ms).", e);
 					}
 				};
 				
 				try {
 					final int exitValue = process.exitValue();
-					throw new RjException("R node process stopped (exit code = "+exitValue+")");
+					throw new RjException("R node process stopped (exit code = "+exitValue+").");
 				}
 				catch (final IllegalThreadStateException ok) {}
 				
-				Thread.sleep(100);
+				Thread.sleep(250);
 			}
 		}
 		catch (final Exception e) {
@@ -474,18 +477,17 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	public void cleanupNode(final NodeHandler poolObj) {
 		if (!this.verbose && poolObj.dir != null
 				&& poolObj.dir.exists() && poolObj.dir.isDirectory()) {
-			for (int i = 0; i < 4; i++) { // 3 seconds
+			for (int i = 0; i < 20; i++) { // >= 5 seconds
 				try {
-					Thread.sleep(750);
+					Thread.sleep(250);
 				}
 				catch (final InterruptedException e) {
-					Thread.interrupted();
 				}
 				if (ServerUtil.delDir(poolObj.dir)) {
 					return;
 				}
 			}
-			Utils.LOGGER.log(Level.WARNING, "Failed to delete the RServi node working directory '" + poolObj.dir.toString() + "'.");
+			Utils.logWarning("Failed to delete the RServi node working directory '" + poolObj.dir.toString() + "'.");
 		}
 	}
 	

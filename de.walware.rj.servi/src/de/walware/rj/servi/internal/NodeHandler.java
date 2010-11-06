@@ -13,7 +13,6 @@ package de.walware.rj.servi.internal;
 
 import java.io.File;
 import java.rmi.RemoteException;
-import java.util.logging.Level;
 
 import de.walware.ecommons.net.RMIAddress;
 
@@ -47,7 +46,7 @@ public abstract class NodeHandler {
 			this.isConsoleEnabled = this.node.setConsole(authConfig);
 		}
 		catch (final Exception e) {
-			Utils.LOGGER.log(Level.SEVERE, "An error occurred when configuring the debug console.", e);
+			Utils.logError("An error occurred when configuring the debug console.", e);
 			throw new RjException("An error occurred when configuring the debug console. See server log for detail.");
 		}
 	}

@@ -31,6 +31,7 @@ import de.walware.ecommons.net.RMIRegistry;
 import de.walware.ecommons.net.RMIUtil;
 
 import de.walware.rj.RjException;
+import de.walware.rj.RjInitFailedException;
 import de.walware.rj.RjInvalidConfigurationException;
 import de.walware.rj.server.srvext.ServerUtil;
 import de.walware.rj.servi.RServiUtil;
@@ -63,6 +64,9 @@ public class RJServlet extends HttpServlet {
 			
 			final String libPath = getServletContext().getRealPath("WEB-INF/lib");
 			
+			// RMI registry setup
+			final OtherConfigBean rmiConfig = (OtherConfigBean) Utils.loadFromFile(getServletContext(), new OtherConfigBean());
+			
 			final String property = System.getProperty("java.rmi.server.codebase");
 			if (property == null) {
 				final String[] libs = ServerUtil.searchRJLibs(libPath,
@@ -70,27 +74,50 @@ public class RJServlet extends HttpServlet {
 				System.setProperty("java.rmi.server.codebase", ServerUtil.concatCodebase(libs));
 			}
 			
-			final OtherConfigBean rmiConfig = (OtherConfigBean) Utils.loadFromFile(getServletContext(), new OtherConfigBean());
 			if (System.getProperty("java.rmi.server.hostname") == null) {
 				System.setProperty("java.rmi.server.hostname", rmiConfig.getEffectiveHostaddress());
 			}
-			final RMIAddress rmiRegistryAddress = new RMIAddress(rmiConfig.getEffectiveHostaddress(), rmiConfig.getEffectiveRegistryPort(), null);
+			
+			final int registryPort = rmiConfig.getEffectiveRegistryPort();
+			final RMIAddress rmiRegistryAddress = new RMIAddress(rmiConfig.getEffectiveHostaddress(), registryPort, null);
 			Registry registry = LocateRegistry.getRegistry(rmiRegistryAddress.getPortNum());
-			RMIRegistry rmiRegistry = null;
+			RMIRegistry rmiRegistry;
 			if (rmiConfig.getRegistryEmbed()) {
 				try {
 					rmiRegistry = new RMIRegistry(rmiRegistryAddress, registry, true);
+					ECommons.getEnv().log(new Status(IStatus.WARNING, RJWeb.PLUGIN_ID, 0,
+							"Found running RMI registry at port "+registryPort+", embedded RMI registry will not be started.", null));
 				}
 				catch (final RemoteException e) {
-					ECommons.getEnv().log(new Status(IStatus.INFO, RJWeb.PLUGIN_ID, 0, "Failed to connect to registry - will try to start embedded.", e));
-					RMIUtil.INSTANCE.setEmbeddedPrivatePort(rmiConfig.getEffectiveRegistryPort());
+					RMIUtil.INSTANCE.setEmbeddedPrivatePort(registryPort);
 					rmiRegistry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry();
+					if (rmiRegistry != null) {
+						ECommons.getEnv().log(new Status(IStatus.INFO, RJWeb.PLUGIN_ID, 0,
+								"Embedded RMI registry at port "+registryPort+" started.", null));
+					}
+					else {
+						ECommons.getEnv().log(new Status(IStatus.INFO, RJWeb.PLUGIN_ID, 0,
+								"Failed to connect to running RMI registry at port "+registryPort+".", e));
+						ECommons.getEnv().log(new Status(IStatus.ERROR, RJWeb.PLUGIN_ID, 0,
+								"Failed to start embedded RMI registry at port "+registryPort+".", null));
+						throw new RjInitFailedException("Initalization of RMI registry setup failed.");
+					}
 				}
 			}
-			if (rmiRegistry == null) {
-				rmiRegistry = new RMIRegistry(rmiRegistryAddress, registry, true);
+			else {
+				try {
+					rmiRegistry = new RMIRegistry(rmiRegistryAddress, registry, true);
+					ECommons.getEnv().log(new Status(IStatus.INFO, RJWeb.PLUGIN_ID, 0,
+							"Found running RMI registry at port "+registryPort+".", null));
+				}
+				catch (final RemoteException e) {
+					ECommons.getEnv().log(new Status(IStatus.ERROR, RJWeb.PLUGIN_ID, 0,
+							"Failed to connect to running RMI registry at port "+registryPort+".", e));
+					throw new RjInitFailedException("Initalization of RMI registry setup failed.");
+				}
 			}
 			
+			// Pool manager setup
 			final RServiPoolManager manager = new PoolManager(id, rmiRegistry);
 			
 			final PoolConfigBean poolConfig = (PoolConfigBean) Utils.loadFromFile(getServletContext(), new PoolConfigBean());
