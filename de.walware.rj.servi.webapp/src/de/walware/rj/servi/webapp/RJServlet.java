@@ -133,7 +133,7 @@ public class RJServlet extends HttpServlet {
 			
 			manager.init();
 			this.manager = manager;
-			getServletContext().setAttribute("pool.manager", manager);
+			getServletContext().setAttribute(RJWeb.POOLMANAGER_KEY, manager);
 		}
 		catch (final Exception e) {
 			throw new ServletException("Failed to initialized RServi Server.", e);
