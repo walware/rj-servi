@@ -280,17 +280,14 @@ public class RMIUtil {
 		catch (final Exception e) {
 			return new Status(IStatus.ERROR, ECommons.PLUGIN_ID, MessageFormat.format(Messages.RMI_status_RegistryStartFailed_message, address.getPort()), e);
 		}
+		
 		RemoteException lastException = null;
-		for (int i = 0; i < 25; i++) {
+		for (int i = 1; ; i++) {
 			try {
 				final int exit = process.exitValue();
 				return new Status(IStatus.ERROR, ECommons.PLUGIN_ID, MessageFormat.format(Messages.RMI_status_RegistryStartFailedWithExitValue_message, address.getPort(), exit));
 			}
 			catch (final IllegalThreadStateException e) {
-			}
-			if (Thread.interrupted()) {
-				process.destroy();
-				return Status.CANCEL_STATUS;
 			}
 			try {
 				final Registry registry = LocateRegistry.getRegistry(address.getHost(), address.getPortNum());
@@ -306,6 +303,15 @@ public class RMIUtil {
 			catch (final RemoteException e) {
 				lastException = e;
 			}
+			
+			if (Thread.interrupted()) {
+				process.destroy();
+				return Status.CANCEL_STATUS;
+			}
+			if (i >= 25) {
+				process.destroy();
+				return new Status(IStatus.ERROR, ECommons.PLUGIN_ID, MessageFormat.format(Messages.RMI_status_RegistryStartFailed_message, address.getPort()), lastException);
+			}
 			try {
 				Thread.sleep(50);
 				continue;
@@ -314,7 +320,6 @@ public class RMIUtil {
 				Thread.currentThread().interrupt();
 			}
 		}
-		return new Status(IStatus.ERROR, ECommons.PLUGIN_ID, MessageFormat.format(Messages.RMI_status_RegistryStartFailed_message, address.getPort()), lastException);
 	}
 	
 	public IStatus startSeparateRegistry(int port, final StopRule stopRule) {
