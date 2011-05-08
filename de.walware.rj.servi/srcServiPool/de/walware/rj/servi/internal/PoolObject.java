@@ -14,9 +14,8 @@ package de.walware.rj.servi.internal;
 import java.rmi.Remote;
 import java.rmi.server.Unreferenced;
 
-import org.apache.commons.pool.ObjectPoolItem;
-
 import de.walware.rj.RjException;
+import de.walware.rj.servi.acommons.pool.ObjectPoolItem;
 
 
 public class PoolObject extends NodeHandler implements RServiImpl.PoolRef, Unreferenced {

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.commons.pool;
+package de.walware.rj.servi.acommons.pool;
 
 import java.util.NoSuchElementException;
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.commons.pool.impl;
+package de.walware.rj.servi.acommons.pool.impl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,10 +25,10 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.ObjectPoolItem;
-import org.apache.commons.pool.ObjectPoolItem.State;
-import org.apache.commons.pool.PoolableObjectFactory;
+import de.walware.rj.servi.acommons.pool.ObjectPool;
+import de.walware.rj.servi.acommons.pool.ObjectPoolItem;
+import de.walware.rj.servi.acommons.pool.PoolableObjectFactory;
+import de.walware.rj.servi.acommons.pool.ObjectPoolItem.State;
 
 /**
  * A configurable {@link ObjectPool} implementation.
@@ -332,7 +332,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 	/**
 	 * A simple "struct" encapsulating the
 	 * configuration information for a {@link ExtGenericObjectPool}.
-	 * @see ExtGenericObjectPool#GenericObjectPool(org.apache.commons.pool.PoolableObjectFactory,org.apache.commons.pool.impl.ExtGenericObjectPool.Config)
+	 * @see ExtGenericObjectPool#GenericObjectPool(de.walware.rj.servi.acommons.pool.PoolableObjectFactory,de.walware.rj.servi.acommons.pool.impl.ExtGenericObjectPool.Config)
 	 * @see ExtGenericObjectPool#setConfig
 	 */
 	public static class Config {

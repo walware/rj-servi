@@ -15,9 +15,8 @@ import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 
-import org.apache.commons.pool.ObjectPoolItem;
-import org.apache.commons.pool.PoolableObjectFactory;
-
+import de.walware.rj.servi.acommons.pool.ObjectPoolItem;
+import de.walware.rj.servi.acommons.pool.PoolableObjectFactory;
 import de.walware.rj.servi.pool.PoolConfig;
 
 

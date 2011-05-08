@@ -11,9 +11,9 @@
 
 package de.walware.rj.servi.pool;
 
-import org.apache.commons.pool.ObjectPoolItem;
 
 import de.walware.rj.RjException;
+import de.walware.rj.servi.acommons.pool.ObjectPoolItem;
 import de.walware.rj.servi.internal.NodeHandler;
 
 

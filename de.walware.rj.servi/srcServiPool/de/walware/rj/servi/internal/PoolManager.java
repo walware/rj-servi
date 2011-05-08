@@ -15,16 +15,15 @@ import java.rmi.Remote;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.NoSuchElementException;
 
-import org.apache.commons.pool.ObjectPoolItem;
-import org.apache.commons.pool.impl.ExtGenericObjectPool;
-import org.apache.commons.pool.impl.ExtGenericObjectPool.Config;
-
 import de.walware.ecommons.net.RMIRegistry;
 
 import de.walware.rj.RjException;
 import de.walware.rj.RjInitFailedException;
 import de.walware.rj.server.ServerLogin;
 import de.walware.rj.servi.RServi;
+import de.walware.rj.servi.acommons.pool.ObjectPoolItem;
+import de.walware.rj.servi.acommons.pool.impl.ExtGenericObjectPool;
+import de.walware.rj.servi.acommons.pool.impl.ExtGenericObjectPool.Config;
 import de.walware.rj.servi.pool.PoolConfig;
 import de.walware.rj.servi.pool.RServiNodeFactory;
 import de.walware.rj.servi.pool.RServiPool;
@@ -144,7 +143,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		try {
 			Thread.sleep(1000);
 		}
-		catch (InterruptedException e) {
+		catch (final InterruptedException e) {
 		}
 		if (PoolManager.this.pool != null) {
 			Utils.logInfo("Closing R nodes...");
