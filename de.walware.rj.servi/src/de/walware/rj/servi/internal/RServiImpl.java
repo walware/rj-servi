@@ -43,6 +43,7 @@ import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.services.FunctionCall;
 import de.walware.rj.services.RGraphicCreator;
 import de.walware.rj.services.RPlatform;
+import de.walware.rj.services.RService;
 
 
 /**
@@ -186,7 +187,7 @@ public class RServiImpl implements RServi, Externalizable {
 		if (this.rjsId == 0) {
 			init();
 		}
-		return this.rjs.evalData(command, null, 0, -1, monitor);
+		return this.rjs.evalData(command, null, 0, RService.DEPTH_INFINITE, monitor);
 	}
 	
 	public RObject evalData(final String command, final String factoryId, final int options, final int depth, final IProgressMonitor monitor) throws CoreException {
