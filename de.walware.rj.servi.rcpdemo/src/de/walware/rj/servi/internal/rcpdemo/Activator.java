@@ -3,7 +3,7 @@ package de.walware.rj.servi.internal.rcpdemo;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import de.walware.rj.eclient.graphics.ERGraphicFactory;
+import de.walware.rj.eclient.graphics.comclient.ERGraphicFactory;
 import de.walware.rj.servi.rcpdemo.RServiManager;
 
 

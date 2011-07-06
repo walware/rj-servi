@@ -36,6 +36,7 @@ import de.walware.rj.server.RjsComConfig;
 import de.walware.rj.server.RjsStatus;
 import de.walware.rj.server.Server;
 import de.walware.rj.server.client.AbstractRJComClient;
+import de.walware.rj.server.client.AbstractRJComClientGraphicActions;
 import de.walware.rj.server.client.RClientGraphicFactory;
 import de.walware.rj.server.client.RGraphicCreatorImpl;
 import de.walware.rj.servi.RServi;
@@ -61,9 +62,13 @@ public class RServiImpl implements RServi, Externalizable {
 		
 		@Override
 		protected void initGraphicFactory() {
-			final Object value = RjsComConfig.getProperty("rj.servi.graphicFactory");
-			if (value instanceof RClientGraphicFactory) {
-				setGraphicFactory((RClientGraphicFactory) value, null);
+			final Object graphicFactory = RjsComConfig.getProperty("rj.servi.graphicFactory");
+			final Object actionsFactory = RjsComConfig.getProperty("rj.servi.comClientGraphicActionsFactory");
+			if (graphicFactory instanceof RClientGraphicFactory) {
+				setGraphicFactory((RClientGraphicFactory) graphicFactory,
+						(actionsFactory instanceof AbstractRJComClientGraphicActions.Factory) ?
+								((AbstractRJComClientGraphicActions.Factory) actionsFactory).create(
+										this, getRHandle() ) : null );
 			}
 		}
 		
@@ -116,23 +121,33 @@ public class RServiImpl implements RServi, Externalizable {
 	private final AbstractRJComClient rjs = new RServiComClient();
 	private int rjsId;
 	
+	private Object rHandle;
+	
 	
 	public RServiImpl(final long accessId, final PoolRef ref, final RServiBackend backend) {
 		this.accessId = accessId;
 		this.poolRef = ref;
 		this.backend = backend;
-		this.rjs.setServer(this.backend);
+		this.rjs.setServer(this.backend, 1);
 	}
 	
 	public RServiImpl() {
 	}
 	
 	
+	public void setRHandle(final Object rHandle) {
+		this.rHandle = rHandle;
+	}
+	
+	public Object getRHandle() {
+		return this.rHandle;
+	}
+	
 	public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
 		this.accessId = in.readLong();
 		this.poolRef = (PoolRef) in.readObject();
 		this.backend = (RServiBackend) in.readObject();
-		this.rjs.setServer(this.backend);
+		this.rjs.setServer(this.backend, 1);
 	}
 	
 	public void writeExternal(final ObjectOutput out) throws IOException {
@@ -144,10 +159,9 @@ public class RServiImpl implements RServi, Externalizable {
 	
 	private void init() throws CoreException {
 		this.rjsId = RjsComConfig.registerClientComHandler(this.rjs);
-		final Map<String, Object> rjsProperties = new HashMap<String, Object>();
-		rjsProperties.put("rj.com.init", Boolean.TRUE);
-		rjsProperties.put(RjsComConfig.RJ_COM_S2C_ID_PROPERTY_ID, this.rjsId);
-		this.rjs.setRjsProperties(rjsProperties);
+		final Map<String, Object> properties = new HashMap<String, Object>();
+		this.rjs.initClient(this.rHandle, this, properties, this.rjsId);
+		this.rjs.setRjsProperties(properties);
 	}
 	
 	public synchronized void close() throws CoreException {

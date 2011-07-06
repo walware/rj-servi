@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Text;
 import de.walware.rj.data.RObject;
 import de.walware.rj.servi.RServi;
 import de.walware.rj.servi.RServiUtil;
+import de.walware.rj.servi.demo.EAppEnvSWT;
 import de.walware.rj.services.FunctionCall;
 import de.walware.rj.services.utils.Graphic;
 import de.walware.rj.services.utils.PngGraphic;
@@ -61,6 +62,9 @@ public class CorrelationPlotter {
 	
 	
 	public CorrelationPlotter(){
+		EAppEnvSWT eAppEnvSWT = new EAppEnvSWT();
+		shell.addDisposeListener(eAppEnvSWT);
+		
 		shell.setText("Correlation Plotter"); // set window title
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 2;

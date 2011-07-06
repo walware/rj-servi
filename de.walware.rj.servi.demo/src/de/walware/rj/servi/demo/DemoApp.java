@@ -107,8 +107,10 @@ public class DemoApp {
 	
 	
 	public DemoApp(Composite parent) {
+		EAppEnvSWT eAppEnv = new EAppEnvSWT();
 		Control content = createContent(parent);
 		
+		parent.getShell().addDisposeListener(eAppEnv);
 		parent.getShell().addShellListener(new ShellAdapter() {
 			@Override
 			public void shellClosed(ShellEvent e) {

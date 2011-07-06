@@ -9,7 +9,7 @@
 <booleanAttribute key="clearConfig" value="false"/>
 <booleanAttribute key="clearws" value="true"/>
 <booleanAttribute key="clearwslog" value="true"/>
-<stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/RSerci RCP 64"/>
+<stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/RServi RCP win64"/>
 <booleanAttribute key="default" value="false"/>
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="location" value="${workspace_loc}/../runtime-de.walware.rj.servi.rcpdemo.product"/>
@@ -19,8 +19,8 @@
 <booleanAttribute key="pde.generated.config" value="false"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <stringAttribute key="product" value="de.walware.rj.servi.rcpdemo.product"/>
-<stringAttribute key="selected_target_plugins" value="org.eclipse.core.databinding@default:default,org.eclipse.help@default:default,org.eclipse.ui.workbench@default:default,org.eclipse.core.runtime.compatibility.registry@default:false,org.eclipse.jface@default:default,org.eclipse.core.databinding.property@default:default,org.eclipse.equinox.preferences@default:default,org.eclipse.core.jobs@default:default,org.eclipse.core.expressions@default:default,org.eclipse.equinox.common@2:true,javax.servlet@default:default,org.eclipse.swt@default:default,org.eclipse.core.databinding.observable@default:default,org.eclipse.ui@default:default,org.eclipse.equinox.registry@default:default,org.eclipse.core.runtime.compatibility.auth@default:default,org.eclipse.core.contenttype@default:default,org.eclipse.jface.databinding@default:default,org.eclipse.swt.win32.win32.x86_64@default:false,org.eclipse.core.runtime@default:true,org.eclipse.osgi@-1:true,org.eclipse.core.commands@default:default,com.ibm.icu@default:default,org.eclipse.equinox.app@default:default,org.eclipse.osgi.services@default:default"/>
-<stringAttribute key="selected_workspace_plugins" value="de.walware.rj.servi.rcpdemo@default:default,de.walware.rj.client@default:default,de.walware.rj.server@default:default,de.walware.rj.data@default:default,de.walware.ecommons.coremisc@default:default,de.walware.ecommons.uimisc@default:default,de.walware.rj.servi@default:default,de.walware.rj.eclient.graphics@default:default"/>
+<stringAttribute key="selected_target_plugins" value="org.eclipse.jface.databinding@default:default,org.eclipse.core.contenttype@default:default,org.eclipse.equinox.registry@default:default,org.eclipse.jface@default:default,org.eclipse.core.databinding.observable@default:default,org.eclipse.core.databinding@default:default,org.eclipse.equinox.app@default:default,org.eclipse.core.expressions@default:default,org.eclipse.core.runtime@default:true,org.eclipse.osgi@-1:true,org.eclipse.ui@default:default,javax.servlet@default:default,com.ibm.icu@default:default,org.eclipse.osgi.services@default:default,org.eclipse.swt@default:default,org.eclipse.core.databinding.property@default:default,org.eclipse.equinox.preferences@default:default,org.eclipse.core.commands@default:default,org.eclipse.help@default:default,org.eclipse.swt.win32.win32.x86_64@default:false,org.eclipse.core.runtime.compatibility.registry@default:false,org.eclipse.ui.workbench@default:default,org.eclipse.equinox.common@2:true,org.eclipse.core.runtime.compatibility.auth@default:default,org.eclipse.core.jobs@default:default"/>
+<stringAttribute key="selected_workspace_plugins" value="de.walware.rj.data@default:default,de.walware.rj.servi@default:default,de.walware.rj.eclient.graphics@default:default,de.walware.ecommons.coremisc@default:default,de.walware.ecommons.uimisc@default:default,de.walware.rj.client@default:default,de.walware.rj.server@default:default,de.walware.rj.servi.rcpdemo@default:default"/>
 <booleanAttribute key="show_selected_only" value="false"/>
 <booleanAttribute key="tracing" value="false"/>
 <booleanAttribute key="useCustomFeatures" value="false"/>

@@ -14,10 +14,11 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import de.walware.ecommons.net.RMIRegistry;
 import de.walware.ecommons.net.RMIUtil;
 import de.walware.rj.RjException;
-import de.walware.rj.eclient.graphics.ERGraphicFactory;
+import de.walware.rj.eclient.graphics.comclient.ERClientGraphicActionsFactory;
 import de.walware.rj.rsetups.RSetup;
 import de.walware.rj.rsetups.RSetupUtil;
 import de.walware.rj.server.RjsComConfig;
+import de.walware.rj.server.client.RClientGraphicFactory;
 import de.walware.rj.servi.RServi;
 import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.servi.internal.rcpdemo.Activator;
@@ -58,10 +59,12 @@ public class RServiManager {
 	};
 	
 	
-	public RServiManager(final String appId, final ERGraphicFactory graphicFactory) {
+	public RServiManager(final String appId, final RClientGraphicFactory graphicFactory) {
 		this.name = appId;
 		
 		RjsComConfig.setProperty("rj.servi.graphicFactory", graphicFactory);
+		RjsComConfig.setProperty("rj.servi.comClientGraphicActionsFactory",
+				new ERClientGraphicActionsFactory() );
 	}
 	
 	
