@@ -135,13 +135,6 @@ public abstract class LocalNodeFactory implements NodeFactory {
 			sb.append(ServerUtil.concatCodebase(libs));
 			p.command.add(sb.toString());
 		}
-		if (!javaArgs.contains("-Xss")) {
-			sb.setLength(0);
-			sb.append("-Xss");
-			sb.append(config.getBits()*256);
-			sb.append("k"); 
-			p.command.add(sb.toString());
-		}
 		
 		p.command.add("de.walware.rj.servi.internal.NodeController");
 		

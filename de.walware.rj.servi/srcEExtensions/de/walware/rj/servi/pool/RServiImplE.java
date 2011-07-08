@@ -61,7 +61,7 @@ public class RServiImplE {
 		return new LocalNodeFactory(poolId, registry, libIds) {
 			@Override
 			protected String[] getRJLibs(final String[] libIds) throws RjInvalidConfigurationException {
-				return EServerUtil.searchRJLibsInPlatform(libIds, (getConfig().getBits() == 64));
+				return EServerUtil.searchRJLibsInPlatform(libIds);
 			}
 			@Override
 			protected String getPolicyFile() throws RjInvalidConfigurationException {

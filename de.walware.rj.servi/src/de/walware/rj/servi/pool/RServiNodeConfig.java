@@ -156,10 +156,12 @@ public class RServiNodeConfig implements PropertiesBean {
 		return this.rArch;
 	}
 	
+	@Deprecated
 	public void setBits(final int bits) {
 		this.bits = bits;
 	}
 	
+	@Deprecated
 	public int getBits() {
 		return this.bits;
 	}
