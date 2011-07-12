@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <category-def name="de.walware.libraries" label="WalWare - Libraries"/>
+   <category-def name="de.walware.sources" label="WalWare - Sources"/>
+
+   <feature url="features/de.walware.ecommons.e_0.0.0.qualifier.jar" id="de.walware.ecommons.e" version="0.0.0">
+      <category name="de.walware.libraries"/>
+   </feature>
+
+   <feature url="features/de.walware.rj.core_0.0.0.qualifier.jar" id="de.walware.rj.core" version="0.0.0">
+      <category name="de.walware.libraries"/>
+   </feature>
+   <feature url="features/de.walware.rj.eclient_0.0.0.qualifier.jar" id="de.walware.rj.eclient" version="0.0.0">
+      <category name="de.walware.libraries"/>
+   </feature>
+   <feature url="features/de.walware.rj.servi.e_0.0.0.qualifier.jar" id="de.walware.rj.servi.e" version="0.0.0">
+         <category name="de.walware.libraries"/>
+   </feature>
+
+   <feature url="features/de.walware.rj.servi.e.sdk_0.0.0.qualifier.jar" id="de.walware.rj.servi.e.sdk" version="0.0.0">
+      <category name="de.walware.libraries"/>
+   </feature>
+
+   <feature url="features/de.walware.ecommons.e.source_0.0.0.qualifier.jar" id="de.walware.ecommons.e.source" version="0.0.0">
+      <category name="de.walware.sources"/>
+   </feature>
+   <feature url="features/de.walware.rj.core.source_0.0.0.qualifier.jar" id="de.walware.rj.core.source" version="0.0.0">
+      <category name="de.walware.sources"/>
+   </feature>
+   <feature url="features/de.walware.rj.eclient.source_0.0.0.qualifier.jar" id="de.walware.rj.eclient.source" version="0.0.0">
+      <category name="de.walware.sources"/>
+   </feature>
+
+</site>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="Base RCP with RServices (Binary only)">
+<locations>
+<location id="org.eclipse.rcp" path="${eclipse_home}" type="Feature"/>
+<location includeAllPlatforms="true" includeMode="slicer" type="InstallableUnit">
+<unit id="de.walware.rj.servi.e.feature.group" version="0.0.0"/>
+<repository location="platform:/resource/de.walware.rj.devbundle/libs/"/>
+</location>
+</locations>
+</target>

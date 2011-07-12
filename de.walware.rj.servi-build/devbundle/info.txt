@@ -1,0 +1,44 @@
+(RJ) RServi Development Bundle
+
+== Content ==
+
+rservi/
+  (rservi web application)
+  Web application providing RServi pool with configuration interface
+  
+  To start the pool using Tomcat:
+   1. Put it into the 'webapps' directory of Tomcat
+   2. Start Tomcat
+   3. Open the configuration interface in a browser:
+          http://localhost:8080/rservi
+
+democlient/
+  (demo client)
+  Binaries of a small demo client to connect to an RServi pool
+  
+   1. Copy the SWT bundles for your platform into the directory.
+   2. To start the client run:
+          java -cp "*" de.walware.rj.servi.demo.DemoApp
+
+sprojects/
+  (source snapshot / webapp+democlient projects)
+  Eclipse projects with all sources of the web application and demo client
+  above
+  
+   1. Import the projects using the import wizard 'Existing projects into
+      Workspace'
+   2. The rj.server project depends on the JRI API. Add the JRI library to the
+      build path, if required.
+  
+  To absolutely exclude all Eclipse dependencies, remove the source folders
+  named 'srcEExtensions' from the build-/class-path.
+
+eprojects/
+  (eclipse rcp projects)
+  Eclipse plug-ins (Osgi bundles) relevant for Eclipse RCP client development
+  and the Eclipse project of the RCP demo application
+  
+   1. Import the projects using the import wizard 'Existing projects into
+      Workspace'
+   2. Load the plug-in target definition 'rcp-rj.source.target' located in the project
+      'de.walware.rj' project
