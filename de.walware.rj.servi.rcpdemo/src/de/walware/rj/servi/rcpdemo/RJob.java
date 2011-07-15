@@ -14,24 +14,24 @@ import de.walware.rj.services.RService;
 public abstract class RJob extends Job {
 	
 	
-	private RServiManager rServiManager;
+	private final RServiManager rServiManager;
 	
 	
-	public RJob(String name) {
+	public RJob(final String name) {
 		super(name);
-		rServiManager = Activator.getDefault().getRServiManager();
-		setRule(rServiManager.getSchedulingRule());
+		this.rServiManager = Activator.getDefault().getRServiManager();
+		setRule(this.rServiManager.getSchedulingRule());
 	}
 	
 	
 	@Override
-	protected IStatus run(IProgressMonitor monitor) {
+	protected IStatus run(final IProgressMonitor monitor) {
 		RServi servi = null;
 		try {
-			servi = rServiManager.getRServi(getName());
+			servi = this.rServiManager.getRServi(getName());
 			runRTask(servi, monitor);
 		}
-		catch (CoreException e) {
+		catch (final CoreException e) {
 			return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
 					"An error occurred when running " + getName() + ".", e);
 		}
@@ -39,7 +39,7 @@ public abstract class RJob extends Job {
 			if (servi != null) {
 				try {
 					servi.close();
-				} catch (CoreException e) {
+				} catch (final CoreException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -49,8 +49,8 @@ public abstract class RJob extends Job {
 	}
 	
 	@Override
-	public boolean belongsTo(Object family) {
-		return rServiManager == family;
+	public boolean belongsTo(final Object family) {
+		return this.rServiManager == family;
 	}
 	
 	protected abstract void runRTask(RService r, IProgressMonitor monitor) throws CoreException;

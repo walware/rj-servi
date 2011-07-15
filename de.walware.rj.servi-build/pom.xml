@@ -18,6 +18,7 @@
 		
 		<module>../de.walware.rj.servi.demo</module>
 		<module>../de.walware.rj.servi.rcpdemo</module>
+		<module>../de.walware.rj.servi.rcpdemo2</module>
 	</modules>
 	
 	<properties>

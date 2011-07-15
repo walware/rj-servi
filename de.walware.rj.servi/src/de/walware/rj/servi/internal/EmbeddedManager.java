@@ -98,6 +98,9 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 		ECommons.getEnv().removeStoppingListener(this);
 		if (this.inUse) {
 			returnRServi(this.accessId);
+			if (this.handler == null) {
+				return;
+			}
 		}
 		try {
 			this.handler.shutdown();

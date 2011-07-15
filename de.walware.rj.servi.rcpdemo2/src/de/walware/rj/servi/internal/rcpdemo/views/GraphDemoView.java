@@ -1,7 +1,12 @@
 package de.walware.rj.servi.internal.rcpdemo.views;
 
+import static de.walware.rj.eclient.graphics.RGraphicCompositeActionSet.CONTEXT_MENU_GROUP_ID;
+import static de.walware.rj.eclient.graphics.RGraphicCompositeActionSet.SIZE_MENU_GROUP_ID;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,13 +17,19 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.services.IServiceLocator;
 
+import de.walware.ecommons.ts.IToolRunnable;
+
+import de.walware.rj.eclient.AbstractRServiceRunnable;
 import de.walware.rj.eclient.graphics.IERGraphic;
 import de.walware.rj.eclient.graphics.RGraphicComposite;
+import de.walware.rj.eclient.graphics.RGraphicCompositeActionSet;
 import de.walware.rj.graphic.RGraphic;
-import de.walware.rj.servi.rcpdemo.RJob;
+import de.walware.rj.servi.internal.rcpdemo.Activator;
 import de.walware.rj.services.RGraphicCreator;
 import de.walware.rj.services.RService;
 
@@ -34,6 +45,8 @@ public class GraphDemoView extends ViewPart {
 	private RGraphicComposite imageControl;
 	
 	private IERGraphic currentPlot;
+	
+	private RGraphicCompositeActionSet actionSet;
 	
 	
 	public GraphDemoView() {
@@ -66,10 +79,37 @@ public class GraphDemoView extends ViewPart {
 		
 		this.imageControl = new RGraphicComposite(composite, null);
 		this.imageControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+		
+		initActions(getViewSite());
+		contributeToActionsBars(getViewSite(), getViewSite().getActionBars());
+	}
+	
+	protected void initActions(final IServiceLocator serviceLocator) {
+		this.actionSet = new RGraphicCompositeActionSet(this.imageControl) {
+			@Override
+			public void contributeToActionsBars(final IServiceLocator serviceLocator, final IActionBars actionBars) {
+				super.contributeToActionsBars(serviceLocator, actionBars);
+				
+				addSizeActions(serviceLocator, actionBars);
+				addTestLocator(serviceLocator, actionBars);
+			}
+		};
+		this.actionSet.initActions(serviceLocator);
+	}
+	
+	protected void contributeToActionsBars(final IServiceLocator serviceLocator,
+			final IActionBars actionBars) {
+		final IToolBarManager toolBar = actionBars.getToolBarManager();
+		toolBar.add(new Separator("additions"));
+		toolBar.insertBefore("additions", new Separator(CONTEXT_MENU_GROUP_ID));
+		toolBar.insertBefore("additions", new Separator(SIZE_MENU_GROUP_ID));
+		
+		this.actionSet.contributeToActionsBars(serviceLocator, actionBars);
 	}
 	
 	protected void setGraphic(final IERGraphic graphic) {
 		this.imageControl.setGraphic(graphic);
+		this.actionSet.setGraphic(graphic);
 		
 		if (this.currentPlot != null) {
 			this.currentPlot.close();
@@ -95,9 +135,10 @@ public class GraphDemoView extends ViewPart {
 	private void run() {
 		final Point size = this.imageControl.getSize();
 		final String command = this.commandControl.getText();
-		final RJob job = new RJob("GraphDemo") {
+		final IToolRunnable job = new AbstractRServiceRunnable("r/demo/graphic", "Graphic Demo") {
 			@Override
-			protected void runRTask(final RService r, final IProgressMonitor monitor) throws CoreException {
+			protected void run(final RService r,
+					final IProgressMonitor monitor) throws CoreException {
 				monitor.beginTask("Creating graphic in R...", 100);
 				
 				final RGraphicCreator rGraphicCreator = r.createRGraphicCreator(0);
@@ -121,7 +162,7 @@ public class GraphDemoView extends ViewPart {
 				return;
 			}
 		};
-		job.schedule();
+		Activator.getDefault().getRServiManager().scheduleDemo(job);
 	}
 	
 }

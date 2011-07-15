@@ -3,6 +3,8 @@ package de.walware.rj.servi.internal.rcpdemo;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import de.walware.ecommons.IDisposable;
+
 import de.walware.rj.eclient.graphics.comclient.ERGraphicFactory;
 import de.walware.rj.servi.rcpdemo.RServiManager;
 
@@ -13,7 +15,7 @@ import de.walware.rj.servi.rcpdemo.RServiManager;
 public class Activator extends AbstractUIPlugin {
 	
 	
-	public static final String PLUGIN_ID = "de.walware.rj.servi.rcpdemo";
+	public static final String PLUGIN_ID = "de.walware.rj.servi.rcpdemo2";
 	
 	
 	private static Activator plugin;
@@ -48,6 +50,15 @@ public class Activator extends AbstractUIPlugin {
 	
 	@Override
 	public void stop(final BundleContext context) throws Exception {
+		IDisposable disposable;
+		synchronized (this) {
+			disposable = this.rserviManager;
+			this.rserviManager = null;
+		}
+		if (disposable != null) {
+			disposable.dispose();
+		}
+		
 		plugin = null;
 		super.stop(context);
 	}

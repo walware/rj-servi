@@ -85,6 +85,7 @@
 			<unpackOptions>
 				<includes>
 					<include>de.walware.rj.servi.rcpdemo/**</include>
+					<include>de.walware.rj.servi.rcpdemo2/**</include>
 				</includes>
 			</unpackOptions>
 		</dependencySet>

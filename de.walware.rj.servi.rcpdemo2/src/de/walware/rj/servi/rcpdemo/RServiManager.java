@@ -1,6 +1,7 @@
 package de.walware.rj.servi.rcpdemo;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -9,10 +10,13 @@ import javax.security.auth.login.LoginException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.ui.statushandlers.StatusManager;
 
+import de.walware.ecommons.IDisposable;
 import de.walware.ecommons.net.RMIRegistry;
 import de.walware.ecommons.net.RMIUtil;
+import de.walware.ecommons.ts.ITool;
+import de.walware.ecommons.ts.IToolRunnable;
 
 import de.walware.rj.RjException;
 import de.walware.rj.eclient.graphics.comclient.ERClientGraphicActionsFactory;
@@ -28,7 +32,8 @@ import de.walware.rj.servi.pool.RServiImplE;
 import de.walware.rj.servi.pool.RServiNodeConfig;
 import de.walware.rj.servi.pool.RServiNodeFactory;
 
-public class RServiManager {
+
+public class RServiManager implements IDisposable {
 	
 	
 	private static final int EMBEDDED = 1;
@@ -49,15 +54,8 @@ public class RServiManager {
 	
 	private EmbeddedRServiManager embeddedR;
 	
-	private final ISchedulingRule schedulingRule = new ISchedulingRule() {
-		public boolean contains(final ISchedulingRule rule) {
-			return (rule == this);
-		}
-		public boolean isConflicting(final ISchedulingRule rule) {
-			// if concurrent remote instances are desired, return false here
-			return (rule == this);
-		}
-	};
+	private RServiSession currentSession;
+	private final List<RServiSession> runningSessions = new ArrayList<RServiSession>();
 	
 	
 	public RServiManager(final String appId, final RClientGraphicFactory graphicFactory) {
@@ -69,11 +67,9 @@ public class RServiManager {
 	}
 	
 	
-	public ISchedulingRule getSchedulingRule() {
-		return this.schedulingRule;
-	}
-	
 	public void setEmbedded(final String rHome) throws CoreException {
+		closeRServiSession();
+		
 		final Config config = new Config();
 		config.mode = EMBEDDED;
 		config.address = rHome;
@@ -87,6 +83,8 @@ public class RServiManager {
 	}
 	
 	public void setPool(final String poolAddress) {
+		closeRServiSession();
+		
 		final Config config = new Config();
 		config.mode = POOL;
 		config.address = poolAddress;
@@ -94,6 +92,8 @@ public class RServiManager {
 	}
 	
 	public void setRSetup(final String setupId) throws CoreException {
+		closeRServiSession();
+		
 		final Config config = new Config();
 		config.mode = RSETUP;
 		config.address = setupId;
@@ -154,7 +154,70 @@ public class RServiManager {
 	}
 	
 	
-	public RServi getRServi(final String task) throws CoreException {
+	public synchronized ITool getRServiSession() throws CoreException {
+		if (this.currentSession == null) {
+			final RServi servi = getRServi("session");
+			this.currentSession = new RServiSession(servi) {
+				@Override
+				protected void terminated() {
+					synchronized (RServiManager.this.runningSessions) {
+						RServiManager.this.runningSessions.remove(this);
+					}
+				}
+			};
+			synchronized (this.runningSessions) {
+				this.runningSessions.add(this.currentSession);
+			}
+		}
+		return this.currentSession;
+	}
+	
+	private void closeRServiSession() {
+		if (this.currentSession != null) {
+			this.currentSession.close(false);
+			this.currentSession = null;
+		}
+	}
+	
+	
+	public void schedule(final IToolRunnable runnable) throws CoreException {
+		final ITool session = getRServiSession();
+		final IStatus status;
+		if (session != null) {
+			status = session.getQueue().add(runnable);
+		}
+		else {
+			status = new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+					"R engine not available.");
+		}
+		if (!status.isOK()) {
+			throw new CoreException(status);
+		}
+	}
+	
+	public void scheduleDemo(final IToolRunnable runnable) {
+		try {
+			schedule(runnable);
+		}
+		catch (final CoreException e) {
+			final Status status = new Status(e.getStatus().getSeverity(), Activator.PLUGIN_ID,
+					"Cannot schedule '" + runnable.getLabel() + "'", e);
+			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
+		}
+	}
+	
+	public void dispose() {
+		this.config = new Config();
+		final RServiSession[] sessions;
+		synchronized (this.runningSessions) {
+			sessions = this.runningSessions.toArray(new RServiSession[this.runningSessions.size()]);
+		}
+		for (final RServiSession session : sessions) {
+			session.close(true);
+		}
+	}
+	
+	private RServi getRServi(final String task) throws CoreException {
 		final Config config = this.config;
 		final String key = this.name + "-" + task;
 		
