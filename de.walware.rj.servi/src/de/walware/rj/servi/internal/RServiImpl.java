@@ -196,21 +196,21 @@ public class RServiImpl implements RServi, Externalizable {
 		if (this.rjsId == 0) {
 			init();
 		}
-		this.rjs.evalVoid(command, monitor);
+		this.rjs.evalVoid(command, null, monitor);
 	}
 	
 	public RObject evalData(final String command, final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
-		return this.rjs.evalData(command, null, 0, RService.DEPTH_INFINITE, monitor);
+		return this.rjs.evalData(command, null, null, 0, RService.DEPTH_INFINITE, monitor);
 	}
 	
 	public RObject evalData(final String command, final String factoryId, final int options, final int depth, final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
-		return this.rjs.evalData(command, factoryId, options, depth, monitor);
+		return this.rjs.evalData(command, null, factoryId, options, depth, monitor);
 	}
 	
 	public RObject evalData(final RReference reference, final IProgressMonitor monitor) throws CoreException {
@@ -231,7 +231,7 @@ public class RServiImpl implements RServi, Externalizable {
 		if (this.rjsId == 0) {
 			init();
 		}
-		this.rjs.assignData(expression, data, monitor);
+		this.rjs.assignData(expression, data, null, monitor);
 	}
 	
 	public void downloadFile(final OutputStream out, final String fileName, final int options, final IProgressMonitor monitor) throws CoreException {

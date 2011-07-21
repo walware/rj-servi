@@ -197,7 +197,7 @@ public class NodeServer extends DefaultServerImpl {
 		
 		public void runSnippet(final String code) throws RemoteException, RjException {
 			NodeServer.this.runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0,
-					code, null ));
+					code, null, null ));
 		}
 		
 		public RServiBackend bindClient(final String client) throws RemoteException {
@@ -293,10 +293,10 @@ public class NodeServer extends DefaultServerImpl {
 			synchronized (this.serviRunLock) {
 				LOGGER.log(Level.FINE, "Initializing R node: Loading R package 'rj'...");
 				runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0,
-						"library(rj)", null ));
+						"library(rj)", null, null ));
 				LOGGER.log(Level.FINE, "Initializing R node: Preparing R workspace for first client...");
 				runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0,
-						this.resetCommand, null ));
+						this.resetCommand, null, null ));
 			}
 		}
 		catch (final Exception e) {
@@ -363,7 +363,7 @@ public class NodeServer extends DefaultServerImpl {
 				try {
 					synchronized (this.serviRunLock) {
 						runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0,
-								this.resetCommand, null));
+								this.resetCommand, null, null ));
 						ServerUtil.cleanDir(new File(this.workingDirectory), "out.log");
 					}
 				}
