@@ -32,11 +32,13 @@ import de.walware.ecommons.ECommons;
 import de.walware.rj.RjException;
 import de.walware.rj.data.RObject;
 import de.walware.rj.data.RReference;
+import de.walware.rj.data.defaultImpl.RObjectFactoryImpl;
 import de.walware.rj.server.RjsComConfig;
 import de.walware.rj.server.RjsStatus;
 import de.walware.rj.server.Server;
 import de.walware.rj.server.client.AbstractRJComClient;
 import de.walware.rj.server.client.AbstractRJComClientGraphicActions;
+import de.walware.rj.server.client.FunctionCallImpl;
 import de.walware.rj.server.client.RClientGraphicFactory;
 import de.walware.rj.server.client.RGraphicCreatorImpl;
 import de.walware.rj.servi.RServi;
@@ -257,7 +259,7 @@ public class RServiImpl implements RServi, Externalizable {
 		if (this.rjsId == 0) {
 			init();
 		}
-		return new FunctionCallImpl(this, name);
+		return new FunctionCallImpl(this.rjs, name, RObjectFactoryImpl.INSTANCE);
 	}
 	
 	public RGraphicCreator createRGraphicCreator(final int options) throws CoreException {
