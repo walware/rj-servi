@@ -277,8 +277,13 @@ public class DemoApp {
 			fFunctionNewButton.setText("New (Restart builder)");
 			fFunctionNewButton.addSelectionListener(new SelectionAdapter() {
 				@Override
-				public void widgetSelected(SelectionEvent e) {
-					fFunctionBuilder = fRServi.createFunctionCall(fFunctionNameText.getText());
+				public void widgetSelected(SelectionEvent event) {
+					try {
+						fFunctionBuilder = fRServi.createFunctionCall(fFunctionNameText.getText());
+					}
+					catch (Exception e) {
+						logError(e);
+					}
 					logFunction();
 					checkedEnabled();
 				}

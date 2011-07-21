@@ -253,11 +253,17 @@ public class RServiImpl implements RServi, Externalizable {
 		this.rjs.uploadFile(in, length, fileName, options, monitor);
 	}
 	
-	public FunctionCall createFunctionCall(final String name) {
+	public FunctionCall createFunctionCall(final String name) throws CoreException {
+		if (this.rjsId == 0) {
+			init();
+		}
 		return new FunctionCallImpl(this, name);
 	}
 	
-	public RGraphicCreator createRGraphicCreator(final int options) {
+	public RGraphicCreator createRGraphicCreator(final int options) throws CoreException {
+		if (this.rjsId == 0) {
+			init();
+		}
 		return new RGraphicCreatorImpl(this, this.rjs, options);
 	}
 	
