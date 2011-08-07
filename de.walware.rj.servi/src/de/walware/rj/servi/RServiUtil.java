@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import de.walware.rj.RjException;
+import de.walware.rj.server.RjsComConfig;
 import de.walware.rj.servi.pool.EmbeddedRServiManager;
 import de.walware.rj.servi.pool.RServiPool;
 
@@ -59,36 +60,42 @@ public class RServiUtil {
 	 * @throws LoginException if the RServi request requires authentication
 	 */
 	public static RServi getRServi(final String address, final String name) throws CoreException, NoSuchElementException, LoginException {
-		RServiPool pool;
 		try {
-			pool = (RServiPool) Naming.lookup(address);
+			RjsComConfig.setRMIClientSocketFactory(null);
+			RServiPool pool;
+			try {
+				pool = (RServiPool) Naming.lookup(address);
+			}
+			catch (final MalformedURLException e) {
+				throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
+						"Invalid address for the RServi pool.", e));
+			}
+			catch (final NotBoundException e) {
+				throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
+						"The address does not point to a valid RServi pool.", e));
+			}
+			catch (final ClassCastException e) {
+				throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
+						"The address does not point to a valid/compatible RServi pool.", e));
+			}
+			catch (final RemoteException e) {
+				throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
+						"Failed looking for RServi pool in the RMI registry.", e));
+			}
+			try {
+				return pool.getRServi(name, null);
+			}
+			catch (final RjException e) {
+				throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
+						"Failed getting an RServi instance from the RServi pool.", e));
+			}
+			catch (final RemoteException e) {
+				throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
+						"Failed looking for RServi pool in the RMI registry.", e));
+			}
 		}
-		catch (final MalformedURLException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
-					"Invalid address for the RServi pool.", e));
-		}
-		catch (final NotBoundException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
-					"The address does not point to a valid RServi pool.", e));
-		}
-		catch (final ClassCastException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
-					"The address does not point to a valid/compatible RServi pool.", e));
-		}
-		catch (final RemoteException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
-					"Failed looking for RServi pool in the RMI registry.", e));
-		}
-		try {
-			return pool.getRServi(name, null);
-		}
-		catch (final RjException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
-					"Failed getting an RServi instance from the RServi pool.", e));
-		}
-		catch (final RemoteException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
-					"Failed looking for RServi pool in the RMI registry.", e));
+		finally {
+			RjsComConfig.clearRMIClientSocketFactory();
 		}
 	}
 	
