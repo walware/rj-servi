@@ -12,18 +12,25 @@
 package de.walware.ecommons.net;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -104,23 +111,58 @@ public class RMIUtil {
 	}
 	
 	
-	private static final int EMBEDDED_PORT_FROM_DEFAULT = 49152;
-	private static final int EMBEDDED_PORT_TO_DEFAULT = 65535;
+	private static final int EMBEDDED_PORT_FROM_DEFAULT = 51234;
+	private static final int EMBEDDED_PORT_TO_DEFAULT = EMBEDDED_PORT_FROM_DEFAULT + 100;
 	
-	public static final RMIUtil INSTANCE = new RMIUtil();
+	public static final RMIUtil INSTANCE = new RMIUtil(true);
 	
 	
 	private final Map<Port, ManagedRegistry> registries = new HashMap<Port, ManagedRegistry>();
 	
 	private final Object embeddedLock = new Object();
-	private int embeddedPortFrom = EMBEDDED_PORT_FROM_DEFAULT;
-	private int embeddedPortTo = EMBEDDED_PORT_TO_DEFAULT;
-	private boolean embeddedStartSeparate = false;
+	private int embeddedPortFrom;
+	private int embeddedPortTo;
+	private boolean embeddedStartSeparate = true;
 	private ManagedRegistry embeddedRegistry;
+	private List<String> embeddedClasspathEntries;
+	private boolean embeddedClasspathLoadContrib;
 	
 	
 	private RMIUtil() {
+		this(false);
+	}
+	
+	private RMIUtil(final boolean instance) {
 		initDispose();
+		
+		embeddedPortFrom = EMBEDDED_PORT_FROM_DEFAULT;
+		embeddedPortTo = EMBEDDED_PORT_TO_DEFAULT;
+		if (instance) {
+			embeddedClasspathLoadContrib = true;
+			String s = System.getProperty("de.walware.ecommons.net.rmi.eRegistryPortrange");
+			if (s != null && s.length() > 0) {
+				final String from;
+				final String to;
+				final int idx = s.indexOf('-');
+				if (idx >= 0) {
+					from = s.substring(0, idx);
+					to = s.substring(idx+1);
+				}
+				else {
+					from = to = s;
+				}
+				try {
+					embeddedPortFrom = Integer.parseInt(from);
+					embeddedPortTo = Integer.parseInt(to);
+				}
+				catch (final NumberFormatException e) {
+					embeddedPortFrom = EMBEDDED_PORT_FROM_DEFAULT;
+					embeddedPortTo = EMBEDDED_PORT_TO_DEFAULT;
+					ECommons.getEnv().log(new Status(IStatus.ERROR, ECommons.PLUGIN_ID,
+							"The value of the Java property 'de.walware.ecommons.net.rmi.eRegistryPortrange' is invalid.", e ));
+				}
+			}
+		}
 	}
 	
 	protected void initDispose() {
@@ -174,8 +216,8 @@ public class RMIUtil {
 			throw new IllegalArgumentException("from > to");
 		}
 		synchronized (this.embeddedLock) {
-			this.embeddedPortFrom = (from >= 0) ? from : EMBEDDED_PORT_FROM_DEFAULT;
-			this.embeddedPortTo = (to >= 0) ? to : EMBEDDED_PORT_TO_DEFAULT;
+			this.embeddedPortFrom = (from > 0) ? from : EMBEDDED_PORT_FROM_DEFAULT;
+			this.embeddedPortTo = (to > 0) ? to : EMBEDDED_PORT_TO_DEFAULT;
 		}
 	}
 	
@@ -190,65 +232,112 @@ public class RMIUtil {
 		}
 	}
 	
+	public void addEmbeddedClasspathEntry(final String entry) {
+		synchronized (this.embeddedLock) {
+			if (this.embeddedClasspathEntries == null) {
+				this.embeddedClasspathEntries = new ArrayList<String>();
+			}
+			this.embeddedClasspathEntries.add(entry);
+		}
+	}
+	
+	
 	/**
 	 * Returns the managed embedded private RMI registry.
 	 * 
 	 * @return the registry or <code>null</code> if not available
 	 */
-	public RMIRegistry getEmbeddedPrivateRegistry() {
-		ManagedRegistry r = null;
-		synchronized (this.embeddedLock) {
-			if (this.embeddedRegistry != null) {
-				return this.embeddedRegistry.registry;
-			}
-			
-			final int startPort = new Random().nextInt(this.embeddedPortTo-this.embeddedPortFrom+1) + this.embeddedPortFrom;
-			for (int port = startPort; ; ) {
-				try {
-					final RMIAddress rmiAddress = new RMIAddress(RMIAddress.LOOPBACK, port, null);
-					if (this.embeddedStartSeparate) {
-						if (startSeparateRegistry(rmiAddress, StopRule.ALWAYS).getSeverity() < IStatus.ERROR) {
-							r = this.registries.get(new Port(port));
+	public RMIRegistry getEmbeddedPrivateRegistry(final IProgressMonitor monitor)
+			throws CoreException {
+		try {
+			ManagedRegistry r = null;
+			IStatus status = null;
+			synchronized (this.embeddedLock) {
+				if (this.embeddedRegistry != null) {
+					return this.embeddedRegistry.registry;
+				}
+				
+				monitor.beginTask("Starting registry (RMI)...", IProgressMonitor.UNKNOWN);
+				
+				if (this.embeddedClasspathLoadContrib && this.embeddedStartSeparate) {
+					loadClasspathContrib();
+				}
+				
+				int loop = 1;
+				for (int port = this.embeddedPortFrom; ; ) {
+					if (monitor.isCanceled()) {
+						throw new CoreException(Status.CANCEL_STATUS);
+					}
+					try {
+						final RMIAddress rmiAddress = new RMIAddress(RMIAddress.LOOPBACK, port, null);
+						if (this.embeddedStartSeparate) {
+							status = startSeparateRegistry(rmiAddress, false, StopRule.ALWAYS, this.embeddedClasspathEntries);
+							if (status.getSeverity() < IStatus.ERROR) {
+								r = this.registries.get(new Port(port));
+							}
+						}
+						else {
+							final Registry javaRegistry = LocateRegistry.createRegistry(port);
+							final RMIRegistry registry = new RMIRegistry(rmiAddress, javaRegistry, false);
+							r = new ManagedRegistry(registry, StopRule.NEVER);
+							r.stopRule = StopRule.ALWAYS;
+						}
+						if (r != null) {
+							this.embeddedRegistry = r;
+							break;
 						}
 					}
-					else {
-						final Registry javaRegistry = LocateRegistry.createRegistry(port);
-						final RMIRegistry registry = new RMIRegistry(rmiAddress, javaRegistry, false);
-						r = new ManagedRegistry(registry, StopRule.NEVER);
-						r.stopRule = StopRule.ALWAYS;
+					catch (final Exception e) {
+						if (!(e.getCause() instanceof BindException)) {
+							status = new Status(IStatus.ERROR, ECommons.PLUGIN_ID,
+									"An unknown exception was thrown when starting the embedded registry.", e);
+						}
 					}
-					if (r != null) {
-						this.embeddedRegistry = r;
-						break;
+					port++;
+					if (port % 10 == 0) {
+						port += 10;
 					}
-				}
-				catch (final Exception e) {
-					if (!(e.getCause() instanceof BindException)) {
-						return null;
+					if (port > this.embeddedPortTo) {
+						if (loop == 1) {
+							loop = 2;
+							port = this.embeddedPortFrom + 10;
+						}
+						else {
+							break;
+						}
 					}
-				}
-				port++;
-				if (this.embeddedPortFrom - this.embeddedPortTo > 200
-						&& (port % 10 == 0)) {
-					port += 10;
-				}
-				if (port > this.embeddedPortTo) {
-					port = this.embeddedPortFrom;
-				}
-				if (port == startPort) {
-					return null;
 				}
 			}
+			if (r != null) {
+				final Port key = new Port(r.registry.getAddress().getPortNum());
+				synchronized (this) {
+					this.registries.put(key, r);
+				}
+				return r.registry;
+			}
+			if (status != null) {
+				throw new CoreException(status);
+			}
+			return null;
 		}
-		final Port key = new Port(r.registry.getAddress().getPortNum());
-		synchronized (this) {
-			this.registries.put(key, r);
+		finally {
+			if (monitor != null) {
+				monitor.done();
+			}
 		}
-		return r.registry;
+	}
+	
+	private void loadClasspathContrib() {
+		// not available outside Eclipse
+		this.embeddedClasspathLoadContrib = false;
 	}
 	
 	
-	public IStatus startSeparateRegistry(RMIAddress address, final StopRule stopRule) {
+	public IStatus startSeparateRegistry(RMIAddress address, boolean allowExisting,
+			final StopRule stopRule, final List<String> classpathEntries) {
+		if (allowExisting && classpathEntries != null && !classpathEntries.isEmpty()) {
+			throw new IllegalArgumentException("allow existing not valid in combination with classpath entries");
+		}
 		final InetAddress hostAddress = address.getHostAddress();
 		if (!(hostAddress.isLinkLocalAddress() || hostAddress.isLoopbackAddress())) {
 			throw new IllegalArgumentException("address not local");
@@ -260,22 +349,56 @@ public class RMIUtil {
 		}
 		
 		try {
-			final Registry registry = LocateRegistry.getRegistry(address.getPortNum());
-			registry.list();
-			final Port key = new Port(address.getPortNum());
-			synchronized (this) {
-				if (!this.registries.containsKey(key)) {
-					final ManagedRegistry r = new ManagedRegistry(new RMIRegistry(address, registry, false), StopRule.NEVER);
-					this.registries.put(key, r);
+			checkRegistryAccess(address);
+			if (allowExisting) {
+				try {
+					final Registry registry = LocateRegistry.getRegistry(address.getHost(), address.getPortNum());
+					registry.list();
+					final Port key = new Port(address.getPortNum());
+					synchronized (this) {
+						if (!this.registries.containsKey(key)) {
+							final ManagedRegistry r = new ManagedRegistry(new RMIRegistry(address, registry, false), StopRule.NEVER);
+							this.registries.put(key, r);
+						}
+					}
+					return new Status(IStatus.INFO, ECommons.PLUGIN_ID,
+							MessageFormat.format(Messages.RMI_status_RegistryAlreadyStarted_message, address.getPort()) );
 				}
+				catch (final RemoteException e) {}
 			}
-			return new Status(IStatus.INFO, ECommons.PLUGIN_ID, MessageFormat.format(Messages.RMI_status_RegistryAlreadyStarted_message, address.getPort()));
+			return new Status(IStatus.ERROR, ECommons.PLUGIN_ID,
+					MessageFormat.format(Messages.RMI_status_RegistryStartFailedPortAlreadyUsed_message, address.getPort()) );
 		}
 		catch (final RemoteException e) {}
+		
 		final Process process;
 		try {
-			final String registryExe = System.getProperty("java.home") + File.separator + "bin" + File.separator + "rmiregistry"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			process = Runtime.getRuntime().exec(new String[] { registryExe, address.getPort() });
+			final List<String> command = new ArrayList<String>();
+			final StringBuilder sb = new StringBuilder();
+			sb.setLength(0);
+			sb.append(System.getProperty("java.home")); //$NON-NLS-1$
+			sb.append(File.separator).append("bin"); //$NON-NLS-1$
+			sb.append(File.separator).append("rmiregistry"); //$NON-NLS-1$
+			command.add(sb.toString());
+			command.add(address.getPort());
+			if (classpathEntries != null && !classpathEntries.isEmpty()) {
+				command.add("-J-classpath");
+				sb.setLength(0);
+				sb.append("-J");
+				sb.append(classpathEntries.get(0));
+				for (int i = 1; i < classpathEntries.size(); i++) {
+					sb.append(File.pathSeparatorChar);
+					sb.append(classpathEntries.get(i));
+				}
+				command.add(sb.toString());
+			}
+			if (address.getHost() != null) {
+				sb.setLength(0);
+				sb.append("-J-Djava.rmi.server.hostname=");
+				sb.append(address.getHost());
+				command.add(sb.toString());
+			}
+			process = Runtime.getRuntime().exec(command.toArray(new String[command.size()]));
 		}
 		catch (final Exception e) {
 			return new Status(IStatus.ERROR, ECommons.PLUGIN_ID, MessageFormat.format(Messages.RMI_status_RegistryStartFailed_message, address.getPort()), e);
@@ -289,19 +412,23 @@ public class RMIUtil {
 			}
 			catch (final IllegalThreadStateException e) {
 			}
-			try {
-				final Registry registry = LocateRegistry.getRegistry(address.getHost(), address.getPortNum());
-				final ManagedRegistry r = new ManagedRegistry(new RMIRegistry(address, registry, true),
-						(stopRule != null) ? stopRule : StopRule.IF_EMPTY);
-				r.process = process;
-				final Port key = new Port(address.getPortNum());
-				synchronized (this) {
-					this.registries.put(key, r);
+			if (i > 1) {
+				try {
+					checkRegistryAccess(address);
+					final Registry registry = LocateRegistry.getRegistry(address.getHost(), address.getPortNum());
+					registry.list();
+					final ManagedRegistry r = new ManagedRegistry(new RMIRegistry(address, registry, true),
+							(stopRule != null) ? stopRule : StopRule.IF_EMPTY);
+					r.process = process;
+					final Port key = new Port(address.getPortNum());
+					synchronized (this) {
+						this.registries.put(key, r);
+					}
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;
-			}
-			catch (final RemoteException e) {
-				lastException = e;
+				catch (final RemoteException e) {
+					lastException = e;
+				}
 			}
 			
 			if (Thread.interrupted()) {
@@ -319,21 +446,6 @@ public class RMIUtil {
 			catch (final InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-		}
-	}
-	
-	public IStatus startSeparateRegistry(int port, final StopRule stopRule) {
-		if (port <= 0) {
-			port = Registry.REGISTRY_PORT;
-		}
-		try {
-			return startSeparateRegistry(new RMIAddress((String) null, port, null), stopRule);
-		}
-		catch (final UnknownHostException e) {
-			throw new IllegalStateException();
-		}
-		catch (final MalformedURLException e) { // invalid port
-			return new Status(IStatus.ERROR, ECommons.PLUGIN_ID, MessageFormat.format(Messages.RMI_status_RegistryStartFailed_message, port), e);
 		}
 	}
 	
@@ -387,6 +499,45 @@ public class RMIUtil {
 			}
 			this.registries.clear();
 		}
+	}
+	
+	
+	public static final int ACCESS_TIMEOUT;
+	
+	public static void checkRegistryAccess(final RMIAddress address) throws RemoteException {
+		Socket socket = null;
+		try {
+			socket = new Socket();
+			try {
+				socket.setSoTimeout(ACCESS_TIMEOUT);
+			}
+			catch (final SocketException e) {}
+			socket.connect(new InetSocketAddress(address.getHostAddress(), address.getPortNum()),
+					ACCESS_TIMEOUT);
+		}
+		catch (final IOException e) {
+			throw new RemoteException("Cannot connect to RMI registry.", e);
+		}
+		finally {
+			if (socket != null && !socket.isClosed()) {
+				try {
+					socket.close();
+				}
+				catch (final IOException e) {}
+			}
+		}
+	}
+	
+	
+	static {
+		int timeout = 15000;
+		String s = System.getProperty("de.walware.ecommons.net.rmi.accessTimeout");
+		if (s != null) {
+			try {
+				timeout = Integer.parseInt(s);
+			} catch (Exception e) {}
+		}
+		ACCESS_TIMEOUT = timeout;
 	}
 	
 }

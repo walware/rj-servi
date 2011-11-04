@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import de.walware.ecommons.ECommons;
@@ -89,8 +90,9 @@ public class RJServlet extends HttpServlet {
 							"Found running RMI registry at port "+registryPort+", embedded RMI registry will not be started.", null));
 				}
 				catch (final RemoteException e) {
+					RMIUtil.INSTANCE.setEmbeddedPrivateMode(false);
 					RMIUtil.INSTANCE.setEmbeddedPrivatePort(registryPort);
-					rmiRegistry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry();
+					rmiRegistry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry(new NullProgressMonitor());
 					if (rmiRegistry != null) {
 						ECommons.getEnv().log(new Status(IStatus.INFO, RJWeb.PLUGIN_ID, 0,
 								"Embedded RMI registry at port "+registryPort+" started.", null));

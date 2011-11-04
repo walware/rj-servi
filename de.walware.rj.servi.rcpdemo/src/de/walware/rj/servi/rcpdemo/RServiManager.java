@@ -7,7 +7,9 @@ import java.util.NoSuchElementException;
 import javax.security.auth.login.LoginException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
@@ -126,6 +128,17 @@ public class RServiManager {
 	}
 	
 	private void startEmbedded(final RServiNodeConfig rConfig) throws CoreException {
+		startEmbedded(rConfig, new NullProgressMonitor()); // TODO real monitor, e.g. in a Job
+	}
+	
+	private void startEmbedded(final RServiNodeConfig rConfig,
+			final IProgressMonitor monitor) throws CoreException {
+		if (rConfig == null) {
+			throw new NullPointerException("rConfig");
+		}
+		if (monitor == null) {
+			throw new NullPointerException("monitor");
+		}
 		try {
 			if (System.getSecurityManager() == null) {
 				if (System.getProperty("java.security.policy") == null) {
@@ -135,8 +148,8 @@ public class RServiManager {
 				System.setSecurityManager(new SecurityManager());
 			}
 			
-			RMIUtil.INSTANCE.setEmbeddedPrivateMode(true);
-			final RMIRegistry registry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry();
+			final RMIRegistry registry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry(monitor);
+			rConfig.setNodeArgs(rConfig.getNodeArgs() + " -embedded");
 			final RServiNodeFactory nodeFactory = RServiImplE.createLocalhostNodeFactory(this.name, registry);
 			nodeFactory.setConfig(rConfig);
 			
