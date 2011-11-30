@@ -154,8 +154,11 @@ public class RMIUtil {
 				try {
 					embeddedPortFrom = Integer.parseInt(from);
 					embeddedPortTo = Integer.parseInt(to);
+					if (embeddedPortFrom > embeddedPortTo) {
+						throw new IllegalArgumentException("from > to");
+					}
 				}
-				catch (final NumberFormatException e) {
+				catch (final IllegalArgumentException e) {
 					embeddedPortFrom = EMBEDDED_PORT_FROM_DEFAULT;
 					embeddedPortTo = EMBEDDED_PORT_TO_DEFAULT;
 					ECommons.getEnv().log(new Status(IStatus.ERROR, ECommons.PLUGIN_ID,
@@ -301,10 +304,11 @@ public class RMIUtil {
 						if (loop == 1) {
 							loop = 2;
 							port = this.embeddedPortFrom + 10;
+							if (port <= embeddedPortTo) {
+								continue;
+							}
 						}
-						else {
-							break;
-						}
+						break;
 					}
 				}
 			}
