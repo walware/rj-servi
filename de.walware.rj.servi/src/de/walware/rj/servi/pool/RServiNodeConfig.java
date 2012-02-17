@@ -11,6 +11,7 @@
 
 package de.walware.rj.servi.pool;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -189,6 +190,17 @@ public class RServiNodeConfig implements PropertiesBean {
 	 */
 	public Map<String, String> getEnvironmentVariables() {
 		return this.environmentVariables;
+	}
+	
+	public void addToClasspath(final String entry) {
+		String cp = this.environmentVariables.get("CLASSPATH");
+		if (cp != null) {
+			cp += File.pathSeparatorChar + entry;
+		}
+		else {
+			cp = entry;
+		}
+		this.environmentVariables.put("CLASSPATH", cp);
 	}
 	
 	public String getNodeArgs() {

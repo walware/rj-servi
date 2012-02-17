@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import de.walware.ecommons.net.RMIAddress;
 import de.walware.ecommons.net.RMIRegistry;
@@ -100,7 +101,14 @@ public abstract class LocalNodeFactory implements NodeFactory {
 				this.errorMessage = e.getMessage();
 				throw e;
 			}
-			p.command.add(ServerUtil.concatPathVar(libs));
+			String cp = config.getEnvironmentVariables().get("CLASSPATH");
+			if (cp != null) {
+				cp = ServerUtil.concatPathVar(libs) + File.pathSeparatorChar + cp;
+			}
+			else {
+				cp = ServerUtil.concatPathVar(libs);
+			}
+			p.command.add(cp);
 		}
 		
 		String javaArgs = config.getJavaArgs();
@@ -262,7 +270,11 @@ public abstract class LocalNodeFactory implements NodeFactory {
 			throw new RjInvalidConfigurationException(this.errorMessage);
 		}
 		
-		p.addEnv.putAll(config.getEnvironmentVariables());
+		for (final Entry<String, String> var : config.getEnvironmentVariables().entrySet()) {
+			if (!var.getKey().equals("CLASSPATH")) {
+				p.addEnv.put(var.getKey(), var.getValue());
+			}
+		}
 		
 		p.authConfig = config.getEnableConsole() ? "none" : null;
 		
