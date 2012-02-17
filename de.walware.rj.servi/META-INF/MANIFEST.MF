@@ -3,13 +3,13 @@ Bundle-ManifestVersion: 2
 Bundle-Vendor: WalWare.de
 Bundle-Name: RJ RServi
 Bundle-SymbolicName: de.walware.rj.servi;singleton:=true
-Bundle-Version: 1.0.2.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: de.walware.rj.servi.internal.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Require-Bundle: de.walware.rj.data;bundle-version="[1.0.0,1.1.0)",
- de.walware.rj.server;bundle-version="[1.0.0,1.1.0)",
- de.walware.rj.client;bundle-version="[1.0.0,1.1.0)";visibility:=reexport
+Require-Bundle: de.walware.rj.data;bundle-version="[1.1.0,1.2.0)",
+ de.walware.rj.server;bundle-version="[1.1.0,1.2.0)",
+ de.walware.rj.client;bundle-version="[1.1.0,1.2.0)";visibility:=reexport
 Import-Package: de.walware.ecommons,
  de.walware.ecommons.net;version="1.1.0",
  org.eclipse.core.runtime,

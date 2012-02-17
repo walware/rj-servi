@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Vendor: WalWare.de
 Bundle-Name: RJ Services Minimum Eclipse Runtime
 Bundle-SymbolicName: de.walware.rj.services.eruntime
-Bundle-Version: 1.0.3.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: de.walware.ecommons,
  de.walware.ecommons.net;version="1.1.0",

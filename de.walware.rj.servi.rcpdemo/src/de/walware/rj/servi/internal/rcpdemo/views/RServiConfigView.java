@@ -104,7 +104,7 @@ public class RServiConfigView extends ViewPart {
 		this.remoteSelectControl.setSelection(true);
 		this.remoteAddressControl.setText("rmi://localhost/rservi-pool");
 		final String rhome = System.getenv("R_HOME");
-		this.embeddedRhomeControl.setText((rhome != null) ? rhome : "D:\\R\\R-2.13");
+		this.embeddedRhomeControl.setText((rhome != null) ? rhome : "");
 		this.rsetupIdControl.setText("org.rproject.r.DefaultSetup");
 	}
 	
