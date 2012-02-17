@@ -34,7 +34,7 @@
 <hr/>
 
 <p>
-Copyright (c) 2007-2010 WalWare/RJ-Project (www.walware.de/goto/opensource) contributors
+Copyright (c) 2007-2012 WalWare/RJ-Project (www.walware.de/goto/opensource) contributors
 and others.</p>
 <p>
 This product includes software developed by The Apache Software Foundation
