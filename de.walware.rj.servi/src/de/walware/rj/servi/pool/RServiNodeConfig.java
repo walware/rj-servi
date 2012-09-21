@@ -90,13 +90,13 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.bits = templ.bits;
 		this.javaHome = templ.javaHome;
 		this.javaArgs = templ.javaArgs;
+		this.environmentVariables.clear();
 		this.environmentVariables.putAll(templ.environmentVariables);
 		this.nodeArgs = templ.nodeArgs;
 		this.baseWd = templ.baseWd;
 		this.rStartupSnippet = templ.rStartupSnippet;
 		this.enableConsole = templ.enableConsole;
 		this.enableVerbose = templ.enableVerbose;
-		this.environmentVariables.clear();
 	}
 	
 	public void load(final Properties map) {
