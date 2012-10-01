@@ -23,6 +23,7 @@ import de.walware.ecommons.ts.IToolService;
 
 import de.walware.rj.data.RObject;
 import de.walware.rj.data.RReference;
+import de.walware.rj.eclient.IRToolService;
 import de.walware.rj.servi.RServi;
 import de.walware.rj.servi.internal.RServiImpl;
 import de.walware.rj.servi.internal.rcpdemo.Activator;
@@ -92,7 +93,7 @@ public class RServiSession implements ITool {
 		
 	}
 	
-	private class RServiService implements RService, IToolService {
+	private class RServiService implements IRToolService, RService, IToolService {
 		
 		public ITool getTool() {
 			return RServiSession.this;

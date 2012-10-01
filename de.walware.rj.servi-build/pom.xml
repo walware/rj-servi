@@ -5,7 +5,7 @@
 	
 	<groupId>de.walware.rj</groupId>
 	<artifactId>rj-servi</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>RJ Servi</name>
 	
@@ -45,7 +45,7 @@
 						<artifact>
 							<groupId>de.walware.rj</groupId>
 							<artifactId>de.walware.rj.servi-targetplatform</artifactId>
-							<version>1.1.1-SNAPSHOT</version>
+							<version>1.2.0-SNAPSHOT</version>
 							<classifier>all</classifier>
 						</artifact>
 					</target>

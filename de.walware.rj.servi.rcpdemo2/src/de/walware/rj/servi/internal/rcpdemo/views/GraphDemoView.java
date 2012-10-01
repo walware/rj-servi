@@ -25,13 +25,13 @@ import org.eclipse.ui.services.IServiceLocator;
 import de.walware.ecommons.ts.IToolRunnable;
 
 import de.walware.rj.eclient.AbstractRServiceRunnable;
+import de.walware.rj.eclient.IRToolService;
 import de.walware.rj.eclient.graphics.IERGraphic;
 import de.walware.rj.eclient.graphics.RGraphicComposite;
 import de.walware.rj.eclient.graphics.RGraphicCompositeActionSet;
 import de.walware.rj.graphic.RGraphic;
 import de.walware.rj.servi.internal.rcpdemo.Activator;
 import de.walware.rj.services.RGraphicCreator;
-import de.walware.rj.services.RService;
 
 
 public class GraphDemoView extends ViewPart {
@@ -137,7 +137,7 @@ public class GraphDemoView extends ViewPart {
 		final String command = this.commandControl.getText();
 		final IToolRunnable job = new AbstractRServiceRunnable("r/demo/graphic", "Graphic Demo") {
 			@Override
-			protected void run(final RService r,
+			protected void run(final IRToolService r,
 					final IProgressMonitor monitor) throws CoreException {
 				monitor.beginTask("Creating graphic in R...", 100);
 				
