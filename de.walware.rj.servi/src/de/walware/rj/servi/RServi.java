@@ -46,8 +46,22 @@ import de.walware.rj.services.RService;
  * throw an exception.</p>
  * <p>
  * All common guidelines of {@link RService} should be taken into account.</p>
+ * 
+ * @since 0.1
  */
 public interface RServi extends RService {
+	
+	
+	/**
+	 * Returns the current state of the RServi instance.
+	 * <p>
+	 * The RServi instance is usually closed by {@link #close()} or if a disconnection to the
+	 * R engine was detected. The method does not actively test the connection.
+	 * 
+	 * @return <code>true</code> if the RServi instance is closed, otherwise <code>false</code>.
+	 * @since 1.2
+	 */
+	boolean isClosed();
 	
 	/**
 	 * Closes this RServi instance. An cleanup of resources created by this RServi
@@ -61,6 +75,6 @@ public interface RServi extends RService {
 	 * @throws CoreException if the operation failed; the status
 	 *     of the exception contains detail about the cause
 	 */
-	public void close() throws CoreException;
+	void close() throws CoreException;
 	
 }

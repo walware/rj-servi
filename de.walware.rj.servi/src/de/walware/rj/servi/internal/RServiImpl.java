@@ -166,6 +166,11 @@ public class RServiImpl implements RServi, Externalizable {
 		this.rjs.setRjsProperties(properties);
 	}
 	
+	@Override
+	public boolean isClosed() {
+		return this.rjs.isClosed();
+	}
+	
 	public synchronized void close() throws CoreException {
 		if (this.rjs.isClosed()) {
 			throw new CoreException(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, 0,
