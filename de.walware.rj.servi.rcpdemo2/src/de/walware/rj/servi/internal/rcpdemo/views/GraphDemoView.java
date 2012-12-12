@@ -24,7 +24,7 @@ import org.eclipse.ui.services.IServiceLocator;
 
 import de.walware.ecommons.ts.IToolRunnable;
 
-import de.walware.rj.eclient.AbstractRServiceRunnable;
+import de.walware.rj.eclient.AbstractRToolRunnable;
 import de.walware.rj.eclient.IRToolService;
 import de.walware.rj.eclient.graphics.IERGraphic;
 import de.walware.rj.eclient.graphics.RGraphicComposite;
@@ -135,7 +135,7 @@ public class GraphDemoView extends ViewPart {
 	private void run() {
 		final Point size = this.imageControl.getSize();
 		final String command = this.commandControl.getText();
-		final IToolRunnable job = new AbstractRServiceRunnable("r/demo/graphic", "Graphic Demo") {
+		final IToolRunnable job = new AbstractRToolRunnable("r/demo/graphic", "Graphic Demo") {
 			@Override
 			protected void run(final IRToolService r,
 					final IProgressMonitor monitor) throws CoreException {

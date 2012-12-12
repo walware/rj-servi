@@ -8,6 +8,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -37,7 +38,7 @@ import de.walware.rj.services.RService;
  * Implementations of ECommons Tool Service and Scheduling interfaces (de.walware.ecommons.ts) for 
  * RServi using Eclipse jobs.
  */
-public class RServiSession implements ITool {
+public class RServiSession extends PlatformObject implements ITool {
 	
 	
 	private class Queue implements IQueue {
