@@ -2,11 +2,12 @@
 <?pde version="3.6"?>
 
 <target name="Base RCP with RServices (with Sources)">
-<locations>
-<location id="org.eclipse.rcp" path="${eclipse_home}" type="Feature"/>
-<location includeAllPlatforms="true" includeMode="slicer" type="InstallableUnit">
-<unit id="de.walware.rj.servi.e.sdk.feature.group" version="0.0.0"/>
-<repository location="platform:/resource/de.walware.rj.devbundle/libs/"/>
-</location>
-</locations>
+	<locations>
+		<location id="org.eclipse.rcp" path="${eclipse_home}" type="Feature"/>
+		<location includeAllPlatforms="false" includeMode="planner" includeConfigurePhase="false"
+				type="InstallableUnit">
+			<repository location="platform:/resource/de.walware.rj.devbundle/libs/"/>
+			<unit id="de.walware.rj.servi.e.sdk.feature.group" version="0.0.0"/>
+		</location>
+	</locations>
 </target>
