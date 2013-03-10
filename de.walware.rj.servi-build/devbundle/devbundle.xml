@@ -93,7 +93,7 @@
 			<outputDirectory>eprojects/de.walware.rj.devbundle/libs</outputDirectory>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<includes>
-				<include>de.walware.rj:de.walware.rj.servi-repo</include>
+				<include>de.walware.rj-packaging:de.walware.rj.servi-repo</include>
 			</includes>
 			<unpack>true</unpack>
 		</dependencySet>
