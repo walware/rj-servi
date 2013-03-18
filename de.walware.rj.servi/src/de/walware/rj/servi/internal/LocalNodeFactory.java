@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	
 	private final String poolId;
 	private RServiNodeConfig baseConfig;
-	private String[] libIds;
+	private final String[] libIds;
 	
 	private final String securityPolicyPath;
 	private ProcessConfig processConfig;
@@ -80,6 +80,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	protected abstract String getPolicyFile() throws RjInvalidConfigurationException;
 	
 	
+	@Override
 	public void setConfig(final RServiNodeConfig config) throws RjInvalidConfigurationException {
 		final ProcessConfig p = new ProcessConfig();
 		final StringBuilder sb = new StringBuilder();
@@ -297,11 +298,13 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		return false;
 	}
 	
+	@Override
 	public RServiNodeConfig getConfig() {
 		return this.baseConfig;
 	}
 	
 	
+	@Override
 	public void createNode(final NodeHandler poolObj) throws RjException {
 		final ProcessConfig p = this.processConfig;
 		if (p == null) {
@@ -345,7 +348,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		try {
 			process = pBuilder.start();
 			
-			long t = System.nanoTime();
+			final long t = System.nanoTime();
 			for (int i = 1; ; i++) {
 				try {
 					final Server server = (Server) this.nodeRegistry.getRegistry().lookup(id);
@@ -479,6 +482,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		}
 	}
 	
+	@Override
 	public void cleanupNode(final NodeHandler poolObj) {
 		if (!this.verbose && poolObj.dir != null
 				&& poolObj.dir.exists() && poolObj.dir.isDirectory()) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,6 +80,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	}
 	
 	
+	@Override
 	public String getBeanId() {
 		return "rconfig";
 	}
@@ -99,6 +100,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.enableVerbose = templ.enableVerbose;
 	}
 	
+	@Override
 	public void load(final Properties map) {
 		setRHome(map.getProperty(R_HOME_ID));
 		setRArch(map.getProperty(R_ARCH_ID));
@@ -125,6 +127,7 @@ public class RServiNodeConfig implements PropertiesBean {
 		setEnableVerbose(Boolean.parseBoolean(map.getProperty(VERBOSE_ENABLED_ID)));
 	}
 	
+	@Override
 	public void save(final Properties map) {
 		map.setProperty(R_HOME_ID, this.rHome);
 		map.setProperty(R_ARCH_ID, this.rArch);

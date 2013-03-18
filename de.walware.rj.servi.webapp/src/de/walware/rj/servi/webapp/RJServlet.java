@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,7 +81,7 @@ public class RJServlet extends HttpServlet {
 			
 			final int registryPort = rmiConfig.getEffectiveRegistryPort();
 			final RMIAddress rmiRegistryAddress = new RMIAddress(rmiConfig.getEffectiveHostaddress(), registryPort, null);
-			Registry registry = LocateRegistry.getRegistry(rmiRegistryAddress.getPortNum());
+			final Registry registry = LocateRegistry.getRegistry(rmiRegistryAddress.getPortNum());
 			RMIRegistry rmiRegistry;
 			if (rmiConfig.getRegistryEmbed()) {
 				try {

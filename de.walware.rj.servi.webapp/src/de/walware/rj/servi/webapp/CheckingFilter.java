@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,16 +35,19 @@ public class CheckingFilter implements Filter {
 	}
 	
 	
-	public void init(FilterConfig fConfig) throws ServletException {
+	@Override
+	public void init(final FilterConfig fConfig) throws ServletException {
 	}
 	
+	@Override
 	public void destroy() {
 	}
 	
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		HttpSession session = httpRequest.getSession(false);
+	@Override
+	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+		final HttpServletRequest httpRequest = (HttpServletRequest) request;
+		final HttpServletResponse httpResponse = (HttpServletResponse) response;
+		final HttpSession session = httpRequest.getSession(false);
 		if (!httpRequest.getParameterMap().isEmpty()
 				&& httpRequest.getRequestedSessionId() != null
 				&& ((session == null) || session.isNew() || !session.getId().equals(httpRequest.getRequestedSessionId()))

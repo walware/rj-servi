@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,7 @@ public class FacesUtils {
 		if (externalContext instanceof ServletContext) {
 			return (RServiPoolManager) ((ServletContext) externalContext).getAttribute(RJWeb.POOLMANAGER_KEY);
 		}
-		throw new IllegalThreadStateException();
+		throw new IllegalStateException();
 	}
 	
 	public static String getPoolId() {
@@ -60,7 +60,7 @@ public class FacesUtils {
 		if (externalContext instanceof ServletContext) {
 			return (String) ((ServletContext) externalContext).getAttribute(RJWeb.POOLID_KEY);
 		}
-		throw new IllegalThreadStateException();
+		throw new IllegalStateException();
 	}
 	
 	public static InputStream getPropertiesFileInput(final String name) throws IOException {
@@ -68,7 +68,7 @@ public class FacesUtils {
 		if (externalContext instanceof ServletContext) {
 			return Utils.getPropertiesFileInput((ServletContext)externalContext, name);
 		}
-		throw new IllegalThreadStateException();
+		throw new IllegalStateException();
 	}
 	
 	public static OutputStream getPropertiesFileOutput(final String name) throws IOException {
@@ -76,7 +76,7 @@ public class FacesUtils {
 		if (externalContext instanceof ServletContext) {
 			return Utils.getPropertiesFileOutput((ServletContext)externalContext, name);
 		}
-		throw new IllegalThreadStateException();
+		throw new IllegalStateException();
 	}
 	
 	public static boolean saveToFile(final PropertiesBean bean) {

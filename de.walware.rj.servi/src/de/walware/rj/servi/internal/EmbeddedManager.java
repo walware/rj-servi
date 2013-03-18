@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 	
 	private class EmbeddedObject extends NodeHandler implements RServiImpl.PoolRef {
 		
+		@Override
 		public void returnObject(final long accessId) throws RjException, RemoteException {
 			returnRServi(accessId);
 		}
@@ -65,18 +66,22 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 	}
 	
 	
+	@Override
 	public String getId() {
 		return this.id;
 	}
 	
+	@Override
 	public RServiNodeFactory getFactory() {
 		return this.factory;
 	}
 	
+	@Override
 	public void dispose() {
 		stop();
 	}
 	
+	@Override
 	public synchronized void start() throws RjException {
 		final EmbeddedObject poolObj = new EmbeddedObject();
 		try {
@@ -91,6 +96,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 		}
 	}
 	
+	@Override
 	public synchronized void stop() {
 		if (this.handler == null) {
 			return;
@@ -112,6 +118,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 		this.handler = null;
 	}
 	
+	@Override
 	public synchronized RServi getRServi(final String name) throws NoSuchElementException, RjException {
 		if (this.handler == null) {
 			start();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,18 +62,22 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	}
 	
 	
+	@Override
 	public String getId() {
 		return this.id;
 	}
 	
+	@Override
 	public NodeFactory getFactories() {
 		return this.nodeFactory;
 	}
 	
+	@Override
 	public synchronized void addNodeFactory(final RServiNodeFactory factory) {
 		this.nodeFactory = (NodeFactory) factory;
 	}
 	
+	@Override
 	public synchronized void setConfig(PoolConfig config) {
 		config = new PoolConfig(config);
 		if (this.pool != null) {
@@ -83,6 +87,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		this.poolConfig = config;
 	}
 	
+	@Override
 	public PoolConfig getConfig() {
 		final PoolConfig config = this.poolConfig;
 		if (config != null) {
@@ -91,6 +96,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		return null;
 	}
 	
+	@Override
 	public synchronized void init() throws RjException {
 		this.poolFactory = new PoolObjectFactory(this.nodeFactory, this.stats, this.poolConfig);
 		this.pool = new ExtGenericObjectPool(this.poolFactory, createConfig(this.poolConfig));
@@ -112,10 +118,12 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		}
 	}
 	
+	@Override
 	public Object[] getPoolItemsData() {
 		return this.pool.getItems();
 	}
 	
+	@Override
 	public synchronized void stop(final int mode) throws RjException {
 		Utils.logInfo("Unpublishing pool...");
 		if (this.registry != null) {
@@ -177,6 +185,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		return poolConfig;
 	}
 	
+	@Override
 	public RServi getRServi(final String name, final ServerLogin login) throws NoSuchElementException, RjException {
 		final PoolObject poolObject = getPoolObject(name);
 		return new RServiImpl(poolObject.getAccessId(), poolObject, poolObject.clientHandler);
@@ -199,6 +208,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		}
 	}
 	
+	@Override
 	public RServiPoolManager.Counter getCounter() {
 		final RServiPoolManager.Counter counter = new RServiPoolManager.Counter();
 		synchronized (this.pool) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -153,6 +153,7 @@ public class NodeServer extends DefaultServerImpl {
 	
 	class Node implements RServiNode {
 		
+		@Override
 		public boolean setConsole(final String authConfig) throws RemoteException, RjException {
 			final boolean enabled;
 			synchronized (NodeServer.this.internalEngine) {
@@ -179,13 +180,16 @@ public class NodeServer extends DefaultServerImpl {
 			return enabled;
 		}
 		
+		@Override
 		public int getEvalTime() throws RemoteException {
 			return 0;
 		}
 		
+		@Override
 		public void ping() throws RemoteException {
 		}
 		
+		@Override
 		public String getPoolHost() throws RemoteException {
 			try {
 				return RemoteServer.getClientHost();
@@ -195,19 +199,23 @@ public class NodeServer extends DefaultServerImpl {
 			}
 		}
 		
+		@Override
 		public void runSnippet(final String code) throws RemoteException, RjException {
-			NodeServer.this.runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0,
+			runServerLoopCommand(null, new DataCmdItem(DataCmdItem.EVAL_VOID, 0,
 					code, null, null ));
 		}
 		
+		@Override
 		public RServiBackend bindClient(final String client) throws RemoteException {
 			return NodeServer.this.bindClient(client);
 		}
 		
+		@Override
 		public void unbindClient() throws RemoteException {
 			NodeServer.this.unbindClient();
 		}
 		
+		@Override
 		public void shutdown() throws RemoteException {
 			NodeServer.this.shutdown();
 		}
@@ -216,14 +224,17 @@ public class NodeServer extends DefaultServerImpl {
 	
 	class Backend implements RServiBackend {
 		
+		@Override
 		public Server getPublic() throws RemoteException {
 			return null;
 		}
 		
+		@Override
 		public Map<String, Object> getPlatformData() {
 			return NodeServer.this.internalEngine.getPlatformData();
 		}
 		
+		@Override
 		public void setProperties(final Map<String, ? extends Object> properties) throws RemoteException {
 			NodeServer.this.setProperties(properties, this);
 		}
@@ -232,18 +243,22 @@ public class NodeServer extends DefaultServerImpl {
 			throw new UnsupportedOperationException();
 		}
 		
+		@Override
 		public void disconnect() throws RemoteException {
 			throw new UnsupportedOperationException();
 		}
 		
+		@Override
 		public RjsComObject runMainLoop(final RjsComObject com) throws RemoteException {
 			return NodeServer.this.runMainLoop(com, this);
 		}
 		
+		@Override
 		public RjsComObject runAsync(final RjsComObject com) throws RemoteException {
 			return NodeServer.this.runAsync(com, this);
 		}
 		
+		@Override
 		public boolean isClosed() throws RemoteException {
 			return (NodeServer.this.currentClientBackend != this);
 		}

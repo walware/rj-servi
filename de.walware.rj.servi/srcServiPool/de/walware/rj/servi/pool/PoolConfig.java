@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ public class PoolConfig implements PropertiesBean {
 	}
 	
 	
+	@Override
 	public String getBeanId() {
 		return RServiPoolManager.POOLCONFIG_NAME;
 	}
@@ -68,6 +69,7 @@ public class PoolConfig implements PropertiesBean {
 		this.maxUsageCount = templ.maxUsageCount;
 	}
 	
+	@Override
 	public void load(final Properties map) {
 		this.maxTotalCount = Integer.parseInt(map.getProperty(MAX_TOTAL_COUNT_ID));
 		this.minIdleCount = Integer.parseInt(map.getProperty(MIN_IDLE_COUNT_ID));
@@ -77,6 +79,7 @@ public class PoolConfig implements PropertiesBean {
 		this.maxUsageCount = Integer.parseInt(map.getProperty(MAX_USAGE_COUNT_ID));
 	}
 	
+	@Override
 	public void save(final Properties map) {
 		map.setProperty(MAX_TOTAL_COUNT_ID, Integer.toString(this.maxTotalCount));
 		map.setProperty(MIN_IDLE_COUNT_ID, Integer.toString(this.minIdleCount));

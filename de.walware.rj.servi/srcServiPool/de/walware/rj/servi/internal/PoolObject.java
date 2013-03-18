@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public class PoolObject extends NodeHandler implements RServiImpl.PoolRef, Unref
 		return clientId;
 	}
 	
+	@Override
 	public void returnObject(final long accessId) throws RjException {
 		try {
 			synchronized(this.item) {
@@ -56,6 +57,7 @@ public class PoolObject extends NodeHandler implements RServiImpl.PoolRef, Unref
 		}
 	}
 	
+	@Override
 	public void unreferenced() {
 		synchronized (this.item) {
 			if (this.item.getState() != ObjectPoolItem.State.LENT

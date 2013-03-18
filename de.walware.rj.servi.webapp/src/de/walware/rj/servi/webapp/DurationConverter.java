@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,10 +22,13 @@ public class DurationConverter implements Converter {
 	public DurationConverter() {
 	}
 	
+	
+	@Override
 	public Object getAsObject(final FacesContext context, final UIComponent component, final String value) {
 		return null;
 	}
 	
+	@Override
 	public String getAsString(final FacesContext context, final UIComponent component, final Object value) {
 		if (value instanceof Long) {
 			long time1 = ((Long)value).longValue();

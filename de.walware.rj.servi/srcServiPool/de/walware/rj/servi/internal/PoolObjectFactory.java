@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 	}
 	
 	
+	@Override
 	public void makeObject(final ObjectPoolItem item) throws Exception {
 		// start
 		final PoolObject poolObj = new PoolObject(item);
@@ -56,6 +57,7 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 	}
 	
 	
+	@Override
 	public String activateObject(final ObjectPoolItem item, final Object arg) throws Exception {
 		final PoolObject poolObj = (PoolObject) item.getObject();
 		String clientHost;
@@ -68,11 +70,13 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 		return poolObj.bindClient((String) arg, clientHost);
 	}
 	
+	@Override
 	public void passivateObject(final ObjectPoolItem item) throws Exception {
 		final PoolObject poolObj = (PoolObject) item.getObject();
 		poolObj.unbindClient();
 	}
 	
+	@Override
 	public void destroyObject(final ObjectPoolItem item) throws Exception {
 		final PoolObject poolObj = (PoolObject) item.getObject();
 		this.stats.logNodeUsageEnd(poolObj);
@@ -94,6 +98,7 @@ public class PoolObjectFactory implements PoolableObjectFactory {
 		this.nodeFactory.cleanupNode(poolObj);
 	}
 	
+	@Override
 	public boolean validateObject(final ObjectPoolItem item) {
 		final PoolObject poolObj = (PoolObject) item.getObject();
 		if (this.maxUsageCount > 0 && item.getLentCount() > this.maxUsageCount) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public class EAppEnvDummy implements ServletContextListener, ECommons.IAppEnviro
 	}
 	
 	
+	@Override
 	public void contextInitialized(final ServletContextEvent sce) {
 		this.context = sce.getServletContext();
 		ECommons.init("de.walware.rj.services.eruntime", this);
@@ -47,6 +48,7 @@ public class EAppEnvDummy implements ServletContextListener, ECommons.IAppEnviro
 		this.logger = Logger.getLogger("de.walware.rj.servi.pool");
 	}
 	
+	@Override
 	public void contextDestroyed(final ServletContextEvent sce) {
 		try {
 			for (final IDisposable listener : this.stopListeners) {
@@ -59,10 +61,12 @@ public class EAppEnvDummy implements ServletContextListener, ECommons.IAppEnviro
 		}
 	}
 	
+	@Override
 	public void addStoppingListener(final IDisposable listener) {
 		this.stopListeners.add(listener);
 	}
 	
+	@Override
 	public void removeStoppingListener(final IDisposable listener) {
 		this.stopListeners.remove(listener);
 	}
@@ -96,6 +100,7 @@ public class EAppEnvDummy implements ServletContextListener, ECommons.IAppEnviro
 //		this.context.log(sb.toString(), status.getException());
 //	}
 	
+	@Override
 	public void log(final IStatus status) {
 		final Level level;
 		switch (status.getSeverity()) {
@@ -127,7 +132,7 @@ public class EAppEnvDummy implements ServletContextListener, ECommons.IAppEnviro
 				}
 			}
 		}
-		catch (Exception ignore) {}
+		catch (final Exception ignore) {}
 		
 		this.logger.log(record);
 	}

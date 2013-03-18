@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ public class OtherConfigBean implements PropertiesBean {
 	}
 	
 	
+	@Override
 	public String getBeanId() {
 		return "other";
 	}
@@ -60,6 +61,7 @@ public class OtherConfigBean implements PropertiesBean {
 		setRegistryEmbed(templ.registryEmbed);
 	}
 	
+	@Override
 	public void load(final Properties map) {
 		String tmp = map.getProperty(HOSTADDRESS_ID);
 		setHostAddress(tmp);
@@ -69,6 +71,7 @@ public class OtherConfigBean implements PropertiesBean {
 		setRegistryEmbed((tmp == null || tmp.length() <= 0) ? false : Boolean.parseBoolean(tmp));
 	}
 	
+	@Override
 	public void save(final Properties map) {
 		map.put(HOSTADDRESS_ID, (this.hostAddress == null) ? "" : this.hostAddress);
 		map.put(REGISTRY_PORT_ID, (this.registryPort <= 0) ? "" : Integer.toString(this.registryPort));
@@ -131,8 +134,8 @@ public class OtherConfigBean implements PropertiesBean {
 				return new RMIAddress(this.effectiveHostaddress, this.effectiveRegsitryPort,
 						PoolConfig.getPoolName(FacesUtils.getPoolId())).toString();
 			}
-			catch (UnknownHostException e) {}
-			catch (MalformedURLException e) {
+			catch (final UnknownHostException e) {}
+			catch (final MalformedURLException e) {
 				// TODO 
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ public class Activator implements BundleActivator, ECommons.IAppEnvironment {
 	private final CopyOnWriteArraySet<IDisposable> stopListeners = new CopyOnWriteArraySet<IDisposable>();
 	
 	
+	@Override
 	public void start(final BundleContext context) throws Exception {
 		Activator.plugin = this;
 		this.context = context;
@@ -44,6 +45,7 @@ public class Activator implements BundleActivator, ECommons.IAppEnvironment {
 		ECommons.init("de.walware.rj.servi", this);
 	}
 	
+	@Override
 	public void stop(final BundleContext context) throws Exception {
 		try {
 			for (final IDisposable listener : this.stopListeners) {
@@ -58,14 +60,17 @@ public class Activator implements BundleActivator, ECommons.IAppEnvironment {
 	}
 	
 	
+	@Override
 	public void log(final IStatus status) {
 		Platform.getLog(this.context.getBundle()).log(status);
 	}
 	
+	@Override
 	public void addStoppingListener(final IDisposable listener) {
 		this.stopListeners.add(listener);
 	}
 	
+	@Override
 	public void removeStoppingListener(final IDisposable listener) {
 		this.stopListeners.remove(listener);
 	}
