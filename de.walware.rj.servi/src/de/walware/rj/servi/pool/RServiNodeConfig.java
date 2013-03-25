@@ -12,6 +12,7 @@
 package de.walware.rj.servi.pool;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,10 +25,11 @@ import java.util.Properties;
 public class RServiNodeConfig implements PropertiesBean {
 	
 	
+	public static final String BEAN_ID = "rconfig";
+	
 	public static final String R_HOME_ID = "r_home.path";
 	
 	public static final String R_ARCH_ID = "r_arch.code";
-	public static final String BITS_ID = "bits.num";
 	
 	public static final String JAVA_HOME_ID = "java_home.path";
 	
@@ -51,10 +53,19 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	public static final String VERBOSE_ENABLED_ID = "debug_verbose.enabled";
 	
+	/**
+	 * Property id for timeout of start/stop of nodes
+	 * 
+	 * @see #setStartStopTimeout(long)
+	 * @since 2.0
+	 */
+	public static final String STARTSTOP_TIMEOUT__ID = "startstop_timeout.millis";
+	
+	private static final long STARTSTOP_TIMEOUT_DEFAULT = 30 * 1000;
+	
 	
 	private String rHome;
 	private String rArch;
-	private int bits;
 	
 	private String javaHome;
 	private String javaArgs;
@@ -69,26 +80,34 @@ public class RServiNodeConfig implements PropertiesBean {
 	private boolean enableConsole;
 	private boolean enableVerbose;
 	
+	private long startStopTimeout;
+	
 	
 	public RServiNodeConfig() {
 		this.rHome = System.getenv("R_HOME");
 		this.rArch = System.getenv("R_ARCH");
-		this.bits = 64;
 		this.javaArgs = "-server";
 		this.nodeArgs = "";
 		this.rStartupSnippet = "";
+		this.startStopTimeout = STARTSTOP_TIMEOUT_DEFAULT;
+	}
+	
+	public RServiNodeConfig(final RServiNodeConfig config) {
+		this();
+		synchronized (config) {
+			load(config);
+		}
 	}
 	
 	
 	@Override
 	public String getBeanId() {
-		return "rconfig";
+		return BEAN_ID;
 	}
 	
-	protected void load(final RServiNodeConfig templ) {
+	public synchronized void load(final RServiNodeConfig templ) {
 		this.rHome = templ.rHome;
 		this.rArch = templ.rArch;
-		this.bits = templ.bits;
 		this.javaHome = templ.javaHome;
 		this.javaArgs = templ.javaArgs;
 		this.environmentVariables.clear();
@@ -98,13 +117,13 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.rStartupSnippet = templ.rStartupSnippet;
 		this.enableConsole = templ.enableConsole;
 		this.enableVerbose = templ.enableVerbose;
+		this.startStopTimeout = templ.startStopTimeout;
 	}
 	
 	@Override
-	public void load(final Properties map) {
+	public synchronized void load(final Properties map) {
 		setRHome(map.getProperty(R_HOME_ID));
 		setRArch(map.getProperty(R_ARCH_ID));
-		setBits(Integer.parseInt(map.getProperty(BITS_ID, "64")));
 		setJavaHome(map.getProperty(JAVA_HOME_ID));
 		setJavaArgs(map.getProperty(JAVA_ARGS_ID));
 		if (this.javaArgs.length() == 0) {
@@ -125,13 +144,15 @@ public class RServiNodeConfig implements PropertiesBean {
 		setRStartupSnippet(map.getProperty(R_STARTUP_SNIPPET_ID));
 		setEnableConsole(Boolean.parseBoolean(map.getProperty(CONSOLE_ENABLED_ID)));
 		setEnableVerbose(Boolean.parseBoolean(map.getProperty(VERBOSE_ENABLED_ID)));
+		{	final String s = map.getProperty(STARTSTOP_TIMEOUT__ID);
+			this.startStopTimeout = ((s != null) ? Long.parseLong(s) : STARTSTOP_TIMEOUT_DEFAULT);
+		}
 	}
 	
 	@Override
-	public void save(final Properties map) {
+	public synchronized void save(final Properties map) {
 		map.setProperty(R_HOME_ID, this.rHome);
 		map.setProperty(R_ARCH_ID, this.rArch);
-		map.setProperty(BITS_ID, Integer.toString(this.bits));
 		map.setProperty(JAVA_HOME_ID, (this.javaHome != null) ? this.javaHome : "");
 		map.setProperty(JAVA_ARGS_ID, this.javaArgs);
 		for (final Entry<String, String> variable : this.environmentVariables.entrySet()) {
@@ -142,47 +163,38 @@ public class RServiNodeConfig implements PropertiesBean {
 		map.setProperty(R_STARTUP_SNIPPET_ID, this.rStartupSnippet);
 		map.setProperty(CONSOLE_ENABLED_ID, Boolean.toString(this.enableConsole));
 		map.setProperty(VERBOSE_ENABLED_ID, Boolean.toString(this.enableVerbose));
+		map.setProperty(STARTSTOP_TIMEOUT__ID, Long.toString(this.startStopTimeout));
 	}
 	
-	public void setRHome(final String path) {
+	public synchronized void setRHome(final String path) {
 		this.rHome = path;
 	}
 	
-	public String getRHome() {
+	public synchronized String getRHome() {
 		return this.rHome;
 	}
 	
-	public void setRArch(final String code) {
+	public synchronized void setRArch(final String code) {
 		this.rArch = code;
 	}
 	
-	public String getRArch() {
+	public synchronized String getRArch() {
 		return this.rArch;
 	}
 	
-	@Deprecated
-	public void setBits(final int bits) {
-		this.bits = bits;
-	}
-	
-	@Deprecated
-	public int getBits() {
-		return this.bits;
-	}
-	
-	public String getJavaHome() {
+	public synchronized String getJavaHome() {
 		return this.javaHome;
 	}
 	
-	public void setJavaHome(final String javaHome) {
+	public synchronized void setJavaHome(final String javaHome) {
 		this.javaHome = (javaHome != null && javaHome.trim().length() > 0) ? javaHome : null;
 	}
 	
-	public String getJavaArgs() {
+	public synchronized String getJavaArgs() {
 		return this.javaArgs;
 	}
 	
-	public void setJavaArgs(final String args) {
+	public synchronized void setJavaArgs(final String args) {
 		this.javaArgs = (args != null) ? args : "";
 	}
 	
@@ -191,11 +203,11 @@ public class RServiNodeConfig implements PropertiesBean {
 	 * 
 	 * @return a name - value map of the environment variables
 	 */
-	public Map<String, String> getEnvironmentVariables() {
+	public synchronized Map<String, String> getEnvironmentVariables() {
 		return this.environmentVariables;
 	}
 	
-	public void addToClasspath(final String entry) {
+	public synchronized void addToClasspath(final String entry) {
 		String cp = this.environmentVariables.get("CLASSPATH");
 		if (cp != null) {
 			cp += File.pathSeparatorChar + entry;
@@ -206,29 +218,31 @@ public class RServiNodeConfig implements PropertiesBean {
 		this.environmentVariables.put("CLASSPATH", cp);
 	}
 	
-	public String getNodeArgs() {
+	public synchronized String getNodeArgs() {
 		return this.nodeArgs;
 	}
 	
-	public void setNodeArgs(final String args) {
+	public synchronized void setNodeArgs(final String args) {
 		this.nodeArgs = (args != null) ? args : "";
 	}
 	
-	public void setBaseWorkingDirectory(final String path) {
+	public synchronized void setBaseWorkingDirectory(final String path) {
 		this.baseWd = (path != null && path.trim().length() > 0) ? path : null;
 	}
 	
-	public String getBaseWorkingDirectory() {
+	public synchronized String getBaseWorkingDirectory() {
 		return this.baseWd;
 	}
 	
 	/**
 	 * Returns the R code snippet to run at startup of a node.
 	 * 
+	 * @return the code
+	 * 
 	 * @see #setRStartupSnippet(String)
 	 * @since 0.5
 	 */
-	public String getRStartupSnippet() {
+	public synchronized String getRStartupSnippet() {
 		return this.rStartupSnippet;
 	}
 	
@@ -239,26 +253,83 @@ public class RServiNodeConfig implements PropertiesBean {
 	 * If the execution of the code throws an error, the startup of the node is canceled.</p>
 	 * 
 	 * @param code the R code to run
+	 * 
 	 * @since 0.5
 	 */
-	public void setRStartupSnippet(final String code) {
+	public synchronized void setRStartupSnippet(final String code) {
 		this.rStartupSnippet = (code != null) ? code : "";
 	}
 	
-	public boolean getEnableConsole() {
+	public synchronized boolean getEnableConsole() {
 		return this.enableConsole;
 	}
 	
-	public void setEnableConsole(final boolean enable) {
+	public synchronized void setEnableConsole(final boolean enable) {
 		this.enableConsole = enable;
 	}
 	
-	public boolean getEnableVerbose() {
+	public synchronized boolean getEnableVerbose() {
 		return this.enableVerbose;
 	}
 	
-	public void setEnableVerbose(final boolean enable) {
+	public synchronized void setEnableVerbose(final boolean enable) {
 		this.enableVerbose = enable;
+	}
+	
+	/**
+	 * Returns the timeout of start/stop of nodes
+	 * 
+	 * @return the timeout in milliseconds
+	 * 
+	 * @since 2.0
+	 */
+	public long getStartStopTimeout() {
+		return this.startStopTimeout;
+	}
+	
+	/**
+	 * Sets the timeout of start/stop of nodes
+	 * 
+	 * @param milliseconds the timeout in milliseconds
+	 * 
+	 * @since 2.0
+	 */
+	public void setStartStopTimeout(final long milliseconds) {
+		this.startStopTimeout = milliseconds;
+	}
+	
+	
+	@Override
+	public synchronized boolean validate(final Collection<ValidationMessage> messages) {
+		boolean valid = true;
+		
+		if (this.rHome != null && !new File(this.rHome).exists()) {
+			if (messages != null) {
+				messages.add(new ValidationMessage(R_HOME_ID, "The directory does not exist."));
+			}
+			valid = false;
+		}
+		if (this.javaHome != null && !new File(this.javaHome).exists()) {
+			if (messages != null) {
+				messages.add(new ValidationMessage(JAVA_HOME_ID, "The directory does not exist."));
+			}
+			valid = false;
+		}
+		if (this.baseWd != null && !new File(this.baseWd).exists()) {
+			if (messages != null) {
+				messages.add(new ValidationMessage(BASE_WD_ID, "The directory does not exist."));
+			}
+			valid = false;
+		}
+		
+		if (this.startStopTimeout != -1 && this.startStopTimeout < 0) {
+			if (messages != null) {
+				messages.add(new ValidationMessage(STARTSTOP_TIMEOUT__ID, "Value must be > 0 or -1 (infinite)."));
+			}
+			valid = false;
+		}
+		
+		return valid;
 	}
 	
 }

@@ -17,13 +17,14 @@ public class RJWeb {
 	
 	public static final String PLUGIN_ID = "de.walware.rj.servi.webapp";
 	
-	public static final String POOLMANAGER_KEY = "pool.manager";
+	public static final String RJ_POOLSERVER_KEY = "rj.pool.server";
 	public static final String POOLID_KEY = "pool.id";
+	public static final String RJCONTEXT_KEY = "rj.context";
 	
 	public static final String POOLCONFIG_NAV = "conf-pool";
 	public static final String POOLSTATUS_NAV = "status-pool";
 	public static final String RCONFIG_NAV = "conf-r";
-	public static final String OTHERCONFIG_NAV = "conf-other";
+	public static final String NETCONFIG_NAV = "conf-net";
 	
 	
 	private RJWeb() {}

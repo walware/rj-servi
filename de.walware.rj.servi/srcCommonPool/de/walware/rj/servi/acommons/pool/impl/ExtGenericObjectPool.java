@@ -22,13 +22,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.walware.rj.servi.acommons.pool.ObjectPool;
 import de.walware.rj.servi.acommons.pool.ObjectPoolItem;
-import de.walware.rj.servi.acommons.pool.PoolableObjectFactory;
 import de.walware.rj.servi.acommons.pool.ObjectPoolItem.State;
+import de.walware.rj.servi.acommons.pool.PoolableObjectFactory;
+
 
 /**
  * A configurable {@link ObjectPool} implementation.
@@ -329,6 +331,10 @@ public class ExtGenericObjectPool implements ObjectPool {
 	
 	//--- static internal --------------------------------------------
 	
+	
+	private static final int CLOSE_DAEMON = 1;
+	private static final int CLOSE_FINAL = 3;
+	
 	/**
 	 * A simple "struct" encapsulating the
 	 * configuration information for a {@link ExtGenericObjectPool}.
@@ -398,7 +404,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 *
 	 * This is also used by {@link ExtGenericObjectPool}.
 	 */
-	class Item implements Comparable, ObjectPoolItem {
+	class Item implements Comparable<Item>, ObjectPoolItem {
 		
 		private State state;
 		
@@ -413,24 +419,31 @@ public class ExtGenericObjectPool implements ObjectPool {
 		
 		private Object value;
 		
+		private long evict;
+		
+		
 		Item() {
 			this.createStamp = this.stateStamp = System.currentTimeMillis();
 			this.state = State.INITIALIZING;
 		}
 		
 		
+		@Override
 		public long getClientId() {
 			return this.clientId;
 		}
 		
+		@Override
 		public String getClientLabel() {
 			return this.clientLabel;
 		}
 		
+		@Override
 		public ObjectPool getPool() {
 			return ExtGenericObjectPool.this;
 		}
 		
+		@Override
 		public State getState() {
 			return this.state;
 		}
@@ -453,27 +466,33 @@ public class ExtGenericObjectPool implements ObjectPool {
 			}
 		}
 		
+		@Override
 		public synchronized void invalidateClient() {
 			this.clientId = -1L;
 			this.clientLabel = null;
 		}
 		
+		@Override
 		public long getCreationTime() {
 			return this.createStamp;
 		}
 		
+		@Override
 		public long getDestrutionTime() {
 			return this.destroyStamp;
 		}
 		
+		@Override
 		public long getStateTime() {
 			return this.stateStamp;
 		}
 		
+		@Override
 		public long getLentCount() {
 			return this.lentCount;
 		}
 		
+		@Override
 		public long getLentDuration() {
 			return this.lentDuration;
 		}
@@ -483,10 +502,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 			return this.value + ";" + this.stateStamp;
 		}
 		
-		public int compareTo(Object obj) {
-			return compareTo((Item) obj);
-		}
-		
+		@Override
 		public int compareTo(Item other) {
 			final long tstampdiff = this.stateStamp - other.stateStamp;
 			if (tstampdiff == 0) {
@@ -499,10 +515,12 @@ public class ExtGenericObjectPool implements ObjectPool {
 			}
 		}
 		
+		@Override
 		public Object getObject() {
 			return this.value;
 		}
 		
+		@Override
 		public void setObject(Object obj) {
 			this.value = obj;
 		}
@@ -657,13 +675,16 @@ public class ExtGenericObjectPool implements ObjectPool {
 	
 	//-- data --
 	
-	private ArrayList<Item> _completePool = new ArrayList<Item>();
+	private final ArrayList<Item> _completePool = new ArrayList<Item>();
+	
 	
 	/** My pool. */
-	private CursorableLinkedList _idlePool = null;
+	private CursorableLinkedList<Item> _idlePool = null;
+	
+	private final ArrayList<Item> _evictionCheckList = new ArrayList<ExtGenericObjectPool.Item>();
 	
 	/** Eviction cursor - keeps track of idle object evictor position */
-	private CursorableLinkedList.Cursor _evictionCursor = null;
+	private CursorableLinkedList<Item>.Cursor _evictionCursor = null;
 	
 	/** My {@link PoolableObjectFactory}. */
 	private PoolableObjectFactory _factory = null;
@@ -674,16 +695,15 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 */
 	private int _numActive = 0;
 	
-	/**
-	 * My idle object eviction {@link TimerTask}, if any.
-	 */
-	private Evictor _evictor = null;
+	private DaemonTimer timer = DaemonTimer.DEFAULT;
+	private Evictor evictor = null;
+	private ScheduledFuture<?> evictorFuture;
 	
 	private List<Item> _toDestroy = new ArrayList<Item>();
 	
 	private Lock _clearLock = new ReentrantLock();
 	
-	private volatile boolean _closed = false;
+	private volatile int _closed = 0;
 	
 	
 	private int _statMaxActive;
@@ -759,7 +779,9 @@ public class ExtGenericObjectPool implements ObjectPool {
 		this._softMinEvictableIdleTimeMillis = softMinEvictableIdleTimeMillis;
 		this._testWhileIdle = testWhileIdle;
 		
-		this._idlePool = new CursorableLinkedList();
+		this._idlePool = new CursorableLinkedList<Item>();
+		
+		this.timer.register();
 		startEvictor(this._timeBetweenEvictionRunsMillis);
 	}
 	
@@ -1190,6 +1212,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 *
 	 * @return the number of instances currently borrowed from this pool
 	 */
+	@Override
 	public synchronized int getNumActive() {
 		return this._numActive;
 	}
@@ -1199,6 +1222,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 *
 	 * @return the number of instances currently idle in this pool
 	 */
+	@Override
 	public synchronized int getNumIdle() {
 		return this._idlePool.size();
 	}
@@ -1219,6 +1243,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 * Create an object, and place it into the pool.
 	 * addObject() is useful for "pre-loading" a pool with idle objects.
 	 */
+	@Override
 	public void addObject() throws Exception {
 		assertOpen();
 		Item item = null;
@@ -1234,6 +1259,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 		}
 	}
 	
+	@Override
 	public ObjectPoolItem borrowObject(Object arg) throws Exception {
 		long starttime = System.currentTimeMillis();
 		for(;;) {
@@ -1332,6 +1358,19 @@ public class ExtGenericObjectPool implements ObjectPool {
 		}
 	}
 	
+	@Override
+	public void evictObject(ObjectPoolItem obj, long timeoutMillis) {
+		if (obj == null) {
+			throw new NullPointerException();
+		}
+		long evict = checkEvict(timeoutMillis, System.nanoTime());
+		Item item = (Item) obj;
+		synchronized (this) {
+			sPrepareEvict(item, evict);
+		}
+	}
+	
+	@Override
 	public void invalidateObject(ObjectPoolItem obj) throws Exception {
 		if (obj == null) {
 			throw new NullPointerException();
@@ -1351,13 +1390,15 @@ public class ExtGenericObjectPool implements ObjectPool {
 	/**
 	 * Clears any objects sitting idle in the pool.
 	 */
+	@Override
 	public void clear() {
 		this._clearLock.lock();
 		try {
 			Item[] toDestroy;
 			synchronized (this) {
-				for(Iterator it = this._idlePool.iterator(); it.hasNext(); ) {
-					sPrepareDestroy((Item) it.next());
+				this._evictionCheckList.clear();
+				for(Iterator<Item> it = this._idlePool.iterator(); it.hasNext(); ) {
+					sPrepareDestroyEvicting(it.next());
 					it.remove();
 				}
 				this._idlePool.clear();
@@ -1381,12 +1422,13 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 * the same object appearing multiple times in the pool and pool counters 
 	 * (numActive, numIdle) returning incorrect values.</p>
 	 */
+	@Override
 	public void returnObject(ObjectPoolItem obj) throws Exception {
 		if (obj == null) {
 			throw new NullPointerException();
 		}
 		Item item = (Item) obj;
-		if (item.state != State.LENT) {
+		if (item.getState() == State.IDLING) {
 			throw new IllegalStateException();
 		}
 		try {
@@ -1404,10 +1446,16 @@ public class ExtGenericObjectPool implements ObjectPool {
 		}
 	}
 	
-	public void close() throws Exception {
-		this._closed = true;
-		startEvictor(-1L);
-		clear();
+	@Override
+	public synchronized void close(final long timeoutMillis) throws Exception {
+		long evict = checkEvict(timeoutMillis, System.nanoTime());
+		startEvictor(-1);
+		this._closed = CLOSE_DAEMON;
+		for (int i = 0; i < this._completePool.size(); i++) {
+			Item item = this._completePool.get(i);
+			sPrepareEvict(item, evict);
+		}
+		startEvictor(100);
 	}
 	
 	public ObjectPoolItem[] getItems() {
@@ -1432,8 +1480,20 @@ public class ExtGenericObjectPool implements ObjectPool {
 	public void evict() throws Exception {
 		Item[] toDestroy;
 		synchronized (this) {
-			if (this._closed) {
+			if (this._closed >= CLOSE_FINAL) {
 				return;
+			}
+			if (!this._evictionCheckList.isEmpty()) {
+				long t = System.nanoTime();
+				for (int i = 0; i < this._evictionCheckList.size(); ) {
+					Item item = this._evictionCheckList.get(i);
+					if (item.evict == 1 || t - item.evict > 0) {
+						this._evictionCheckList.remove(i);
+						sPrepareDestroyEvicting(item);
+						continue;
+					}
+					i++;
+				}
 			}
 			if(!this._idlePool.isEmpty()) {
 				if (null == this._evictionCursor) {
@@ -1499,6 +1559,12 @@ public class ExtGenericObjectPool implements ObjectPool {
 			} // if !empty
 			toDestroy = this._toDestroy.toArray(new Item[this._toDestroy.size()]);
 			this._toDestroy.clear();
+			
+			if (this._closed != 0 && toDestroy.length == 0 && this._completePool.isEmpty()) {
+				this._closed = CLOSE_FINAL;
+				startEvictor(-1);
+				this.timer.unregister();
+			}
 		}
 		uDoDestroy(toDestroy);
 	}
@@ -1524,7 +1590,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 		}
 		for (int i = 0; ; ) {
 			synchronized (this) {
-				if (this._closed || sCalculateDeficit() <= 0) {
+				if (this._closed > 0 || sCalculateDeficit() <= 0) {
 					return;
 				}
 			}
@@ -1576,7 +1642,45 @@ public class ExtGenericObjectPool implements ObjectPool {
 		}
 	}
 	
-	private void sPrepareDestroy(Item item) {
+	private static long checkEvict(long timeoutMillis, long stamp) {
+		if (timeoutMillis == 0) {
+			return 1;
+		}
+		long t = System.nanoTime() + timeoutMillis * 1000000L;
+		return (t != 0 && t != 1) ? t : 2;
+	}
+	
+	private void sPrepareEvict(final Item item, final long evict) {
+		State state = item.getState();
+		switch (state) {
+		case EVICTING:
+		case EVICTED:
+			return;
+		default:
+			break;
+		}
+		
+		if (item.evict == 0 || item.evict - evict > 0) {
+			item.evict = evict;
+		}
+		if (this._idlePool.remove(item) || evict == 1) { // order important!
+			sPrepareDestroy(item);
+			return;
+		}
+		else {
+			this._evictionCheckList.add(item);
+		}
+	}
+	
+	private void sPrepareDestroy(final Item item) {
+		if (item.evict != 0) {
+			this._evictionCheckList.remove(item);
+		}
+		item.setState(State.EVICTING, null);
+		this._toDestroy.add(item);
+	}
+	
+	private void sPrepareDestroyEvicting(final Item item) {
 		item.setState(State.EVICTING, null);
 		this._toDestroy.add(item);
 	}
@@ -1595,6 +1699,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 				item.destroyStamp = System.currentTimeMillis();
 				synchronized (this._completePool) {
 					this._completePool.remove(item);
+					item.setState(State.EVICTED, null);
 				}
 			}
 		}
@@ -1610,13 +1715,14 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 * @param delay milliseconds between evictor runs.
 	 */
 	private synchronized void startEvictor(long delay) {
-		if(null != this._evictor) {
-			EvictionTimer.cancel(this._evictor);
-			this._evictor = null;
+		if (this.evictorFuture != null) {
+			this.evictorFuture.cancel(false);
 		}
-		if(delay > 0 && !this._closed) {
-			this._evictor = new Evictor();
-			EvictionTimer.schedule(this._evictor, delay/2, delay);
+		if (delay >= 0 && this._closed <= CLOSE_DAEMON) {
+			if (this.evictor == null) {
+				this.evictor = new Evictor();
+			}
+			this.evictorFuture = this.timer.schedule(this.evictor, delay/2, delay);
 		}
 	}
 	
@@ -1625,10 +1731,10 @@ public class ExtGenericObjectPool implements ObjectPool {
 		buf.append("Active: ").append(getNumActive()).append("\n");
 		buf.append("Idle: ").append(getNumIdle()).append("\n");
 		buf.append("Idle Objects:\n");
-		Iterator it = this._idlePool.iterator();
+		Iterator<Item> it = this._idlePool.iterator();
 		long time = System.currentTimeMillis();
 		while(it.hasNext()) {
-			Item pair = (Item)(it.next());
+			Item pair = it.next();
 			buf.append("\t").append(pair.value).append("\t").append(time - pair.stateStamp).append("\n");
 		}
 		return buf.toString();
@@ -1640,14 +1746,14 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 * @see #isClosed()
 	 */
 	private void assertOpen() throws IllegalStateException {
-		if(this._closed) {
+		if(this._closed != 0) {
 			throw new IllegalStateException("Pool not open");
 		}
 	}
 	
 	private void uAddToIdlePool(Item item, boolean decrementNumActive) throws Exception {
 		boolean success = true;
-		if(this._testOnReturn && !(this._factory.validateObject(item))) {
+		if((this._testOnReturn && !(this._factory.validateObject(item))) || item.evict != 0) {
 			success = false;
 		}
 		else {
@@ -1657,9 +1763,16 @@ public class ExtGenericObjectPool implements ObjectPool {
 		// Add instance to pool if there is room and it has passed validation
 		// (if testOnreturn is set)
 		synchronized (this) {
+			switch (item.getState()) {
+			case EVICTING:
+			case EVICTED:
+				return;
+			default:
+				break;
+			}
 			final int numActive = (decrementNumActive) ? (this._numActive - 1) : this._numActive;
 			final int numIdle = this._idlePool.size() + 1;
-			if (success && !this._closed && numIdle <= this._maxIdle) {
+			if (success && this._closed == 0 && numIdle <= this._maxIdle && item.evict == 0) {
 				// borrowObject always takes the first element from the queue,
 				// so for LIFO, push on top, FIFO add to end
 				item.setState(State.IDLING, null);
@@ -1689,26 +1802,15 @@ public class ExtGenericObjectPool implements ObjectPool {
 	 * The idle object evictor {@link TimerTask}.
 	 * @see ExtGenericObjectPool#setTimeBetweenEvictionRunsMillis
 	 */
-	private class Evictor extends TimerTask {
-		
-		private boolean stopped = false;
-		
-		@Override
-		public boolean cancel() {
-			this.stopped = true;
-			return super.cancel();
-		}
+	private class Evictor implements Runnable {
 		
 		@Override
 		public void run() {
 			ExtGenericObjectPool.this._clearLock.lock();
-			if (this.stopped) {
-				return;
-			}
 			try {
 				evict();
 			}
-			catch(Exception e) {
+			catch(Throwable e) {
 				e.printStackTrace();
 			}
 			finally {
@@ -1716,12 +1818,9 @@ public class ExtGenericObjectPool implements ObjectPool {
 			}
 			
 			ExtGenericObjectPool.this._clearLock.lock();
-			if (this.stopped) {
-				return;
-			}
 			try {
 				ensureMinIdle();
-			} catch(Exception e) {
+			} catch(Throwable e) {
 				e.printStackTrace();
 			}
 			finally {

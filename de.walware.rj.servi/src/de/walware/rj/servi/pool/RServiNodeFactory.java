@@ -11,13 +11,17 @@
 
 package de.walware.rj.servi.pool;
 
-import de.walware.rj.RjException;
+import de.walware.ecommons.net.RMIRegistry;
+
+import de.walware.rj.RjInvalidConfigurationException;
 
 
 public interface RServiNodeFactory {
 	
 	
+	void setRegistry(RMIRegistry rmiRegistry);
+	
 	RServiNodeConfig getConfig();
-	void setConfig(RServiNodeConfig config) throws RjException;
+	void setConfig(RServiNodeConfig config) throws RjInvalidConfigurationException;
 	
 }

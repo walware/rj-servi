@@ -33,21 +33,21 @@
 
 <table class="grid">
 <tr><th colspan="2" scope="colgroup">Links</th></tr>
-<tr><td>WalWare.de OpenSource</td><td><a href="http://www.walware.de/goto/opensource">www.walware.de/goto/opensource</a></td></tr>
+<tr><td>WalWare.de Open Source</td><td><a href="http://www.walware.de/goto/opensource">www.walware.de/goto/opensource</a></td></tr>
 <tr><td>R-Project</td><td><a href="http://www.r-project.org">www.r-project.org</a></td></tr>
 </table>
 
 <table class="grid">
 <tr><th colspan="2" scope="colgroup">Sources</th></tr>
-<tr><td>RJ Base</td><td><a href="http://github.com/walware/rj">github.com/walware/rj</a></td></tr>
-<tr><td>RJ Services</td><td><a href="http://github.com/walware/rj">github.com/walware/rj-services</a></td></tr>
+<tr><td>RJ-Core</td><td><a href="http://github.com/walware/rj-core">github.com/walware/rj-core</a></td></tr>
+<tr><td>RJ-Client</td><td><a href="http://github.com/walware/rj-client">github.com/walware/rj-client</a></td></tr>
+<tr><td>RJ-Servi</td><td><a href="http://github.com/walware/rj-servi">github.com/walware/rj-servi</a></td></tr>
 </table>
 
 <hr/>
 
 <p>
-Copyright (c) 2007-2013 WalWare/RJ-Project (www.walware.de/goto/opensource) contributors
-and others.</p>
+Copyright (c) 2007-2013 Stephan Wahlbrink (WalWare.de) and others.</p>
 <p>
 This product includes software developed by The Apache Software Foundation
 (<a href="http://www.apache.org">www.apache.org</a>).</p>

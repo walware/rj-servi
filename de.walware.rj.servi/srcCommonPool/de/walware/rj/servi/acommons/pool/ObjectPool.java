@@ -165,6 +165,12 @@ public interface ObjectPool {
      */
     void clear() throws Exception, UnsupportedOperationException;
 
+	/**
+	 * @param poolItemData
+	 * @param timeoutMillis
+	 */
+	void evictObject(ObjectPoolItem poolItemData, long timeoutMillis);
+
     /**
      * Close this pool, and free any resources associated with it.
      * <p>
@@ -175,6 +181,6 @@ public interface ObjectPool {
      *
      * @throws Exception <strong>deprecated</strong>: implementations should silently fail if not all resources can be freed.
      */
-    void close() throws Exception;
-
+    void close(long timeoutMillis) throws Exception;
+    
 }

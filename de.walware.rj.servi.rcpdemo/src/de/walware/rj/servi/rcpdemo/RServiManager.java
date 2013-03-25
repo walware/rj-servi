@@ -22,6 +22,7 @@ import de.walware.rj.rsetups.RSetup;
 import de.walware.rj.rsetups.RSetupUtil;
 import de.walware.rj.server.RjsComConfig;
 import de.walware.rj.server.client.RClientGraphicFactory;
+import de.walware.rj.server.srvext.ERJContext;
 import de.walware.rj.servi.RServi;
 import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.servi.internal.rcpdemo.Activator;
@@ -140,17 +141,21 @@ public class RServiManager {
 			throw new NullPointerException("monitor");
 		}
 		try {
+			final ERJContext context = new ERJContext();
 			if (System.getSecurityManager() == null) {
 				if (System.getProperty("java.security.policy") == null) {
-					final String policyFile = RServiImplE.getLocalhostPolicyFile();
+					final String policyFile = context.getServerPolicyFilePath();
 					System.setProperty("java.security.policy", policyFile);
 				}
 				System.setSecurityManager(new SecurityManager());
 			}
 			
 			final RMIRegistry registry = RMIUtil.INSTANCE.getEmbeddedPrivateRegistry(monitor);
+			
 			rConfig.setNodeArgs(rConfig.getNodeArgs() + " -embedded");
-			final RServiNodeFactory nodeFactory = RServiImplE.createLocalhostNodeFactory(this.name, registry);
+			
+			final RServiNodeFactory nodeFactory = RServiImplE.createLocalNodeFactory(this.name, context);
+			nodeFactory.setRegistry(registry);
 			nodeFactory.setConfig(rConfig);
 			
 			final EmbeddedRServiManager newEmbeddedR = RServiImplE.createEmbeddedRServi(this.name, registry, nodeFactory);

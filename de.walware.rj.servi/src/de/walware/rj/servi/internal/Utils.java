@@ -13,6 +13,7 @@ package de.walware.rj.servi.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -168,6 +169,13 @@ public class Utils {
 		}
 	}
 	
+	public static void logInfo(final String message, final Throwable e) {
+		final IAppEnvironment env = ECommons.getEnv();
+		if (env != null) {
+			env.log(new Status(IStatus.INFO, RServiUtil.RJ_SERVI_ID, message, e));
+		}
+	}
+	
 	public static void logWarning(final String message) {
 		final IAppEnvironment env = ECommons.getEnv();
 		if (env != null) {
@@ -175,10 +183,10 @@ public class Utils {
 		}
 	}
 	
-	public static void logWarning(final String message, final Throwable exception) {
+	public static void logWarning(final String message, final Throwable e) {
 		final IAppEnvironment env = ECommons.getEnv();
 		if (env != null) {
-			env.log(new Status(IStatus.WARNING, RServiUtil.RJ_SERVI_ID, message, exception));
+			env.log(new Status(IStatus.WARNING, RServiUtil.RJ_SERVI_ID, message, e));
 		}
 	}
 	
@@ -189,11 +197,19 @@ public class Utils {
 		}
 	}
 	
-	public static void logError(final String message, final Throwable exception) {
+	public static void logError(final String message, final Throwable e) {
 		final IAppEnvironment env = ECommons.getEnv();
 		if (env != null) {
-			env.log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, message, exception));
+			env.log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, message, e));
 		}
+	}
+	
+	public static String getProperty(final Properties properties, final String key, final String altKey) {
+		String s = properties.getProperty(key);
+		if (s == null && altKey != null) {
+			s = properties.getProperty(altKey);
+		}
+		return s;
 	}
 	
 	

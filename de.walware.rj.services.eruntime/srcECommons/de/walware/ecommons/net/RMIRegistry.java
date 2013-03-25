@@ -15,6 +15,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+
 
 public class RMIRegistry {
 	
@@ -32,7 +34,9 @@ public class RMIRegistry {
 			throw new IllegalArgumentException();
 		}
 		this.address = address;
-		this.registry = (registry != null) ? registry : LocateRegistry.getRegistry(address.getHost(), address.getPortNum());
+		this.registry = (registry != null) ? registry : LocateRegistry.getRegistry(
+				address.getHost(), address.getPortNum(),
+				(address.isSSL() ? new SslRMIClientSocketFactory() : null ));
 		if (validate) {
 			this.registry.list();
 		}

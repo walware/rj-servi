@@ -20,6 +20,7 @@ import javax.el.ELContext;
 import javax.faces.context.FacesContext;
 
 import de.walware.rj.servi.RServi;
+import de.walware.rj.servi.pool.PoolServer;
 import de.walware.rj.servi.pool.RServiPool;
 import de.walware.rj.servi.pool.RServiPoolManager;
 
@@ -41,7 +42,13 @@ public class DebugBean {
 	
 	
 	public String actionNewNode() {
-		final RServiPoolManager poolManager = FacesUtils.getPoolManager();
+		final PoolServer poolServer = FacesUtils.getPoolServer();
+		final RServiPoolManager poolManager = poolServer.getManager();
+		
+		if (poolManager == null) {
+			FacesUtils.addErrorMessage(null, "The pool is currently not available.");
+			return null;
+		}
 		try {
 			final RServi rservi = ((RServiPool) poolManager).getRServi("control-web-app", null);
 			synchronized(this) {

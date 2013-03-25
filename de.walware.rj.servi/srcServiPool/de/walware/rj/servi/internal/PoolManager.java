@@ -12,9 +12,15 @@
 package de.walware.rj.servi.internal;
 
 import java.rmi.Remote;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.NoSuchElementException;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
+
+import de.walware.ecommons.FastList;
 import de.walware.ecommons.net.RMIRegistry;
 
 import de.walware.rj.RjException;
@@ -46,6 +52,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	
 	private NodeFactory nodeFactory;
 	
+	private final FastList<PoolListener> poolListeners = new FastList<PoolListener>(PoolListener.class, FastList.IDENTITY);
 	private final Stats stats;
 	
 	
@@ -56,6 +63,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		this.id = id;
 		this.registry = registry;
 		this.stats = new Stats();
+		this.poolListeners.add(this.stats);
 		this.poolConfig = new PoolConfig();
 		
 		Utils.preLoad();
@@ -78,33 +86,44 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	}
 	
 	@Override
-	public synchronized void setConfig(PoolConfig config) {
-		config = new PoolConfig(config);
+	public synchronized void setConfig(final PoolConfig config) {
 		if (this.pool != null) {
 			this.pool.setConfig(createConfig(config));
-			this.poolFactory.setConfig(config);
+			this.poolFactory.setMaxUsageCount(config.getMaxUsageCount());
 		}
 		this.poolConfig = config;
 	}
 	
 	@Override
 	public PoolConfig getConfig() {
-		final PoolConfig config = this.poolConfig;
-		if (config != null) {
-			return new PoolConfig(config);
-		}
-		return null;
+		return this.poolConfig;
+	}
+	
+	public void addPoolListener(final PoolListener listener) {
+		this.poolListeners.add(listener);
+	}
+	
+	public void removePoolListener(final PoolListener listener) {
+		this.poolListeners.remove(listener);
 	}
 	
 	@Override
 	public synchronized void init() throws RjException {
-		this.poolFactory = new PoolObjectFactory(this.nodeFactory, this.stats, this.poolConfig);
+		this.poolFactory = new PoolObjectFactory(this.nodeFactory, this.poolListeners);
+		this.poolFactory.setMaxUsageCount(this.poolConfig.getMaxUsageCount());
 		this.pool = new ExtGenericObjectPool(this.poolFactory, createConfig(this.poolConfig));
 		
 		Utils.logInfo("Publishing pool in registry...");
 		if (this.registry != null) {
+			RMIClientSocketFactory clientSocketFactory = null;
+			RMIServerSocketFactory serverSocketFactory = null;
+			if (this.registry.getAddress().isSSL()) {
+				clientSocketFactory = new SslRMIClientSocketFactory();
+				serverSocketFactory = new SslRMIServerSocketFactory(null, null, true);
+			}
 			try {
-				this.thisRemote = UnicastRemoteObject.exportObject(this, 0);
+				this.thisRemote = UnicastRemoteObject.exportObject(this, 0,
+						clientSocketFactory, serverSocketFactory );
 				this.registry.getRegistry().rebind(PoolConfig.getPoolName(this.id), this.thisRemote);
 			}
 			catch (final Exception e) {
@@ -119,8 +138,12 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	}
 	
 	@Override
-	public Object[] getPoolItemsData() {
+	public ObjectPoolItem[] getPoolItemsData() {
 		return this.pool.getItems();
+	}
+	
+	public boolean isInitialized() {
+		return (this.thisRemote != null);
 	}
 	
 	@Override
@@ -156,7 +179,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 		if (PoolManager.this.pool != null) {
 			Utils.logInfo("Closing R nodes...");
 			try {
-				PoolManager.this.pool.close();
+				PoolManager.this.pool.close(this.poolConfig.getEvictionTimeout());
 			}
 			catch (final Exception e) {
 				Utils.logError("An error occurred when closing the pool.", e);

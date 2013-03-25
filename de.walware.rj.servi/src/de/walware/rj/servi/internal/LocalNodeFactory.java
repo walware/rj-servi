@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import de.walware.ecommons.net.RMIAddress;
 import de.walware.ecommons.net.RMIRegistry;
@@ -30,16 +31,43 @@ import de.walware.rj.RjException;
 import de.walware.rj.RjInvalidConfigurationException;
 import de.walware.rj.server.Server;
 import de.walware.rj.server.ServerLogin;
+import de.walware.rj.server.srvext.RJContext;
 import de.walware.rj.server.srvext.ServerUtil;
 import de.walware.rj.servi.pool.RServiNode;
 import de.walware.rj.servi.pool.RServiNodeConfig;
 
 
-public abstract class LocalNodeFactory implements NodeFactory {
+public class LocalNodeFactory implements NodeFactory {
 	
 	
 	public static final String[] CODEBASE_LIBS = new String[] {
 			ServerUtil.RJ_SERVER_ID }; // RServiUtil.RJ_SERVI_ID, RServiUtil.RJ_CLIENT_ID
+	
+	private static void copySystemProperty(final String key, final List<String> command) {
+		final String property = System.getProperty(key);
+		if (property != null) {
+			command.add("-D" + key + "=" + property);
+		}
+	}
+	
+	private static void copySystemPropertyPath(final String key, final List<String> command) {
+		String property = System.getProperty(key);
+		if (property != null) {
+			if (!new File(property).isAbsolute()) {
+				property = new File(System.getProperty("user.dir"), property).getPath();
+			}
+			command.add("-D" + key + "=" + property);
+		}
+	}
+	
+	private static List<String> createSSLPropertyArgs() {
+		final List<String> args = new ArrayList<String>();
+		copySystemPropertyPath("javax.net.ssl.keyStore", args);
+		copySystemProperty("javax.net.ssl.keyStorePassword", args);
+		copySystemPropertyPath("javax.net.ssl.trustStore", args);
+		copySystemProperty("javax.net.ssl.trustStorePassword", args);
+		return args;
+	}
 	
 	private static class ProcessConfig {
 		final Map<String, String> addEnv = new HashMap<String, String>();
@@ -53,32 +81,42 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	
 	private final String poolId;
 	private RServiNodeConfig baseConfig;
+	private final RJContext context;
 	private final String[] libIds;
 	
-	private final String securityPolicyPath;
 	private ProcessConfig processConfig;
 	
-	private String errorMessage;
+	private String errorMessage = null;
 	
-	private final RMIRegistry nodeRegistry;
+	private RMIRegistry nodeRegistry;
 	
 	private boolean verbose;
 	
+	private long timeoutNanos = TimeUnit.SECONDS.toNanos(30);
 	
-	protected LocalNodeFactory(final String poolId, final RMIRegistry registry, final String[] libIds) throws RjInvalidConfigurationException {
-		this.nodeRegistry = registry;
+	private final List<String> sslPropertyArgs;
+	
+	
+	public LocalNodeFactory(final String poolId,
+			final RJContext context, final String[] libIds) {
+		if (poolId == null) {
+			throw new NullPointerException("poolId");
+		}
+		if (context == null) {
+			throw new NullPointerException("context");
+		}
 		this.poolId = poolId;
+		this.context = context;
 		this.libIds = libIds;
-		this.baseConfig = new RServiNodeConfig();
 		
-		this.securityPolicyPath = getPolicyFile();
+		this.sslPropertyArgs = createSSLPropertyArgs();
 	}
 	
 	
-	protected abstract String[] getRJLibs(String[] libIds) throws RjInvalidConfigurationException;
-	
-	protected abstract String getPolicyFile() throws RjInvalidConfigurationException;
-	
+	@Override
+	public void setRegistry(final RMIRegistry registry) {
+		this.nodeRegistry = registry;
+	}
 	
 	@Override
 	public void setConfig(final RServiNodeConfig config) throws RjInvalidConfigurationException {
@@ -96,7 +134,7 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		{	p.command.add("-classpath");
 			final String[] libs;
 			try {
-				libs = getRJLibs(this.libIds);
+				libs = this.context.searchRJLibs(this.libIds);
 			}
 			catch (final RjInvalidConfigurationException e) {
 				this.errorMessage = e.getMessage();
@@ -127,13 +165,13 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		if (!javaArgs.contains("-Djava.security.policy=")) {
 			sb.setLength(0);
 			sb.append("-Djava.security.policy=");
-			sb.append(this.securityPolicyPath);
+			sb.append(this.context.getServerPolicyFilePath());
 			p.command.add(sb.toString());
 		}
 		if (!javaArgs.contains("-Djava.rmi.server.codebase=")) {
 			final String[] libs;
 			try {
-				libs = getRJLibs(CODEBASE_LIBS);
+				libs = this.context.searchRJLibs(CODEBASE_LIBS);
 			}
 			catch (final RjInvalidConfigurationException e) {
 				this.errorMessage = e.getMessage();
@@ -281,9 +319,16 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		
 		p.rStartupSnippet = config.getRStartupSnippet();
 		
-		this.verbose = config.getEnableVerbose();
-		this.baseConfig = config;
-		this.processConfig = p;
+		long timeout = config.getStartStopTimeout();
+		if (timeout > 0) {
+			timeout = TimeUnit.MILLISECONDS.toNanos(timeout);
+		}
+		synchronized (this) {
+			this.verbose = config.getEnableVerbose();
+			this.baseConfig = config;
+			this.processConfig = p;
+			this.timeoutNanos = timeout;
+		}
 	}
 	
 	private boolean testBaseDir(final String path) {
@@ -306,11 +351,23 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	
 	@Override
 	public void createNode(final NodeHandler poolObj) throws RjException {
-		final ProcessConfig p = this.processConfig;
-		if (p == null) {
-			final String message = this.errorMessage;
-			throw new RjInvalidConfigurationException((message != null) ? message :
-					"Missing configuration.");
+		final long t = System.nanoTime();
+		final long timeout;
+		
+		final ProcessConfig p;
+		final RMIRegistry registry;
+		synchronized (this) {
+			p = this.processConfig;
+			if (p == null) {
+				final String message = this.errorMessage;
+				throw new RjInvalidConfigurationException((message != null) ? message :
+						"Missing R node configuration.");
+			}
+			registry = this.nodeRegistry;
+			if (registry == null) {
+				throw new RjInvalidConfigurationException("Missing registry configuration.");
+			}
+			timeout = this.timeoutNanos;
 		}
 		ProcessBuilder pBuilder;
 		String id;
@@ -330,10 +387,13 @@ public abstract class LocalNodeFactory implements NodeFactory {
 			}
 			command = new ArrayList<String>(p.command.size() + 2);
 			command.addAll(p.command);
-			poolObj.address = new RMIAddress(this.nodeRegistry.getAddress(), id);
-			command.set(p.nameCommandIdx, poolObj.address.getAddress());
+			poolObj.address = new RMIAddress(registry.getAddress(), id);
+			command.set(p.nameCommandIdx, poolObj.address.toString());
 			if (this.verbose) {
 				command.add("-verbose");
+			}
+			if (registry.getAddress().isSSL()) {
+				command.addAll(p.nameCommandIdx - 1, this.sslPropertyArgs);
 			}
 			pBuilder = new ProcessBuilder(command);
 			pBuilder.environment().remove("Path");
@@ -348,10 +408,9 @@ public abstract class LocalNodeFactory implements NodeFactory {
 		try {
 			process = pBuilder.start();
 			
-			final long t = System.nanoTime();
-			for (int i = 1; ; i++) {
+			for (int i = 1; i < Integer.MAX_VALUE; i++) {
 				try {
-					final Server server = (Server) this.nodeRegistry.getRegistry().lookup(id);
+					final Server server = (Server) registry.getRegistry().lookup(id);
 					final ServerLogin login = server.createLogin(Server.C_RSERVI_NODECONTROL);
 					final RServiNode node = (RServiNode) server.execute(Server.C_RSERVI_NODECONTROL, null, login);
 					
@@ -388,11 +447,13 @@ public abstract class LocalNodeFactory implements NodeFactory {
 					}
 					
 					poolObj.node = node;
+					poolObj.process = process;
 					return;
 				}
 				catch (final NotBoundException e) {
-					if (i >= 80) { // >= 20 seconds
-						throw new RjException("Start of R node aborted because of timeout (t="+((System.nanoTime()-t)/1000000)+"ms).", e);
+					final long diff = System.nanoTime() - t;
+					if (i >= 10 && timeout >= 0 && diff > timeout) {
+						throw new RjException("Start of R node aborted because of timeout (t="+(diff/1000000L)+"ms).", e);
 					}
 				};
 				
@@ -483,16 +544,52 @@ public abstract class LocalNodeFactory implements NodeFactory {
 	}
 	
 	@Override
-	public void cleanupNode(final NodeHandler poolObj) {
-		if (!this.verbose && poolObj.dir != null
-				&& poolObj.dir.exists() && poolObj.dir.isDirectory()) {
-			for (int i = 0; i < 20; i++) { // >= 5 seconds
+	public void stopNode(final NodeHandler poolObj) {
+		final long t = System.nanoTime();
+		final long timeout = this.timeoutNanos;
+		
+		try {
+			poolObj.shutdown();
+		}
+		catch (final Throwable e) {
+			Utils.logWarning(Messages.ShutdownNode_error_message, e);
+		}
+		
+		final Process process = poolObj.process;
+		poolObj.process = null;
+		if (process != null) {
+			for (int i = 0; i < Integer.MAX_VALUE; i++) {
 				try {
 					Thread.sleep(250);
 				}
 				catch (final InterruptedException e) {
 				}
-				if (ServerUtil.delDir(poolObj.dir)) {
+				try {
+					process.exitValue();
+					break;
+				}
+				catch (final IllegalThreadStateException e) {
+					final long diff = System.nanoTime() - t;
+					if (i >= 10 && timeout >= 0 && diff > timeout) {
+						process.destroy();
+						Utils.logWarning("Killed RServi node '" + poolObj.getAddress().getName() + "'.");
+						break;
+					}
+					continue;
+				}
+			}
+		}
+		
+		if (!this.verbose && poolObj.dir != null
+				&& poolObj.dir.exists() && poolObj.dir.isDirectory() ) {
+			for (int i = 0; i < 20; i++) {
+				try {
+					Thread.sleep(250);
+				}
+				catch (final InterruptedException e) {
+				}
+				
+				if (!poolObj.dir.exists() || ServerUtil.delDir(poolObj.dir)) {
 					return;
 				}
 			}

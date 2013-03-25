@@ -19,6 +19,6 @@ public interface NodeFactory extends RServiNodeFactory {
 	
 	
 	void createNode(NodeHandler poolObj) throws RjException;
-	void cleanupNode(NodeHandler poolObj);
+	void stopNode(NodeHandler poolObj);
 	
 }

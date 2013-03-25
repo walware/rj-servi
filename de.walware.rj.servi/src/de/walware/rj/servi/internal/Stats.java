@@ -11,10 +11,10 @@
 
 package de.walware.rj.servi.internal;
 
-import java.util.ArrayList;
+import de.walware.rj.servi.acommons.pool.ObjectPoolItem;
 
 
-public class Stats {
+public class Stats implements PoolListener {
 	
 	
 	public final static int MAX_USAGE = 1;
@@ -29,16 +29,27 @@ public class Stats {
 	}
 	
 	
-	private final ArrayList<NodeEntry> fTempList = new ArrayList<NodeEntry>();
+//	private final ArrayList<NodeEntry> fTempList = new ArrayList<NodeEntry>();
 	
 	
-	public void logServUsage(final int borrowTime, final int evalTime) {
+	@Override
+	public void initializing(final ObjectPoolItem poolObj) {
 	}
 	
-	public void logNodeUsageBegin(final NodeHandler poolObj) {
+	@Override
+	public void initialized(final ObjectPoolItem poolObj) {
 //		this.fTempList.add(poolObj.stats);
 	}
-	public void logNodeUsageEnd(final NodeHandler poolObj) {
+	
+	@Override
+	public void evicting(final ObjectPoolItem poolObj) {
+	}
+	
+	@Override
+	public void evicted(final ObjectPoolItem poolObj) {
+	}
+	
+	public void logServUsage(final int borrowTime, final int evalTime) {
 	}
 	
 	public void logServRequestFailed(final int reason) {

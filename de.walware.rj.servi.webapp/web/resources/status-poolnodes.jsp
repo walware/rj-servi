@@ -34,7 +34,7 @@
 
 <h:panelGrid columns="2" styleClass="grid" columnClasses=",," style="border-bottom: 2px solid black">
 	<h:outputLabel for="eff_pool_address" value="RMI pool address:" />
-	<h:inputText id="eff_pool_address" value="#{otherConfig.effectivePoolAddress}" readonly="true" size="40" />
+	<h:inputText id="eff_pool_address" value="#{netConfig.effectivePoolAddress}" readonly="true" size="40" />
 </h:panelGrid>
 
 <h:form id="pool_nodes">
@@ -73,7 +73,7 @@
 	
 <br/>
 	
-<h:dataTable value="#{poolStatus.nodes}" var="dataItem" styleClass="table1" columnClasses=",,spanleft,,alignright">
+<h:dataTable value="#{poolStatus.nodeStates}" var="dataItem" styleClass="table1" columnClasses=",,spanleft,,alignright">
 	<h:column>
 		<f:facet name="header">
 			<h:outputText value="Created" />
@@ -122,6 +122,15 @@
 		<h:outputText value=" " />
 		<h:commandLink value="On" action="#{dataItem.actionEnableConsole}" rendered="#{!dataItem.consoleEnabled}" />
 		<h:commandLink value="Off" action="#{dataItem.actionDisableConsole}" rendered="#{dataItem.consoleEnabled}" />
+	</h:column>
+	
+	<h:column>
+		<f:facet name="header">
+			<h:outputText value="Evict" />
+		</f:facet>
+		<h:commandLink value="Stop" action="#{dataItem.actionStop}" />
+		<h:outputText value=" " />
+		<h:commandLink value="Kill" action="#{dataItem.actionKill}" />
 	</h:column>
 	
 </h:dataTable>

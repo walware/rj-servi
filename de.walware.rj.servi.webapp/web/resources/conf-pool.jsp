@@ -50,22 +50,22 @@
 	
 	<h:outputText/>
 	<h:outputText/>
-	<h:outputText>Shutdown idling nodes if...</h:outputText>
+	<h:outputText>Evict idling nodes if...</h:outputText>
 	
 	<h:outputLabel for="max_idle_count" value="(3) Max idle nodes (count):" accesskey="3" />
 	<h:inputText id="max_idle_count" label="Max idle nodes (3)" value="#{poolConfig.maxIdleCount}" required="true" />
 	<h:outputText>... idle count greater than (3) ...</h:outputText>
 	
-	<h:outputLabel for="min_idle_time" value="(4) Min node idle time (millisec):" accesskey="4" />
-	<h:inputText id="min_idle_time" label="Min node idle time (4)" value="#{poolConfig.minIdleTime}" required="true" />
+	<h:outputLabel for="min_idle_millis" value="(4) Min node idle time (millisec):" accesskey="4" />
+	<h:inputText id="min_idle_millis" label="Min node idle time (4)" value="#{poolConfig.minIdleTime}" required="true" />
 	<h:outputText>... or idle count greater than (2) count and idle time greater than (4).</h:outputText>
 	
 	<h:outputText/>
 	<h:outputText/>
 	<h:outputText>When node is requested and max count nodes (1) is in use ...</h:outputText>
 	
-	<h:outputLabel for="max_wait_time" value="(5) Max wait time (millisec):" accesskey="5" />
-	<h:inputText id="max_wait_time" label="Max wait time (5)" value="#{poolConfig.maxWaitTime}" required="true"/>
+	<h:outputLabel for="max_wait_millis" value="(5) Max wait time (millisec):" accesskey="5" />
+	<h:inputText id="max_wait_millis" label="Max wait time (5)" value="#{poolConfig.maxWaitTime}" required="true"/>
 	<h:outputText>... wait for a free node until timeout (5).</h:outputText>
 	
 	<h:outputText/>
@@ -75,6 +75,14 @@
 	<h:outputLabel for="max_usage_count" value="(6) Max node reuse (count):" accesskey="6" />
 	<h:inputText id="max_usage_count" label="Max node reuse (6)" value="#{poolConfig.maxUsageCount}" required="true" />
 	<h:outputText>... recycle a node maximal (6) times.</h:outputText>
+	
+	<h:outputText/>
+	<h:outputText/>
+	<h:outputText>When stopping the pool or single nodes:</h:outputText>
+	
+	<h:outputLabel for="eviction_timeout_millis" value="(7) Timeout when evicting node in use (millisec):" accesskey="7" />
+	<h:inputText id="eviction_timeout_millis" label="Timeout when evicting node (7)" value="#{poolConfig.evictionTimeout}" required="true" />
+	<h:outputText></h:outputText>
 </h:panelGrid>
 	
 	<h:commandButton id="loadDefaults" value="Load Defaults" action="#{poolConfig.actionLoadDefaults}" type="button" immediate="true" accesskey="L" />

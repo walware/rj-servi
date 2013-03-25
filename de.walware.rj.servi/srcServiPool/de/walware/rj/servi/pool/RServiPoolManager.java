@@ -17,10 +17,6 @@ import de.walware.rj.RjException;
 public interface RServiPoolManager {
 	
 	
-	String POOLCONFIG_NAME = "poolconfig";
-	String RCONFIG_NAME = "rconfig";
-	
-	
 	class Counter {
 		public int numIdling;
 		public int numInUse;
@@ -35,8 +31,8 @@ public interface RServiPoolManager {
 	
 	String getId();
 	
-	void setConfig(PoolConfig config);
 	PoolConfig getConfig();
+	void setConfig(PoolConfig config);
 	void addNodeFactory(RServiNodeFactory nodeFactory);
 	RServiNodeFactory getFactories();
 	

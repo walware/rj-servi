@@ -11,28 +11,22 @@
 
 package de.walware.rj.servi.webapp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
+import de.walware.rj.servi.pool.PoolItem;
+import de.walware.rj.servi.pool.PoolStatus;
 import de.walware.rj.servi.pool.RServiPoolManager;
 
 
-public class PoolStatusBean {
+public class PoolStatusBean extends PoolStatus<PoolItemBean> {
 	
-	
-	private long stamp;
-	private List<PoolItemBean> nodes;
-	private int numInUse;
-	private int numIdling;
-	private RServiPoolManager.Counter counter;
 	
 	private boolean forceRefresh;
 	private boolean autoRefresh;
 	
 	
 	public PoolStatusBean() {
+		super(FacesUtils.getPoolServer());
 	}
 	
 	
@@ -42,82 +36,38 @@ public class PoolStatusBean {
 	}
 	
 	private void load() {
-		final RServiPoolManager poolManager = FacesUtils.getPoolManager();
+		final long stamp = System.currentTimeMillis();
+		final RServiPoolManager poolManager = this.server.getManager();
 		if (poolManager == null) {
-			FacesUtils.addErrorMessage(null, "The pool is not available.");
-			return;
+			FacesUtils.addErrorMessage(null, "The pool is currently not available.");
 		}
-		int inUse = 0;
-		int idling = 0;
-		this.stamp = System.currentTimeMillis();
-		final Object itemsData[] = poolManager.getPoolItemsData();
-		final List<PoolItemBean> items = new ArrayList<PoolItemBean>(itemsData.length);
-		for (final Object data : itemsData) {
-			final PoolItemBean item = new PoolItemBean(data, this.stamp);
-			items.add(item);
-			switch(item.getState()) {
-			case LENT:
-				inUse++;
-				break;
-			case IDLING:
-				idling++;
-				break;
-			}
-		}
-		this.nodes = items;
-		this.numInUse = inUse;
-		this.numIdling = idling;
-		this.counter = poolManager.getCounter();
-		this.forceRefresh = false;
+		refresh(poolManager, stamp);
 	}
 	
-	public int getNumInUse() {
+	@Override
+	protected PoolItem createPoolItem(final Object itemData, final long stamp) {
+		return new PoolItemBean(itemData, stamp);
+	}
+	
+	@Override
+	protected PoolItemBean createNodeState(final PoolItem item) {
+		return (PoolItemBean) item;
+	}
+	
+	
+	public synchronized long getStamp() {
 		check();
-		return this.numInUse;
+		return super.getStatusStamp();
 	}
 	
-	public int getNumIdling() {
-		check();
-		return this.numIdling;
-	}
-	
-	public int getNumTotal() {
-		check();
-		return this.numIdling + this.numInUse;
-	}
-	
-	public int getMaxInUse() {
-		check();
-		return this.counter.maxInUse;
-	}
-	
-	public int getMaxIdling() {
-		check();
-		return this.counter.maxIdling;
-	}
-	
-	public int getMaxTotal() {
-		check();
-		return this.counter.maxTotal;
-	}
-	
-	public long getStamp() {
-		check();
-		return this.stamp;
-	}
-	
-	public List<PoolItemBean> getNodes() {
-		check();
-		return this.nodes;
-	}
-	
-	private void check() {
+	@Override
+	protected void check() {
 		if (this.forceRefresh) {
 			load();
 		}
 	}
 	
-	public void forceRefresh() {
+	public synchronized void forceRefresh() {
 		this.forceRefresh = true;
 	}
 	
@@ -126,21 +76,21 @@ public class PoolStatusBean {
 		return null;
 	}
 	
-	public String actionEnableAutoRefresh() {
+	public synchronized String actionEnableAutoRefresh() {
 		this.autoRefresh = true;
 		return null;
 	}
 	
-	public String actionDisableAutoRefresh() {
+	public synchronized String actionDisableAutoRefresh() {
 		this.autoRefresh = false;
 		return null;
 	}
 	
-	public void setAutoRefreshEnabled(final boolean enabled) {
+	public synchronized void setAutoRefreshEnabled(final boolean enabled) {
 		this.autoRefresh = enabled;
 	}
 	
-	public boolean isAutoRefreshEnabled() {
+	public synchronized boolean isAutoRefreshEnabled() {
 		return this.autoRefresh;
 	}
 	

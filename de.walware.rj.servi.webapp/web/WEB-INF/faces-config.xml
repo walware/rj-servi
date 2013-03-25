@@ -10,8 +10,8 @@
 	</converter>
 	
 	<managed-bean>
-		<managed-bean-name>otherConfig</managed-bean-name>
-		<managed-bean-class>de.walware.rj.servi.webapp.OtherConfigBean</managed-bean-class>
+		<managed-bean-name>netConfig</managed-bean-name>
+		<managed-bean-class>de.walware.rj.servi.webapp.NetConfigBean</managed-bean-class>
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 	<managed-bean>

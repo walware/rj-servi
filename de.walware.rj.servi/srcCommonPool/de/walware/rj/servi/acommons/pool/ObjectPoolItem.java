@@ -26,6 +26,7 @@ public interface ObjectPoolItem {
 		IDLING,
 		LENT,
 		EVICTING,
+		EVICTED;
 	}
 	
 	

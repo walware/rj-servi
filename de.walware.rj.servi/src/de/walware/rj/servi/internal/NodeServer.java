@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.PrintStream;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
@@ -24,6 +26,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
 import javax.security.auth.login.LoginException;
 
 import de.walware.rj.RjException;
@@ -281,11 +285,19 @@ public class NodeServer extends DefaultServerImpl {
 	
 	private String resetCommand;
 	
+	private RMIClientSocketFactory clientSocketFactory;
+	private RMIServerSocketFactory serverSocketFactory;
 	
-	public NodeServer(final String name, final AbstractServerControl control) {
-		super(name, control, new NoAuthMethod("<internal>"));
+	
+	public NodeServer(final AbstractServerControl control, final boolean ssl) {
+		super(control, new NoAuthMethod("<internal>"));
 		this.rserviAuthMethod = new NoAuthMethod("<internal>");
 		this.consoleDummyClient = new Client("-", "dummy", (byte) 0);
+		
+		if (ssl) {
+			this.clientSocketFactory = new SslRMIClientSocketFactory();
+			this.serverSocketFactory = new SslRMIServerSocketFactory(null, null, true);
+		}
 	}
 	
 	
@@ -344,7 +356,8 @@ public class NodeServer extends DefaultServerImpl {
 		if (command.equals(C_RSERVI_NODECONTROL)) {
 			final Client client = connectClient(command, login);
 			final Node node = new Node();
-			final RServiNode exported = (RServiNode) UnicastRemoteObject.exportObject(node, 0);
+			final RServiNode exported = (RServiNode) UnicastRemoteObject.exportObject(node, 0,
+					this.clientSocketFactory, this.serverSocketFactory );
 			return exported;
 		}
 		throw new UnsupportedOperationException();
@@ -357,7 +370,8 @@ public class NodeServer extends DefaultServerImpl {
 				throw new IllegalStateException();
 			}
 			final Backend backend = new Backend();
-			final RServiBackend export = (RServiBackend) UnicastRemoteObject.exportObject(backend, 0);
+			final RServiBackend export = (RServiBackend) UnicastRemoteObject.exportObject(backend, 0,
+					this.clientSocketFactory, this.serverSocketFactory );
 			this.currentClientId = client;
 			this.currentClientBackend = backend;
 			this.currentClientExp = export;

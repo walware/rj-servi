@@ -108,13 +108,7 @@ public class EmbeddedManager implements EmbeddedRServiManager, IDisposable {
 				return;
 			}
 		}
-		try {
-			this.handler.shutdown();
-		}
-		catch (final Throwable e) {
-			ECommons.getEnv().log(new Status(IStatus.ERROR, RServiUtil.RJ_SERVI_ID, Messages.ShutdownNode_error_message, e));
-		}
-		this.factory.cleanupNode(this.handler);
+		this.factory.stopNode(this.handler);
 		this.handler = null;
 	}
 	

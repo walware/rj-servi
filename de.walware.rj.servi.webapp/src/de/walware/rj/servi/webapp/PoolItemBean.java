@@ -11,8 +11,12 @@
 
 package de.walware.rj.servi.webapp;
 
+import de.walware.ecommons.net.RMIAddress;
+
 import de.walware.rj.RjException;
+import de.walware.rj.servi.pool.PoolConfig;
 import de.walware.rj.servi.pool.PoolItem;
+import de.walware.rj.servi.pool.PoolServer;
 
 
 public class PoolItemBean extends PoolItem {
@@ -20,6 +24,12 @@ public class PoolItemBean extends PoolItem {
 	
 	public PoolItemBean(final Object data, final long stamp) {
 		super(data, stamp);
+	}
+	
+	
+	public String getRMIAddress() {
+		final RMIAddress address = getAddress();
+		return (address != null) ? address.getAddress() : null;
 	}
 	
 	
@@ -41,6 +51,19 @@ public class PoolItemBean extends PoolItem {
 			FacesUtils.addErrorMessage(null, e.getMessage());
 		}
 		return null;
+	}
+	
+	public void actionStop() {
+		final PoolServer poolServer = FacesUtils.getPoolServer();
+		
+		final PoolConfig config = new PoolConfig();
+		poolServer.getPoolConfig(config);
+		
+		evict(config.getEvictionTimeout());
+	}
+	
+	public void actionKill() {
+		evict(0);
 	}
 	
 }

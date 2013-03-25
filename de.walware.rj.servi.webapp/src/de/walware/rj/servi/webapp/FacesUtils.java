@@ -11,10 +11,9 @@
 
 package de.walware.rj.servi.webapp;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.faces.application.FacesMessage;
@@ -22,35 +21,112 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 
+import de.walware.rj.server.srvext.RJContext;
+import de.walware.rj.servi.pool.NetConfig;
+import de.walware.rj.servi.pool.PoolConfig;
+import de.walware.rj.servi.pool.PoolServer;
 import de.walware.rj.servi.pool.PropertiesBean;
-import de.walware.rj.servi.pool.RServiPoolManager;
+import de.walware.rj.servi.pool.PropertiesBean.ValidationMessage;
+import de.walware.rj.servi.pool.RServiNodeConfig;
 
 
 public class FacesUtils {
 	
 	
-	public static void addErrorMessage(final String id, String message) {
-		final String label = getLabel(id);
+	public static String toUI(final String formId, final String propertyId) {
+		if (formId == null || propertyId == null) {
+			return null;
+		}
+		final StringBuilder sb = new StringBuilder(formId.length() + propertyId.length() + 1);
+		sb.append(formId);
+		sb.append(':');
+		for (int i = 0; i < propertyId.length(); i++) {
+			final char c = propertyId.charAt(i);
+			if (c == '.') {
+				sb.append('_');
+			}
+			else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
+	
+	public static String toFormId(final String beanId) {
+		if (beanId == NetConfig.BEAN_ID) {
+			return "net_config";
+		}
+		if (beanId == RServiNodeConfig.BEAN_ID) {
+			return "r_config";
+		}
+		if (beanId == PoolConfig.BEAN_ID) {
+			return "pool_config";
+		}
+		return null;
+	}
+	
+	public static boolean validate(final PropertiesBean bean) {
+		final List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
+		if (bean.validate(messages)) {
+			return true;
+		}
+		final String formId = toFormId(bean.getBeanId()) + "_config";
+		for (final ValidationMessage message : messages) {
+			addErrorMessage(toUI(formId, message.getPropertyId()), message.getMessage());
+		}
+		return false;
+	}
+	
+	public static void addErrorMessage(final String ui, String message) {
+		{	int end = -1;
+			while (true) {
+				final int begin = message.indexOf('{', end + 1);
+				if (begin < 0) {
+					break;
+				}
+				end = message.indexOf('}', begin + 1);
+				if (end >= 0) {
+					final String label = getLabel(message.substring(begin + 1, end));
+					if (label != null && !label.isEmpty()) {
+						message = message.substring(0, begin) + label + message.substring(end + 1);
+					}
+				}
+				else {
+					end = begin;
+				}
+			}
+		}
+		
+		final String label = getLabel(ui);
 		if (label != null) {
 			message = label + ": " + message;
 		}
-		FacesContext.getCurrentInstance().addMessage(id, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
+		
+		FacesContext.getCurrentInstance().addMessage(ui, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
 	}
 	
 	public static String getLabel(final String componentId) {
 		if (componentId != null) {
 			final UIComponent component = FacesContext.getCurrentInstance().getViewRoot().findComponent(componentId);
 			if (component != null) {
-				return (String)component.getAttributes().get("label");
+				return (String) component.getAttributes().get("label");
 			}
 		}
 		return null;
 	}
 	
-	public static RServiPoolManager getPoolManager() {
+	public static PoolServer getPoolServer() {
 		final Object externalContext = FacesContext.getCurrentInstance().getExternalContext().getContext();
 		if (externalContext instanceof ServletContext) {
-			return (RServiPoolManager) ((ServletContext) externalContext).getAttribute(RJWeb.POOLMANAGER_KEY);
+			return (PoolServer) ((ServletContext) externalContext).getAttribute(RJWeb.RJ_POOLSERVER_KEY);
+		}
+		throw new IllegalStateException();
+	}
+	
+	private static RJContext getRJContext() {
+		final Object externalContext = FacesContext.getCurrentInstance().getExternalContext().getContext();
+		if (externalContext instanceof ServletContext) {
+			return (RJContext) ((ServletContext) externalContext).getAttribute(RJWeb.RJCONTEXT_KEY);
 		}
 		throw new IllegalStateException();
 	}
@@ -63,29 +139,20 @@ public class FacesUtils {
 		throw new IllegalStateException();
 	}
 	
-	public static InputStream getPropertiesFileInput(final String name) throws IOException {
-		final Object externalContext = FacesContext.getCurrentInstance().getExternalContext().getContext();
-		if (externalContext instanceof ServletContext) {
-			return Utils.getPropertiesFileInput((ServletContext)externalContext, name);
-		}
-		throw new IllegalStateException();
-	}
-	
-	public static OutputStream getPropertiesFileOutput(final String name) throws IOException {
-		final Object externalContext = FacesContext.getCurrentInstance().getExternalContext().getContext();
-		if (externalContext instanceof ServletContext) {
-			return Utils.getPropertiesFileOutput((ServletContext)externalContext, name);
-		}
-		throw new IllegalStateException();
-	}
 	
 	public static boolean saveToFile(final PropertiesBean bean) {
-		OutputStream out = null;
 		try {
-			out = getPropertiesFileOutput(bean.getBeanId());
 			final Properties properties = new Properties();
-			bean.save(properties);
-			properties.store(out, null);
+			
+			synchronized (bean) {
+				if (!validate(bean)) {
+					return false;
+				}
+				bean.save(properties);
+			}
+			
+			getRJContext().saveProperties(bean.getBeanId(), properties);
+			
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Configuration saved.", null));
 			return true;
 		}
@@ -95,34 +162,24 @@ public class FacesUtils {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failed to save the configuration: " + e.getMessage(), null));
 			return false;
 		}
-		finally {
-			if (out != null) {
-				try {
-					out.close();
-				}
-				catch (final IOException e) {}
-			}
-		}
-	}
-	
-	public static boolean loadFromFile(final PropertiesBean bean) {
-		return loadFromFile(bean, true);
 	}
 	
 	public static boolean loadFromFile(final PropertiesBean bean, final boolean report) {
-		InputStream in = null;
 		try {
-			in = getPropertiesFileInput(bean.getBeanId());
-			if (in == null) {
+			final Properties properties = getRJContext().loadProperties(bean.getBeanId());
+			if (properties == null) {
 				if (report) {
 					FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
 							MessageFormat.format("The configuration file ''{0}'' could not be found. Default values are used.", new Object[] { bean.getBeanId() }), null));
 				}
 				return false;
 			}
-			final Properties properties = new Properties();
-			properties.load(in);
-			bean.load(properties);
+			
+			synchronized(bean) {
+				bean.load(properties);
+				
+				validate(bean);
+			}
 			return true;
 		}
 		catch (final Exception e) {
@@ -131,14 +188,6 @@ public class FacesUtils {
 						MessageFormat.format("Failed to load the configuration from file ''{0}''.", new Object[] { bean.getBeanId() }), null));
 			}
 			return false;
-		}
-		finally {
-			if (in != null) {
-				try {
-					in.close();
-				}
-				catch (final IOException ioexception) {}
-			}
 		}
 	}
 	

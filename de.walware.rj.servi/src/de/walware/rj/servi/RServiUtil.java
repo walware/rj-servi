@@ -12,16 +12,21 @@
 package de.walware.rj.servi;
 
 import java.net.MalformedURLException;
-import java.rmi.Naming;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.NoSuchElementException;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.security.auth.login.LoginException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import de.walware.ecommons.net.RMIAddress;
 
 import de.walware.rj.RjException;
 import de.walware.rj.server.RjsComConfig;
@@ -49,6 +54,9 @@ public class RServiUtil {
 	 * by the caller (consumer). The consumer is responsible to return it to the pool
 	 * by {@link RServi#close() closing} the RServi.
 	 * 
+	 * For SSL connections, use the prefix <code>ssl:</code>. Note that SSL requires
+	 * the configuration of keystore and truststore at server and client side.
+	 * 
 	 * @param address the RMI address of the pool
 	 * @param name a name which can be used to identify the client
 	 * @return a reference to the RServi instance
@@ -64,9 +72,16 @@ public class RServiUtil {
 			RjsComConfig.setRMIClientSocketFactory(null);
 			RServiPool pool;
 			try {
-				pool = (RServiPool) Naming.lookup(address);
+				final RMIAddress rmiAddress = new RMIAddress(address);
+				final Registry registry = LocateRegistry.getRegistry(rmiAddress.getHost(), rmiAddress.getPortNum(),
+						(rmiAddress.isSSL()) ? new SslRMIClientSocketFactory() : null );
+				pool = (RServiPool) registry.lookup(rmiAddress.getName());
 			}
 			catch (final MalformedURLException e) {
+				throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
+						"Invalid address for the RServi pool.", e));
+			}
+			catch (final UnknownHostException e) {
 				throw new CoreException(new Status(IStatus.ERROR, RJ_SERVI_ID, 0,
 						"Invalid address for the RServi pool.", e));
 			}

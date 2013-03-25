@@ -4,7 +4,7 @@
 
 <h4>Configuration</h4>
 <ul>
-<li><h:outputLink value="conf-other.jsp"><h:outputText value="RMI"/></h:outputLink></li>
+<li><h:outputLink value="conf-net.jsp"><h:outputText value="Net (RMI)"/></h:outputLink></li>
 <li><h:outputLink value="conf-pool.jsp"><h:outputText value="Pool"/></h:outputLink></li>
 <li><h:outputLink value="conf-r.jsp"><h:outputText value="R/RServi Nodes"/></h:outputLink></li>
 </ul>

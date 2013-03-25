@@ -13,6 +13,7 @@ package de.walware.rj.servi.internal;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -45,6 +46,7 @@ public class NodeController extends AbstractServerControl {
 		if (args == null || args.length < 1) {
 			System.exit(EXIT_ARGS_MISSING);
 		}
+		System.out.println(Arrays.toString(args));
 		new NodeController(args[0], cliGetArgs(args, 1)).start();
 	}
 	
@@ -56,7 +58,7 @@ public class NodeController extends AbstractServerControl {
 	
 	public void start() {
 		LOGGER.log(Level.INFO, "{0} Initializing R node...", this.logPrefix);
-		final NodeServer server = new NodeServer(this.name, this);
+		final NodeServer server = new NodeServer(this, this.args.containsKey("ssl"));
 		if (!initREngine(server)) {
 			exit(EXIT_INIT_RENGINE_ERROR);
 		}

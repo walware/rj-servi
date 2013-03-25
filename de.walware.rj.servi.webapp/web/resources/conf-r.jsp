@@ -68,8 +68,8 @@
 	<h:selectBooleanCheckbox id="debug_console_enabled" label="Enable debug console by default (8)" value="#{rConfig.enableConsole}" required="true" />
 	<h:outputText>Enables debug console automatically at startup (use only for development!)</h:outputText>
 	
-	<h:outputLabel for="verbose_console_enabled" value="(9) Enables verbose logging:" accesskey="9" />
-	<h:selectBooleanCheckbox id="verbose_console_enabled" label="Enables verbose logging (9)" value="#{rConfig.enableVerbose}" required="true" />
+	<h:outputLabel for="verbose_console_enabled" value="(9) Enable verbose logging:" accesskey="9" />
+	<h:selectBooleanCheckbox id="verbose_console_enabled" label="Enable verbose logging (9)" value="#{rConfig.enableVerbose}" required="true" />
 	<h:outputText>Enables verbose logging and prevents deletion of the node directory</h:outputText>
 	
 </h:panelGrid>

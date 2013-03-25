@@ -16,20 +16,10 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 
 import de.walware.rj.servi.pool.PoolConfig;
-import de.walware.rj.servi.pool.RServiPoolManager;
+import de.walware.rj.servi.pool.PoolServer;
 
 
 public class PoolConfigBean extends PoolConfig {
-	
-	
-	private static final String FORM_UI = "pool_config";
-	
-	private static final String MAX_TOTAL_COUNT_UI = FORM_UI + ':' + MAX_TOTAL_COUNT_ID.replace('.', '_');
-	private static final String MIN_IDLE_COUNT_UI = FORM_UI + ':' + MIN_IDLE_COUNT_ID.replace('.', '_');
-	private static final String MAX_IDLE_COUNT_UI = FORM_UI + ':' + MAX_IDLE_COUNT_ID.replace('.', '_');
-	private static final String MIN_IDLE_TIME_UI = FORM_UI + ':' + MIN_IDLE_TIME_ID.replace('.', '_');
-	private static final String MAX_WAIT_TIME_UI = FORM_UI + ':' + MAX_WAIT_TIME_ID.replace('.', '_');
-	private static final String MAX_USAGE_COUNT_UI = FORM_UI + ':' + MAX_USAGE_COUNT_ID.replace('.', '_');
 	
 	
 	public PoolConfigBean() {
@@ -38,72 +28,57 @@ public class PoolConfigBean extends PoolConfig {
 	
 	@PostConstruct
 	public void init() {
-		final RServiPoolManager poolManager = FacesUtils.getPoolManager();
-		load(poolManager.getConfig());
+		final PoolServer poolServer = FacesUtils.getPoolServer();
+		
+		poolServer.getPoolConfig(this);
 	}
 	
-	
-	public boolean validate() {
-		boolean valid = true;
-		if (getMinIdleCount() < 0) {
-			FacesUtils.addErrorMessage(MIN_IDLE_COUNT_UI, "Value must be >= 0");
-			valid = false;
-		}
-		if (getMaxTotalCount() < 1) {
-			FacesUtils.addErrorMessage(MAX_TOTAL_COUNT_UI, "Value must be > 0.");
-			valid = false;
-		}
-		if (getMaxIdleCount() < 0) {
-			FacesUtils.addErrorMessage(MAX_IDLE_COUNT_UI, "Value must be >= 0.");
-			valid = false;
-		}
-		if (getMinIdleCount() >= 0 && getMaxIdleCount() >= 0 && getMaxIdleCount() < getMinIdleCount()) {
-			FacesUtils.addErrorMessage(MAX_IDLE_COUNT_UI, (new StringBuilder("Value must be >= ")).append(FacesUtils.getLabel(MIN_IDLE_COUNT_UI)).append(".").toString());
-			valid = false;
-		}
-		if (getMinIdleTime() < 0L) {
-			FacesUtils.addErrorMessage(MIN_IDLE_TIME_UI, "Value must be >= 0");
-			valid = false;
-		}
-		if (getMaxWaitTime() < 0L && getMaxUsageCount() != -1) {
-			FacesUtils.addErrorMessage(MAX_WAIT_TIME_UI, "Value must be >= 0 or == -1 (infinite)");
-			valid = false;
-		}
-		if (getMaxUsageCount() < 1 && getMaxUsageCount() != -1) {
-			FacesUtils.addErrorMessage(MAX_USAGE_COUNT_UI, "Value must be > 0 or == -1 (disable)");
-			valid = false;
-		}
-		return valid;
-	}
 	
 	public String actionLoadCurrent() {
-		// init
+		final PoolServer poolServer = FacesUtils.getPoolServer();
+		
+		synchronized (this) {
+			poolServer.getPoolConfig(this);
+			FacesUtils.validate(this);
+		}
+		
 		return RJWeb.POOLCONFIG_NAV;
 	}
 	
 	public String actionLoadDefaults() {
-		load(new PoolConfig());
+		synchronized (this) {
+			load(new PoolConfig());
+			FacesUtils.validate(this);
+		}
+		
 		return RJWeb.POOLCONFIG_NAV;
 	}
 	
 	public String actionApply() {
-		if (!validate()) {
+		final PoolConfig config = new PoolConfig(this);
+		
+		if (!FacesUtils.validate(config)) {
 			return null;
 		}
-		final RServiPoolManager poolManager = FacesUtils.getPoolManager();
-		poolManager.setConfig(this);
+		final PoolServer poolServer = FacesUtils.getPoolServer();
+		
+		poolServer.setPoolConfig(config);
 		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Configuration applied.", null));
 		return null;
 	}
 	
 	public String actionSaveAndApply() {
-		if (!validate()) {
+		final PoolConfig config = new PoolConfig(this);
+		
+		if (!FacesUtils.validate(config)) {
 			return null;
 		}
-		final RServiPoolManager poolManager = FacesUtils.getPoolManager();
-		poolManager.setConfig(this);
+		final PoolServer poolServer = FacesUtils.getPoolServer();
+		
+		poolServer.setPoolConfig(config);
 		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Configuration applied.", null));
-		FacesUtils.saveToFile(this);
+		
+		FacesUtils.saveToFile(config);
 		return null;
 	}
 	

@@ -27,6 +27,7 @@ public abstract class NodeHandler {
 	
 	RMIAddress address;
 	File dir;
+	Process process;
 	
 	RServiBackend clientHandler;
 	
@@ -55,8 +56,8 @@ public abstract class NodeHandler {
 		enableConsole(null);
 	}
 	
-	public String getAddress() {
-		return this.address.getAddress();
+	public RMIAddress getAddress() {
+		return this.address;
 	}
 	
 	String bindClient(final String name, final String host) throws RemoteException {

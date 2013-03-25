@@ -25,8 +25,12 @@ import java.rmi.registry.Registry;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -122,7 +126,9 @@ public class RMIUtil {
 	private int embeddedPortFrom;
 	private int embeddedPortTo;
 	private boolean embeddedStartSeparate = true;
+	private boolean embeddedSSL = false;
 	private ManagedRegistry embeddedRegistry;
+	private final List<ManagedRegistry> embeddedRegistries = new ArrayList<RMIUtil.ManagedRegistry>(4);
 	private List<String> embeddedClasspathEntries;
 	private boolean embeddedClasspathLoadContrib;
 	
@@ -218,6 +224,7 @@ public class RMIUtil {
 			throw new IllegalArgumentException("from > to");
 		}
 		synchronized (this.embeddedLock) {
+			this.embeddedRegistry = null;
 			this.embeddedPortFrom = (from > 0) ? from : EMBEDDED_PORT_FROM_DEFAULT;
 			this.embeddedPortTo = (to > 0) ? to : EMBEDDED_PORT_TO_DEFAULT;
 		}
@@ -229,8 +236,25 @@ public class RMIUtil {
 	 * @param separate start registry in separate process
 	 */
 	public void setEmbeddedPrivateMode(final boolean separate) {
+		this.setEmbeddedPrivateMode(separate, this.embeddedSSL);
+	}
+	
+	/**
+	 * Sets the start mode for the managed embedded private RMI registry.
+	 * 
+	 * @param separate start registry in separate process
+	 * @param ssl start using SSL sockets
+	 * 
+	 * @since 1.4
+	 */
+	public void setEmbeddedPrivateMode(final boolean separate, final boolean ssl) {
+		if (separate && ssl) {
+			throw new IllegalArgumentException("ssl is only supported if separate is not enabled");
+		}
 		synchronized (this.embeddedLock) {
+			this.embeddedRegistry = null;
 			this.embeddedStartSeparate = separate;
+			this.embeddedSSL = ssl;
 		}
 	}
 	
@@ -239,7 +263,10 @@ public class RMIUtil {
 			if (this.embeddedClasspathEntries == null) {
 				this.embeddedClasspathEntries = new ArrayList<String>();
 			}
-			this.embeddedClasspathEntries.add(entry);
+			if (!this.embeddedClasspathEntries.contains(entry)) {
+				this.embeddedRegistry = null;
+				this.embeddedClasspathEntries.add(entry);
+			}
 		}
 	}
 	
@@ -258,6 +285,17 @@ public class RMIUtil {
 				if (this.embeddedRegistry != null) {
 					return this.embeddedRegistry.registry;
 				}
+				for (Iterator<ManagedRegistry> iter = this.embeddedRegistries.iterator(); iter.hasNext();) {
+					r = iter.next();
+					RMIAddress address = r.registry.getAddress();
+					if (address.getPortNum() >= this.embeddedPortFrom && address.getPortNum() <= this.embeddedPortTo
+							&& address.isSSL() == this.embeddedSSL
+							&& this.embeddedStartSeparate == (r.process != null) ) {
+						this.embeddedRegistry = r;
+						return this.embeddedRegistry.registry;
+					}
+				}
+				r = null;
 				
 				monitor.beginTask("Starting registry (RMI)...", IProgressMonitor.UNKNOWN);
 				
@@ -271,7 +309,8 @@ public class RMIUtil {
 						throw new CoreException(Status.CANCEL_STATUS);
 					}
 					try {
-						final RMIAddress rmiAddress = new RMIAddress(RMIAddress.LOOPBACK, port, null);
+						final RMIAddress rmiAddress = new RMIAddress(RMIAddress.LOOPBACK, port,
+								this.embeddedSSL, null );
 						if (this.embeddedStartSeparate) {
 							status = startSeparateRegistry(rmiAddress, false,
 									(this.embeddedPortFrom == this.embeddedPortTo),
@@ -281,13 +320,22 @@ public class RMIUtil {
 							}
 						}
 						else {
-							final Registry javaRegistry = LocateRegistry.createRegistry(port);
+							final Registry javaRegistry;
+							if (rmiAddress.isSSL()) {
+								javaRegistry = LocateRegistry.createRegistry(port,
+										new SslRMIClientSocketFactory(),
+										new SslRMIServerSocketFactory(null, null, true) );
+							}
+							else {
+								javaRegistry = LocateRegistry.createRegistry(port);
+							}
 							final RMIRegistry registry = new RMIRegistry(rmiAddress, javaRegistry, false);
 							r = new ManagedRegistry(registry, StopRule.NEVER);
 							r.stopRule = StopRule.ALWAYS;
 						}
 						if (r != null) {
 							this.embeddedRegistry = r;
+							this.embeddedRegistries.add(r);
 							break;
 						}
 					}
@@ -496,7 +544,7 @@ public class RMIUtil {
 					continue;
 				case IF_EMPTY:
 					try {
-						final Registry registry = LocateRegistry.getRegistry(r.registry.getAddress().getPortNum());
+						final Registry registry = r.registry.getRegistry();
 						if (registry.list().length > 0) {
 							continue;
 						}

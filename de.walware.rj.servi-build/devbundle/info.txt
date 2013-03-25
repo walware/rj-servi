@@ -4,13 +4,19 @@
 
 rservi/
   (rservi web application)
-  Web application providing RServi pool with configuration interface
+  Web application providing an RServi pool configurable via web and or JMX.
+  The pool id is the web context name (so by default rservi).
   
   To start the pool using Tomcat:
    1. Put it into the 'webapps' directory of Tomcat
    2. Start Tomcat
    3. Open the configuration interface in a browser:
           http://localhost:8080/rservi
+  
+  The WEB-INF/lib folder can be used also for the standalone server
+  providing an RServi pool configurable via JMX:
+     java -cp "*" de.walware.rj.servi.pool.StandalonePoolServer <id>
+  See also the JavaDoc of de.walware.rj.servi.pool.StandalonePoolServer.
 
 democlient/
   (demo client)
