@@ -207,7 +207,20 @@ public class NetConfig implements PropertiesBean {
 			effective = System.getProperty("java.rmi.server.hostname");
 		}
 		try {
-			final InetAddress inet = (effective == null || effective.length() <= 0) ? InetAddress.getLocalHost() : InetAddress.getByName(effective);
+			InetAddress inet = null;
+			if (effective != null && !effective.isEmpty()) {
+				inet = InetAddress.getByName(effective);
+			}
+			else {
+				try {
+					inet = InetAddress.getLocalHost();
+				}
+				catch (final UnknownHostException e) {}
+				catch (final ArrayIndexOutOfBoundsException e) { /* JVM bug */ }
+				if (inet == null) {
+					inet = RMIAddress.LOOPBACK;
+				}
+			}
 			this.effectiveHostaddress = inet.getHostAddress();
 		}
 		catch (final Exception e) {
