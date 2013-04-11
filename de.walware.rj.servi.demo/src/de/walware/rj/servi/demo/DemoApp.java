@@ -48,6 +48,7 @@ import de.walware.rj.servi.RServiUtil;
 import de.walware.rj.services.FunctionCall;
 import de.walware.rj.services.utils.Graphic;
 import de.walware.rj.services.utils.PngGraphic;
+import de.walware.rj.services.utils.RPkgInstallation;
 
 
 public class DemoApp {
@@ -88,6 +89,8 @@ public class DemoApp {
 	private Button fUploadButton;
 	private Button fDownloadButton;
 	private Button fOpenButton;
+	
+	private Button fInstPkgButton;
 	
 	private FunctionCall fFunctionBuilder;
 	private Text fFunctionNameText;
@@ -267,6 +270,22 @@ public class DemoApp {
 		new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL)
 				.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
+		{	addLabel(composite, "Package:");
+			fInstPkgButton = new Button(composite, SWT.PUSH);
+			fInstPkgButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			fInstPkgButton.setText("Install Package file...");
+			fInstPkgButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					instPkgFile();
+				}
+			});
+		}
+		
+		
+		new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL)
+				.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
 		{	addLabel(composite, "Function:");
 			fFunctionNameText = new Text(composite, SWT.BORDER);
 			fFunctionNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -417,6 +436,8 @@ public class DemoApp {
 		fDownloadButton.setEnabled(ok);
 		fOpenButton.setEnabled(fFile != null);
 		
+		fInstPkgButton.setEnabled(ok);
+		
 		fCombinedHistButton.setEnabled(ok);
 		
 		fFunctionNewButton.setEnabled(ok);
@@ -542,8 +563,10 @@ public class DemoApp {
 		
 		final String remote = fRemoteFileText.getText();
 		fLogText.append("\n\t");
+		fLogText.append("local: ");
 		fLogText.append(local);
 		fLogText.append(" -> ");
+		fLogText.append("remote: ");
 		fLogText.append(remote);
 		fLogText.append("\n");
 		
@@ -589,8 +612,10 @@ public class DemoApp {
 		}
 		final String remote = fRemoteFileText.getText();
 		fLogText.append("\n\t");
+		fLogText.append("local: ");
 		fLogText.append(local);
 		fLogText.append(" <- ");
+		fLogText.append("remote: ");
 		fLogText.append(remote);
 		fLogText.append("\n");
 		FileOutputStream out = null;
@@ -628,6 +653,35 @@ public class DemoApp {
 		}
 	}
 	
+	private void instPkgFile() {
+		fLogText.append("Install package file...");
+		final FileDialog dialog = new FileDialog(fLogText.getShell(), SWT.OPEN);
+		final String local = dialog.open();
+		if (local == null) {
+			logCancelled();
+			return;
+		}
+		
+		try {
+			File file = new File(local);
+			RPkgInstallation inst = new RPkgInstallation(file);
+			
+			fLogText.append("\n\t");
+			fLogText.append("local: ");
+			fLogText.append(local);
+			fLogText.append(" -> rpkg: ");
+			fLogText.append(inst.getPkgName());
+			fLogText.append("\n");
+			
+			inst.install(fRServi, null);
+			logOK();
+		}
+		catch (Exception e) {
+			logError(e);
+		}
+		checkedEnabled();
+	}
+	
 	private void showHist() {
 		fLogText.append("Create and Show 'hist(x)'...");
 		
@@ -646,6 +700,7 @@ public class DemoApp {
 			
 			final Image image = new Image(Display.getCurrent(), new ByteArrayInputStream(plot));
 			shell.addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					image.dispose();
 				}
