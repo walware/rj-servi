@@ -1,6 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/StatET-Project (www.walware.de/goto/statet)
- * and others. All rights reserved. This program and the accompanying materials
+ * Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
@@ -71,15 +71,15 @@ public class RMIAddress {
 	}
 	
 	private static String build(final String host, final int portNum, final String name) {
-		final StringBuilder sb = new StringBuilder("//");
+		final StringBuilder sb = new StringBuilder("//"); //$NON-NLS-1$
 		if (host != null) {
 			sb.append(host);
 		}
-		sb.append(":");
+		sb.append(':');
 		if (portNum >= 0) {
 			sb.append(Integer.toString(portNum));
 		}
-		sb.append("/");
+		sb.append('/');
 		if (name != null) {
 			sb.append(name);
 		}
@@ -100,13 +100,15 @@ public class RMIAddress {
 	}
 	
 	
-	private String host;
+	private final String host;
 	private InetAddress hostAddress;
-	private String port;
-	private int portNum;
-	private String path;
+	private final String port;
+	private final int portNum;
+	private final boolean ssl;
+	private final String path;
 	
 	private String address;
+	private String ser;
 	
 	
 	public RMIAddress(final String address) throws UnknownHostException, MalformedURLException {
@@ -117,18 +119,33 @@ public class RMIAddress {
 		this(build(host, portNum, name), true);
 	}
 	
-	public RMIAddress(final InetAddress address, final int port, final String name) throws MalformedURLException {
-		this(address.getHostAddress(), address, Integer.toString(port), checkPort(port), (name != null) ? checkChars(name) : "");
+	public RMIAddress(final InetAddress address, final int port, final String name)
+			throws MalformedURLException {
+		this(address.getHostAddress(), address, Integer.toString(port), checkPort(port), false,
+				(name != null) ? checkChars(name) : "");
+	}
+	
+	public RMIAddress(final InetAddress address, final int port, final boolean ssl, final String name)
+			throws MalformedURLException {
+		this(address.getHostAddress(), address, Integer.toString(port), checkPort(port), ssl,
+				(name != null) ? checkChars(name) : "");
 	}
 	
 	public RMIAddress(final RMIAddress registry, final String name) throws MalformedURLException {
-		this(registry.host, registry.hostAddress, registry.port, registry.portNum,
+		this(registry.host, registry.hostAddress, registry.port, registry.portNum, registry.ssl,
 				(name != null) ? checkChars(name) : "");
 	}
 	
 	private RMIAddress(String address, final boolean resolve) throws UnknownHostException, MalformedURLException {
 		address = checkChars(address);
 		
+		if (address.startsWith("ssl:")) { //$NON-NLS-1$
+			address = address.substring(4);
+			this.ssl = true;
+		}
+		else {
+			this.ssl = false;
+		}
 		if (address.startsWith("rmi:")) { //$NON-NLS-1$
 			address = address.substring(4);
 		}
@@ -142,12 +159,12 @@ public class RMIAddress {
 			if (idxPath <= idxPort) {
 				throw new IllegalArgumentException();
 			}
-			this.host = address.substring(2, idxPort);
-			this.port = address.substring(idxPort+1, idxPath);
+			this.host = (2 < idxPort) ? address.substring(2, idxPort) : null;
+			this.port = (idxPort+1 < idxPath) ? address.substring(idxPort+1, idxPath) : null;
 			this.path = address.substring(idxPath+1);
 		}
 		else if (idxPath > 0){
-			this.host = address.substring(2, idxPath);
+			this.host = (2 < idxPath) ? address.substring(2, idxPath) : null;
 			this.port = null;
 			this.path = address.substring(idxPath+1);
 		}
@@ -155,12 +172,6 @@ public class RMIAddress {
 			this.host = null;
 			this.port = null;
 			this.path = address.substring(2);
-		}
-		if (this.host != null && this.host.length() == 0) {
-			this.host = null;
-		}
-		if (this.port != null && this.port.length() == 0) {
-			this.port = null;
 		}
 		try {
 			this.portNum = checkPort(this.port);
@@ -173,11 +184,13 @@ public class RMIAddress {
 		}
 	}
 	
-	private RMIAddress(final String host, final InetAddress hostAddress, final String port, final int portNum, final String path) {
+	private RMIAddress(final String host, final InetAddress hostAddress, final String port,
+			final int portNum, final boolean ssl, final String path) {
 		this.host = host;
 		this.hostAddress = hostAddress;
 		this.port = port;
 		this.portNum = portNum;
+		this.ssl = ssl;
 		this.path = path;
 	}
 	
@@ -194,14 +207,19 @@ public class RMIAddress {
 	}
 	
 	public boolean isLocalHost() {
-		InetAddress localhost;
+		if (this.hostAddress.isLoopbackAddress()) {
+			return true;
+		}
 		try {
-			localhost = InetAddress.getLocalHost();
+			final InetAddress localhost = InetAddress.getLocalHost();
+			if (this.hostAddress.equals(localhost)) {
+				return true;
+			}
 		}
-		catch (final UnknownHostException e) {
-			localhost = null;
-		}
-		return (this.hostAddress.isLoopbackAddress() || this.hostAddress.equals(localhost));
+		catch (final UnknownHostException e) {}
+		catch (final ArrayIndexOutOfBoundsException e) { /* JVM bug */ }
+		
+		return false;
 	}
 	
 	/**
@@ -245,18 +263,37 @@ public class RMIAddress {
 	}
 	
 	public RMIAddress getRegistryAddress() {
-		return new RMIAddress(this.host, this.hostAddress, this.port, this.portNum, "");
+		return new RMIAddress(this.host, this.hostAddress, this.port, this.portNum, this.ssl, "");
+	}
+	
+	/**
+	 * 
+	 * @return if SSL is enabled
+	 * 
+	 * @since 1.4
+	 */
+	public boolean isSSL() {
+		return this.ssl;
 	}
 	
 	
 	@Override
 	public String toString() {
-		return getAddress();
+		if (this.ser == null) {
+			final String address = getAddress();
+			if (this.ssl) {
+				this.ser = "ssl:" + address; //$NON-NLS-1$
+			}
+			else {
+				this.ser = address;
+			}
+		}
+		return this.ser;
 	}
 	
 	@Override
 	public int hashCode() {
-		return getAddress().hashCode();
+		return toString().hashCode();
 	}
 	
 	@Override
@@ -267,7 +304,8 @@ public class RMIAddress {
 		final RMIAddress other = (RMIAddress) obj;
 		return (this.hostAddress.equals(other.hostAddress)
 				&& this.portNum == other.portNum
-				&& this.path.equals(other.path));
+				&& this.ssl == other.ssl
+				&& this.path.equals(other.path) );
 	}
 	
 }
