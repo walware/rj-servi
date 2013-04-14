@@ -2,7 +2,7 @@
 <feature
       id="de.walware.rj.servi.e"
       label="RJ Servi - E-Compilation"
-      version="1.2.0.qualifier"
+      version="1.2.1.qualifier"
       provider-name="WalWare.de"
       license-feature="de.walware.opensource.license"
       license-feature-version="1.0.0">
