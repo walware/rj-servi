@@ -212,6 +212,15 @@ public class Utils {
 		return s;
 	}
 	
+	public static void setProperty(final Properties properties, final String key, final String value) {
+		if (value != null) {
+			properties.setProperty(key, value);
+		}
+		else {
+			properties.remove(key);
+		}
+	}
+	
 	
 	private Utils() {
 	}

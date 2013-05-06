@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import de.walware.rj.servi.internal.Utils;
+
 
 /**
  * Configuration for an R node (of pool or embedded).
@@ -151,19 +153,19 @@ public class RServiNodeConfig implements PropertiesBean {
 	
 	@Override
 	public synchronized void save(final Properties map) {
-		map.setProperty(R_HOME_ID, this.rHome);
-		map.setProperty(R_ARCH_ID, this.rArch);
-		map.setProperty(JAVA_HOME_ID, (this.javaHome != null) ? this.javaHome : "");
-		map.setProperty(JAVA_ARGS_ID, this.javaArgs);
+		Utils.setProperty(map, R_HOME_ID, this.rHome);
+		Utils.setProperty(map, R_ARCH_ID, this.rArch);
+		Utils.setProperty(map, JAVA_HOME_ID, this.javaHome);
+		Utils.setProperty(map, JAVA_ARGS_ID, this.javaArgs);
 		for (final Entry<String, String> variable : this.environmentVariables.entrySet()) {
 			map.setProperty(NODE_ENVIRONMENT_VARIABLES_PREFIX + variable.getKey(), variable.getValue());
 		}
-		map.setProperty(NODE_ARGS_ID, this.nodeArgs);
-		map.setProperty(BASE_WD_ID, (this.baseWd != null) ? this.baseWd : "");
-		map.setProperty(R_STARTUP_SNIPPET_ID, this.rStartupSnippet);
-		map.setProperty(CONSOLE_ENABLED_ID, Boolean.toString(this.enableConsole));
-		map.setProperty(VERBOSE_ENABLED_ID, Boolean.toString(this.enableVerbose));
-		map.setProperty(STARTSTOP_TIMEOUT__ID, Long.toString(this.startStopTimeout));
+		Utils.setProperty(map, NODE_ARGS_ID, this.nodeArgs);
+		Utils.setProperty(map, BASE_WD_ID, this.baseWd);
+		Utils.setProperty(map, R_STARTUP_SNIPPET_ID, this.rStartupSnippet);
+		Utils.setProperty(map, CONSOLE_ENABLED_ID, Boolean.toString(this.enableConsole));
+		Utils.setProperty(map, VERBOSE_ENABLED_ID, Boolean.toString(this.enableVerbose));
+		Utils.setProperty(map, STARTSTOP_TIMEOUT__ID, Long.toString(this.startStopTimeout));
 	}
 	
 	public synchronized void setRHome(final String path) {

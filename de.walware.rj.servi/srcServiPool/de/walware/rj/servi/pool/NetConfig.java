@@ -19,6 +19,8 @@ import java.util.Properties;
 
 import de.walware.ecommons.net.RMIAddress;
 
+import de.walware.rj.servi.internal.Utils;
+
 
 public class NetConfig implements PropertiesBean {
 	
@@ -136,8 +138,8 @@ public class NetConfig implements PropertiesBean {
 	
 	@Override
 	public synchronized void save(final Properties map) {
-		map.put(HOSTADDRESS_ID, (this.hostAddress == null) ? "" : this.hostAddress);
-		map.put(REGISTRY_PORT_ID, (this.registryPort <= 0) ? "" : Integer.toString(this.registryPort));
+		Utils.setProperty(map, HOSTADDRESS_ID, this.hostAddress);
+		Utils.setProperty(map, REGISTRY_PORT_ID, (this.registryPort > 0) ? Integer.toString(this.registryPort) : null);
 		map.put(REGISTRY_EMBED_ID, Boolean.toString(this.registryEmbed));
 		map.put(SSL_ENABLED_ID, Boolean.toString(this.isSSLEnabled));
 	}
