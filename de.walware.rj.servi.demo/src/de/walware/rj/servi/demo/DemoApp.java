@@ -670,7 +670,7 @@ public class DemoApp {
 			fLogText.append("local: ");
 			fLogText.append(local);
 			fLogText.append(" -> rpkg: ");
-			fLogText.append(inst.getPkgName());
+			fLogText.append(inst.getPkg().toString());
 			fLogText.append("\n");
 			
 			inst.install(fRServi, null);
