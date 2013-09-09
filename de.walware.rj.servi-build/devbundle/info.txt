@@ -1,5 +1,10 @@
 (RJ) RServi Development Bundle
 
+== Requirement for all RJ setups ==
+
+The R packages 'rj' and 'rj.gd' (for graphics) must be installed in an R library.
+
+
 == Content ==
 
 rservi/
