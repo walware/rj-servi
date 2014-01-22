@@ -99,11 +99,8 @@ public class NodeServer extends DefaultServerImpl {
 								MainCmdItem tmp;
 								ITER_ITEMS : for (; (item != null); tmp = item, item = item.next, tmp.next = null) {
 									switch (item.getCmdType()) {
-									case MainCmdItem.T_CONSOLE_WRITE_ERR_ITEM:
-										this.out.println("R-ERR: " + item.getDataText());
-										break;
-									case MainCmdItem.T_CONSOLE_WRITE_OUT_ITEM:
-										this.out.println("R-OUT: " + item.getDataText());
+									case MainCmdItem.T_CONSOLE_WRITE_ITEM:
+										this.out.println("R-OUT (" + item.getOp() + "): " + item.getDataText());
 										break;
 									case MainCmdItem.T_CONSOLE_READ_ITEM:
 										this.out.println("R-PROMPT: " + item.getDataText());
