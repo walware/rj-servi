@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2009-2013 WalWare/RJ-Project (www.walware.de/goto/opensource).
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Distribution License v 1.0
- * which accompanies this distribution, and is available at
- * http://eclipse.org/org/documents/edl-v10.html
- * 
- * Contributors:
- *     Tobias Verbeke - initial API and implementation
- *******************************************************************************/
+/*=============================================================================#
+ # Copyright (c) 2009-2014 Stephan Wahlbrink (WalWare.de) and others.
+ # All rights reserved. This program and the accompanying materials
+ # are made available under the terms of the Eclipse Public License v1.0
+ # which accompanies this distribution, and is available at
+ # http://www.eclipse.org/legal/epl-v10.html
+ # 
+ # Contributors:
+ #     Tobias Verbeke - initial API and implementation
+ #=============================================================================*/
 
 package de.walware.rj.servi.examples;
 
@@ -123,16 +123,19 @@ public class CorrelationPlotter {
 		messageLabel.setVisible(true);
 		
 		ModifyListener nPointsListener = new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent event) {
 				nPointsChanged();
 			}
 		};
 		
 		SelectionListener correlationListener = new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				correlationValueChanged();
 			}
 			
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// nothing is done
 				return;
@@ -140,9 +143,11 @@ public class CorrelationPlotter {
 		};
 		
 		MouseListener clickListener = new MouseListener() {
+			@Override
 			public void mouseUp(MouseEvent e) {
 				return;
 			}
+			@Override
 			public void mouseDown(MouseEvent e) {
 				try {
 					makePlot();
@@ -150,6 +155,7 @@ public class CorrelationPlotter {
 					e2.printStackTrace();
 				}
 			}
+			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 				return;
 			}
@@ -211,7 +217,7 @@ public class CorrelationPlotter {
 					makePlot();
 				} else {
 					messageLabel.setText("Invalid number of points: " + nPointsText.getText());
-				    messageLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
+					messageLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

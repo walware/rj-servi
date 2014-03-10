@@ -6,8 +6,8 @@
 <%@taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%--
- ###############################################################################
- # Copyright (c) 2009-2013 Stephan Wahlbrink (WalWare.de) and others.
+ #=============================================================================#
+ # Copyright (c) 2009-2014 Stephan Wahlbrink (WalWare.de) and others.
  # All rights reserved. This program and the accompanying materials
  # are made available under the terms of the Eclipse Public License v1.0
  # which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@
  # 
  # Contributors:
  #     Stephan Wahlbrink - initial API and implementation
- ###############################################################################
+ #=============================================================================#
 --%>
 <f:view>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -47,7 +47,7 @@
 <hr/>
 
 <p>
-Copyright (c) 2007-2013 Stephan Wahlbrink (WalWare.de) and others.</p>
+Copyright (c) 2007-2014 Stephan Wahlbrink (WalWare.de) and others.</p>
 <p>
 This product includes software developed by The Apache Software Foundation
 (<a href="http://www.apache.org">www.apache.org</a>).</p>

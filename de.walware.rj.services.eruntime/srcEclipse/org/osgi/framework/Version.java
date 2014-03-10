@@ -1,23 +1,23 @@
-/*
- * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*=============================================================================#
+ # Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
+ # 
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ # http://www.apache.org/licenses/LICENSE-2.0
+ # 
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #=============================================================================*/
 
 package org.osgi.framework;
 
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+
 
 /**
  * Version identifier for bundles and packages.
@@ -39,7 +39,6 @@ import java.util.StringTokenizer;
  * @Immutable
  * @version $Revision: 6860 $
  */
-
 public class Version implements Comparable {
 	private final int			major;
 	private final int			minor;
@@ -264,6 +263,7 @@ public class Version implements Comparable {
 	 * 
 	 * @return The string representation of this version identifier.
 	 */
+	@Override
 	public String toString() {
 		int q = qualifier.length();
 		StringBuffer result = new StringBuffer(20 + q);
@@ -284,6 +284,7 @@ public class Version implements Comparable {
 	 * 
 	 * @return An integer which is a hash code value for this object.
 	 */
+	@Override
 	public int hashCode() {
 		return (major << 24) + (minor << 16) + (micro << 8)
 				+ qualifier.hashCode();
@@ -302,6 +303,7 @@ public class Version implements Comparable {
 	 *         <code>Version</code> and is equal to this object;
 	 *         <code>false</code> otherwise.
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (object == this) { // quicktest
 			return true;
@@ -341,6 +343,7 @@ public class Version implements Comparable {
 	 * @throws ClassCastException If the specified object is not a
 	 *         <code>Version</code>.
 	 */
+	@Override
 	public int compareTo(Object object) {
 		if (object == this) { // quicktest
 			return 0;
