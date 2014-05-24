@@ -19,6 +19,8 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -129,8 +131,8 @@ public class RMIUtil {
 	private boolean embeddedSSL = false;
 	private ManagedRegistry embeddedRegistry;
 	private final List<ManagedRegistry> embeddedRegistries = new ArrayList<RMIUtil.ManagedRegistry>(4);
-	private List<String> embeddedClasspathEntries;
-	private boolean embeddedClasspathLoadContrib;
+	private List<String> embeddedCodebaseEntries;
+	private boolean embeddedCodebaseLoadContrib;
 	
 	
 	private RMIUtil() {
@@ -143,8 +145,8 @@ public class RMIUtil {
 		embeddedPortFrom = EMBEDDED_PORT_FROM_DEFAULT;
 		embeddedPortTo = EMBEDDED_PORT_TO_DEFAULT;
 		if (instance) {
-			embeddedClasspathLoadContrib = true;
-			final String s = System.getProperty("de.walware.ecommons.net.rmi.eRegistryPortrange");
+			embeddedCodebaseLoadContrib = true;
+			final String s = System.getProperty("de.walware.ecommons.net.rmi.eRegistryPortrange"); //$NON-NLS-1$
 			if (s != null && s.length() > 0) {
 				final String from;
 				final String to;
@@ -259,14 +261,22 @@ public class RMIUtil {
 		}
 	}
 	
-	public void addEmbeddedClasspathEntry(final String entry) {
+	public void addEmbeddedCodebaseEntry(final String entry) {
+		if (entry.indexOf(':') < 0) {
+			throw new IllegalArgumentException("entry: missing schema"); //$NON-NLS-1$
+		}
+		final String path= encodeCodebaseEntry(entry);
+		if (path == null) {
+			throw new IllegalArgumentException(MessageFormat.format(
+					"entry: unsupported schema ''{0}''", entry.substring(0, entry.indexOf(':')) )); //$NON-NLS-1$
+		}
 		synchronized (this.embeddedLock) {
-			if (this.embeddedClasspathEntries == null) {
-				this.embeddedClasspathEntries = new ArrayList<String>();
+			if (this.embeddedCodebaseEntries == null) {
+				this.embeddedCodebaseEntries = new ArrayList<String>();
 			}
-			if (!this.embeddedClasspathEntries.contains(entry)) {
+			if (!this.embeddedCodebaseEntries.contains(entry)) {
 				this.embeddedRegistry = null;
-				this.embeddedClasspathEntries.add(entry);
+				this.embeddedCodebaseEntries.add(entry);
 			}
 		}
 	}
@@ -300,8 +310,8 @@ public class RMIUtil {
 				
 				monitor.beginTask("Starting registry (RMI)...", IProgressMonitor.UNKNOWN);
 				
-				if (this.embeddedClasspathLoadContrib && this.embeddedStartSeparate) {
-					loadClasspathContrib();
+				if (this.embeddedCodebaseLoadContrib && this.embeddedStartSeparate) {
+					loadCodebaseContrib();
 				}
 				
 				int loop = 1;
@@ -315,7 +325,7 @@ public class RMIUtil {
 						if (this.embeddedStartSeparate) {
 							status = startSeparateRegistry(rmiAddress, false,
 									(this.embeddedPortFrom == this.embeddedPortTo),
-									StopRule.ALWAYS, this.embeddedClasspathEntries );
+									StopRule.ALWAYS, this.embeddedCodebaseEntries );
 							if (status.getSeverity() < IStatus.ERROR) {
 								r = this.registries.get(new Port(port));
 							}
@@ -381,25 +391,44 @@ public class RMIUtil {
 		}
 	}
 	
-	private void loadClasspathContrib() {
+	private static String encodeCodebaseEntry(String path) {
+		if (path == null || path.isEmpty()) {
+			return null;
+		}
+		URI uri= null;
+		try {
+			if (path.startsWith("file:")) {
+				path= path.substring(5);
+				uri= new URI("file", null, path, null);
+			}
+		}
+		catch (final URISyntaxException e) {
+		}
+		if (uri != null) {
+			return uri.toString();
+		}
+		return null;
+	}
+	
+	private void loadCodebaseContrib() {
 		// not available outside Eclipse
-		this.embeddedClasspathLoadContrib = false;
+		this.embeddedCodebaseLoadContrib = false;
 	}
 	
 	
 	public IStatus startSeparateRegistry(final RMIAddress address, final boolean allowExisting,
-			final StopRule stopRule, final List<String> classpathEntries) {
-		return startSeparateRegistry(address, allowExisting, false, stopRule, classpathEntries);
+			final StopRule stopRule, final List<String> codebaseEntries) {
+		return startSeparateRegistry(address, allowExisting, false, stopRule, codebaseEntries);
 	}
 	private IStatus startSeparateRegistry(RMIAddress address, final boolean allowExisting,
 			final boolean noCheck,
-			final StopRule stopRule, final List<String> classpathEntries) {
-		if (allowExisting && classpathEntries != null && !classpathEntries.isEmpty()) {
-			throw new IllegalArgumentException("allow existing not valid in combination with classpath entries");
+			final StopRule stopRule, final List<String> codebaseEntries) {
+		if (allowExisting && codebaseEntries != null && !codebaseEntries.isEmpty()) {
+			throw new IllegalArgumentException("allow existing not valid in combination with codebase entries");
 		}
 		final InetAddress hostAddress = address.getHostAddress();
 		if (!(hostAddress.isLinkLocalAddress() || hostAddress.isLoopbackAddress())) {
-			throw new IllegalArgumentException("address not local");
+			throw new IllegalArgumentException("address: not local"); //$NON-NLS-1$
 		}
 		if (address.getName() != null) {
 			try {
@@ -440,20 +469,19 @@ public class RMIUtil {
 			sb.append(File.separator).append("rmiregistry"); //$NON-NLS-1$
 			command.add(sb.toString());
 			command.add(address.getPort());
-			if (classpathEntries != null && !classpathEntries.isEmpty()) {
-				command.add("-J-classpath");
+			if (codebaseEntries != null && !codebaseEntries.isEmpty()) {
 				sb.setLength(0);
-				sb.append("-J");
-				sb.append(classpathEntries.get(0));
-				for (int i = 1; i < classpathEntries.size(); i++) {
-					sb.append(File.pathSeparatorChar);
-					sb.append(classpathEntries.get(i));
+				sb.append("-J-Djava.rmi.server.codebase="); //$NON-NLS-1$
+				sb.append(codebaseEntries.get(0));
+				for (int i = 1; i < codebaseEntries.size(); i++) {
+					sb.append(' ');
+					sb.append(codebaseEntries.get(i));
 				}
 				command.add(sb.toString());
 			}
 			if (address.getHost() != null) {
 				sb.setLength(0);
-				sb.append("-J-Djava.rmi.server.hostname=");
+				sb.append("-J-Djava.rmi.server.hostname="); //$NON-NLS-1$
 				sb.append(address.getHost());
 				command.add(sb.toString());
 			}
