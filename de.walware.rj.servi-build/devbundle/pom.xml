@@ -7,33 +7,33 @@
 	<parent>
 		<groupId>de.walware.rj</groupId>
 		<artifactId>rj-servi</artifactId>
-		<version>2.0-SNAPSHOT</version>
+		<version>2.0.b201406211200</version>
 	</parent>
 	
 	<groupId>de.walware.rj-packaging</groupId>
 	<artifactId>de.walware.rj.servi-devbundle</artifactId>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>2.0.1.b201406211200</version>
 	<packaging>pom</packaging>
 	
 	<dependencies>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>rj-core</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.0.b201406211200</version>
 			<classifier>module-snapshot</classifier>
 			<type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>rj-client</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.0.b201406211200</version>
 			<classifier>module-snapshot</classifier>
 			<type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>rj-servi</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.0.b201406211200</version>
 			<classifier>module-snapshot</classifier>
 			<type>zip</type>
 		</dependency>
@@ -41,58 +41,58 @@
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.data</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0.b201406211200</version>
 			<type>eclipse-plugin</type>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.server</artifactId>
-			<version>2.0.1-SNAPSHOT</version>
+			<version>2.0.1.b201406211200</version>
 			<type>eclipse-plugin</type>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.client</artifactId>
-			<version>2.0.1-SNAPSHOT</version>
+			<version>2.0.1.b201406211200</version>
 			<type>eclipse-plugin</type>
 		</dependency>
 		
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.services.eruntime</artifactId>
-			<version>1.4.0-SNAPSHOT</version>
+			<version>1.4.0.b201406211200</version>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.servi</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0.b201406211200</version>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.servi.webapp</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0.b201406211200</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj-packaging</groupId>
 			<artifactId>de.walware.rj.servi-repo</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0.b201406211200</version>
 			<type>eclipse-repository</type>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.servi.demo</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0.b201406211200</version>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.servi.rcpdemo</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0.b201406211200</version>
 		</dependency>
 		<dependency>
 			<groupId>de.walware.rj</groupId>
 			<artifactId>de.walware.rj.servi.rcpdemo2</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0.b201406211200</version>
 		</dependency>
 	</dependencies>
 	

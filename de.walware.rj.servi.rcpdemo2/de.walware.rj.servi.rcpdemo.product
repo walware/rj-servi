@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="RServi RCP Demo" id="de.walware.rj.servi.rcpdemo2.product" application="de.walware.rj.servi.rcpdemo.application" version="0.4.0.qualifier" useFeatures="false" includeLaunchers="true">
+<product name="RServi RCP Demo" id="de.walware.rj.servi.rcpdemo2.product" application="de.walware.rj.servi.rcpdemo.application" version="0.4.0.b201406211200" useFeatures="false" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>

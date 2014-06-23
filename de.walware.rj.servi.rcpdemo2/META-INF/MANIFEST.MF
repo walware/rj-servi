@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Vendor: WalWare.de
 Bundle-Name: RJ RServi RCP Demo
 Bundle-SymbolicName: de.walware.rj.servi.rcpdemo2;singleton:=true
-Bundle-Version: 2.0.0.qualifier
+Bundle-Version: 2.0.0.b201406211200
 Bundle-Activator: de.walware.rj.servi.internal.rcpdemo.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
