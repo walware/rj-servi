@@ -45,6 +45,11 @@ import de.walware.rj.servi.internal.rcpdemo.Activator;
 import de.walware.rj.services.RGraphicCreator;
 
 
+/** 
+ * View for R plots using RJ graphic device (rj.gd) and SWT rendering.
+ * 
+ * Note: All field access occur in display thread.
+ */
 public class GraphDemoView extends ViewPart {
 	
 	
@@ -161,6 +166,7 @@ public class GraphDemoView extends ViewPart {
 				if (plot instanceof IERGraphic) {
 					final IERGraphic erPlot = (IERGraphic) plot;
 					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							if (GraphDemoView.this.imageControl.isDisposed()) {
 								erPlot.close();
