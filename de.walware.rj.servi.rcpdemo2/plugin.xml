@@ -12,14 +12,6 @@
       </application>
    </extension>
    <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            name="RCP Perspective"
-            class="de.walware.rj.servi.internal.rcpdemo.Perspective"
-            id="de.walware.rj.servi.rcpdemo.perspective">
-      </perspective>
-   </extension>
-   <extension
          id="product"
          point="org.eclipse.core.runtime.products">
       <product
@@ -28,10 +20,6 @@
          <property
                name="windowImages"
                value="icons/alt_window_16.gif,icons/alt_window_32.gif">
-         </property>
-         <property
-               name="preferenceCustomization"
-               value="plugin_customization.ini">
          </property>
          <property
                name="appName"
@@ -49,24 +37,38 @@
                name="startupMessageRect"
                value="20,210,415,20">
          </property>
+         <property
+               name="preferenceCustomization"
+               value="plugin_customization.ini">
+         </property>
       </product>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="RCP Perspective"
+            class="de.walware.rj.servi.internal.rcpdemo.Perspective"
+            id="de.walware.rj.servi.rcpdemo.perspective">
+      </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu">
-            <menu id="file"
-                  label="&amp;File">
-            </menu>
+         <menu id="file"
+               label="&amp;File">
+         </menu>
       </menuContribution>
       <menuContribution
             locationURI="menu:file">
-            <command
-                  commandId="org.eclipse.ui.file.exit"
-                  style="push">
-            </command>
+         <command
+               commandId="org.eclipse.ui.file.exit"
+               style="push">
+         </command>
       </menuContribution>
    </extension>
+   
    <extension
          point="org.eclipse.ui.views">
       <view
@@ -92,31 +94,31 @@
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
-            targetID="de.walware.rj.servi.rcpdemo.perspective">
+            targetID="*">
          <view
-               closeable="false"
                id="de.walware.rj.servi.rcpdemo.views.GraphDemo"
+               closeable="false"
                minimized="false"
-               relationship="top"
                relative="org.eclipse.ui.editorss"
+               relationship="left"
                visible="true">
          </view>
          <view
-               closeable="false"
                id="de.walware.rj.servi.rcpdemo.views.RServiConfig"
+               closeable="false"
                minimized="false"
                ratio="0.3f"
-               relationship="left"
                relative="de.walware.rj.servi.rcpdemo.views.GraphDemo"
+               relationship="left"
                visible="true">
          </view>
          <view
-               closeable="true"
                id="org.eclipse.ui.views.ProgressView"
+               closeable="true"
                minimized="false"
                ratio="0.75"
-               relationship="bottom"
                relative="de.walware.rj.servi.rcpdemo.views.RServiConfig"
+               relationship="bottom"
                visible="false">
          </view>
       </perspectiveExtension>

@@ -3,16 +3,16 @@ Bundle-ManifestVersion: 2
 Bundle-Vendor: WalWare.de
 Bundle-Name: RJ RServi RCP Demo
 Bundle-SymbolicName: de.walware.rj.servi.rcpdemo;singleton:=true
-Bundle-Version: 2.0.0.qualifier
+Bundle-Version: 2.0.4.qualifier
 Bundle-Activator: de.walware.rj.servi.internal.rcpdemo.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  de.walware.rj.data;bundle-version="1.1.0",
  de.walware.rj.server;bundle-version="1.1.0",
  de.walware.rj.servi;bundle-version="1.1.0",
- de.walware.rj.eclient.graphics;bundle-version="1.1.0"
+ de.walware.rj.eclient.graphics;bundle-version="1.2.0"
 Import-Package: de.walware.ecommons.net;version="1.1.0",
  de.walware.rj.graphic,
  de.walware.rj.services,
