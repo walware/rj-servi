@@ -7,7 +7,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%--
  #=============================================================================#
- # Copyright (c) 2009-2015 Stephan Wahlbrink (WalWare.de) and others.
+ # Copyright (c) 2009-2016 Stephan Wahlbrink (WalWare.de) and others.
  # All rights reserved. This program and the accompanying materials
  # are made available under the terms of the Eclipse Public License v1.0
  # which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@
 <hr/>
 
 <p>
-Copyright (c) 2007-2015 Stephan Wahlbrink (WalWare.de) and others.</p>
+Copyright (c) 2007-2016 Stephan Wahlbrink (WalWare.de) and others.</p>
 <p>
 This product includes software developed by The Apache Software Foundation
 (<a href="http://www.apache.org">www.apache.org</a>).</p>
