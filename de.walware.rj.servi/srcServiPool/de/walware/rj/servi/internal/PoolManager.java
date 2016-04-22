@@ -52,7 +52,7 @@ public class PoolManager implements RServiPool, RServiPoolManager {
 	
 	private NodeFactory nodeFactory;
 	
-	private final FastList<PoolListener> poolListeners = new FastList<PoolListener>(PoolListener.class, FastList.IDENTITY);
+	private final FastList<PoolListener> poolListeners = new FastList<>(PoolListener.class, FastList.IDENTITY);
 	private final Stats stats;
 	
 	

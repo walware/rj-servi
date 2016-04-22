@@ -101,7 +101,7 @@ public abstract class PoolStatus<N> {
 		else {
 			final Object[] itemDatas = manager.getPoolItemsData();
 			counter = manager.getCounter();
-			list = new ArrayList<N>();
+			list = new ArrayList<>();
 			counter.numIdling = 0;
 			counter.numInUse = 0;
 			counter.numTotal = 0;

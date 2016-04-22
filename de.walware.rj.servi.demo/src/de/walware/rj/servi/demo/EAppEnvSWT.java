@@ -25,7 +25,7 @@ import de.walware.ecommons.IDisposable;
 public class EAppEnvSWT implements ECommons.IAppEnvironment, DisposeListener {
 	
 	
-	private final CopyOnWriteArraySet<IDisposable> stopListeners = new CopyOnWriteArraySet<IDisposable>();
+	private final CopyOnWriteArraySet<IDisposable> stopListeners = new CopyOnWriteArraySet<>();
 	
 	
 	public EAppEnvSWT() {

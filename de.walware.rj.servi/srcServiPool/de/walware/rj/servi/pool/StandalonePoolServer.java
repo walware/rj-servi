@@ -56,7 +56,7 @@ public class StandalonePoolServer extends JMPoolServer implements StandalonePool
 	private static class EAppEnv implements ECommons.IAppEnvironment {
 		
 		
-		private final CopyOnWriteArraySet<IDisposable> stopListeners = new CopyOnWriteArraySet<IDisposable>();
+		private final CopyOnWriteArraySet<IDisposable> stopListeners = new CopyOnWriteArraySet<>();
 		
 		
 		public EAppEnv() {

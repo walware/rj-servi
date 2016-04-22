@@ -163,7 +163,7 @@ public class RServiImpl implements RServi, Externalizable {
 	
 	private void init() throws CoreException {
 		this.rjsId = RjsComConfig.registerClientComHandler(this.rjs);
-		final Map<String, Object> properties = new HashMap<String, Object>();
+		final Map<String, Object> properties = new HashMap<>();
 		this.rjs.initClient(this.rHandle, this, properties, this.rjsId);
 		this.rjs.setRjsProperties(properties);
 	}

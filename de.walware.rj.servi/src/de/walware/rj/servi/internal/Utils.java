@@ -50,7 +50,7 @@ public class Utils {
 		}
 		
 		public List<String> parseArguments() {
-			final List<String> v = new ArrayList<String>();
+			final List<String> v = new ArrayList<>();
 			
 			this.ch = getNext();
 			while (this.ch > 0) {
@@ -154,7 +154,7 @@ public class Utils {
 	
 	public static List<String> parseArguments(final String args) {
 		if (args == null) {
-			return new ArrayList<String>(0);
+			return new ArrayList<>(0);
 		}
 		else {
 			final ArgumentParser parser = new ArgumentParser(args);

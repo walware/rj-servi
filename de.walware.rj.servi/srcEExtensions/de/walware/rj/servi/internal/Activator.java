@@ -34,7 +34,7 @@ public class Activator implements BundleActivator, ECommons.IAppEnvironment {
 	
 	private BundleContext context;
 	
-	private final CopyOnWriteArraySet<IDisposable> stopListeners = new CopyOnWriteArraySet<IDisposable>();
+	private final CopyOnWriteArraySet<IDisposable> stopListeners = new CopyOnWriteArraySet<>();
 	
 	
 	@Override

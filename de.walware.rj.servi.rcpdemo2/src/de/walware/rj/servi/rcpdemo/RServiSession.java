@@ -54,6 +54,7 @@ public class RServiSession extends PlatformObject implements ITool {
 	
 	private class Queue implements IQueue {
 		
+		@Override
 		public IStatus add(final IToolRunnable runnable) {
 			synchronized (RServiSession.this.jobs) {
 				if (isTerminated()) {
@@ -71,6 +72,7 @@ public class RServiSession extends PlatformObject implements ITool {
 			}
 		}
 		
+		@Override
 		public void remove(final IToolRunnable runnable) {
 			RunnableJob removed = null;
 			synchronized (RServiSession.this.jobs) {
@@ -91,14 +93,17 @@ public class RServiSession extends PlatformObject implements ITool {
 			}
 		}
 		
+		@Override
 		public boolean isHotSupported() {
 			return false;
 		}
 		
+		@Override
 		public IStatus addHot(final IToolRunnable runnable) {
 			return add(runnable);
 		}
 		
+		@Override
 		public void removeHot(final IToolRunnable runnable) {
 			remove(runnable);
 		}
@@ -107,65 +112,78 @@ public class RServiSession extends PlatformObject implements ITool {
 	
 	private class RServiService implements IRToolService, RService, IToolService {
 		
+		@Override
 		public ITool getTool() {
 			return RServiSession.this;
 		}
 		
+		@Override
 		public RPlatform getPlatform() {
 			return RServiSession.this.servi.getPlatform();
 		}
 		
+		@Override
 		public void evalVoid(final String expression,
 				final IProgressMonitor monitor) throws CoreException {
 			RServiSession.this.servi.evalVoid(expression, monitor);
 		}
 		
+		@Override
 		public RObject evalData(final String expression,
 				final IProgressMonitor monitor) throws CoreException {
 			return RServiSession.this.servi.evalData(expression, monitor);
 		}
 		
+		@Override
 		public RObject evalData(final String expression,
 				final String factoryId, final int options, final int depth,
 				final IProgressMonitor monitor) throws CoreException {
 			return RServiSession.this.servi.evalData(expression, factoryId, options, depth, monitor);
 		}
 		
+		@Override
 		public RObject evalData(final RReference reference,
 				final IProgressMonitor monitor) throws CoreException {
 			return RServiSession.this.servi.evalData(reference, monitor);
 		}
 		
+		@Override
 		public RObject evalData(final RReference reference,
 				final String factoryId, final int options, final int depth,
 				final IProgressMonitor monitor) throws CoreException {
 			return RServiSession.this.servi.evalData(reference, factoryId, options, depth, monitor);
 		}
 		
+		@Override
 		public void assignData(final String expression, final RObject data,
 				final IProgressMonitor monitor) throws CoreException {
 			RServiSession.this.servi.assignData(expression, data, monitor);
 		}
 		
+		@Override
 		public void uploadFile(final InputStream in, final long length, final String fileName,
 				final int options, final IProgressMonitor monitor) throws CoreException {
 			RServiSession.this.servi.uploadFile(in, length, fileName, options, monitor);
 		}
 		
+		@Override
 		public void downloadFile(final OutputStream out, final String fileName, final int options,
 				final IProgressMonitor monitor) throws CoreException {
 			RServiSession.this.servi.downloadFile(fileName, options, monitor);
 		}
 		
+		@Override
 		public byte[] downloadFile(final String fileName, final int options,
 				final IProgressMonitor monitor) throws CoreException {
 			return RServiSession.this.servi.downloadFile(fileName, options, monitor);
 		}
 		
+		@Override
 		public FunctionCall createFunctionCall(final String name) throws CoreException {
 			return RServiSession.this.servi.createFunctionCall(name);
 		}
 		
+		@Override
 		public RGraphicCreator createRGraphicCreator(final int options) throws CoreException {
 			return RServiSession.this.servi.createRGraphicCreator(options);
 		}
@@ -221,12 +239,15 @@ public class RServiSession extends PlatformObject implements ITool {
 	
 	private class JobListener implements IJobChangeListener {
 		
+		@Override
 		public void aboutToRun(final IJobChangeEvent event) {
 		}
 		
+		@Override
 		public void awake(final IJobChangeEvent event) {
 		}
 		
+		@Override
 		public void done(final IJobChangeEvent event) {
 			if (event.getResult() == Status.CANCEL_STATUS) {
 				synchronized (RServiSession.this.jobs) {
@@ -237,12 +258,15 @@ public class RServiSession extends PlatformObject implements ITool {
 			}
 		}
 		
+		@Override
 		public void running(final IJobChangeEvent event) {
 		}
 		
+		@Override
 		public void scheduled(final IJobChangeEvent event) {
 		}
 		
+		@Override
 		public void sleeping(final IJobChangeEvent event) {
 		}
 		
@@ -263,9 +287,11 @@ public class RServiSession extends PlatformObject implements ITool {
 	
 	public RServiSession(final RServi servi) {
 		this("R engine", servi, new ISchedulingRule() {
+			@Override
 			public boolean contains(final ISchedulingRule rule) {
 				return (rule == this);
 			}
+			@Override
 			public boolean isConflicting(final ISchedulingRule rule) {
 				return (rule == this);
 			}
@@ -282,18 +308,22 @@ public class RServiSession extends PlatformObject implements ITool {
 	}
 	
 	
+	@Override
 	public String getMainType() {
 		return "R";
 	}
 	
+	@Override
 	public boolean isProvidingFeatureSet(final String featureSetId) {
 		return "de.walware.rj.services.RService".equals(featureSetId); //$NON-NLS-1$
 	}
 	
+	@Override
 	public IQueue getQueue() {
 		return this.queue;
 	}
 	
+	@Override
 	public boolean isTerminated() {
 		return (this.state < 0);
 	}
@@ -328,6 +358,7 @@ public class RServiSession extends PlatformObject implements ITool {
 	protected void terminated() {
 	}
 	
+	@Override
 	public String getLabel(final int config) {
 		return this.label;
 	}
@@ -345,18 +376,23 @@ public class RServiSession extends PlatformObject implements ITool {
 				this.jobs.clear();
 			}
 			this.queue.add(new ISystemRunnable() {
+				@Override
 				public String getTypeId() {
 					return "r/session/close";
 				}
+				@Override
 				public String getLabel() {
 					return "Close R Session";
 				}
+				@Override
 				public boolean isRunnableIn(final ITool tool) {
 					return (tool == RServiSession.this);
 				}
+				@Override
 				public boolean changed(final int event, final ITool tool) {
 					return true;
 				}
+				@Override
 				public void run(final IToolService service,
 						final IProgressMonitor monitor) throws CoreException {
 					doTerminate();

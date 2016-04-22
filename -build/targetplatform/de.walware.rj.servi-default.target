@@ -5,9 +5,9 @@
 	<locations>
 		<location includeAllPlatforms="false" includeMode="planner" includeConfigurePhase="false" includeSource="false"
 				type="InstallableUnit">
-			<repository location="http://download.eclipse.org/eclipse/updates/3.8"/>
+			<repository location="http://download.eclipse.org/eclipse/updates/4.4"/>
 			<unit id="org.eclipse.platform.feature.group"
-					version="3.8.1.v20130118-180812-9jF7oIBFG8eU2pim-VbIlTuQjY0RWWK3x-bv4I"/>
+					version="4.4.2.v20150204-1700"/>
 		</location>
 	</locations>
 </target>

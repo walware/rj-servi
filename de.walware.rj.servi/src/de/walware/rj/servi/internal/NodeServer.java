@@ -309,7 +309,7 @@ public class NodeServer extends DefaultServerImpl {
 		"}";
 		RjsComConfig.setServerPathResolver(this);
 		
-		final Map<String, Object> properties = new HashMap<String, Object>();
+		final Map<String, Object> properties = new HashMap<>();
 		properties.put("args", new String[0]);
 		this.internalEngine.start(this.consoleDummyClient, properties);
 		

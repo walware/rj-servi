@@ -264,7 +264,7 @@ public class JMPoolServer implements PoolServer, PoolServerMXBean {
 		RMIRegistry rmiRegistry = null;
 		if (embed) {
 			if (this.rmiEmbeddedPorts == null) {
-				this.rmiEmbeddedPorts = new HashSet<Integer>();
+				this.rmiEmbeddedPorts = new HashSet<>();
 			}
 			try {
 				rmiRegistry = new RMIRegistry(rmiRegistryAddress, registry, true);

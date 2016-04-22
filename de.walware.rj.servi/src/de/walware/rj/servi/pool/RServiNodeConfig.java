@@ -72,7 +72,7 @@ public class RServiNodeConfig implements PropertiesBean {
 	private String javaHome;
 	private String javaArgs;
 	
-	private final Map<String, String> environmentVariables = new HashMap<String, String>();
+	private final Map<String, String> environmentVariables = new HashMap<>();
 	private String nodeArgs;
 	
 	private String baseWd;

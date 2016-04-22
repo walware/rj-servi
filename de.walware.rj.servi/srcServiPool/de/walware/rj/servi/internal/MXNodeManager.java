@@ -27,7 +27,7 @@ public class MXNodeManager implements PoolListener {
 	
 	private final PoolServer server;
 	
-	private final Map<ObjectPoolItem, MXNode> nodes = new HashMap<ObjectPoolItem, MXNode>();
+	private final Map<ObjectPoolItem, MXNode> nodes = new HashMap<>();
 	
 	private final PoolManager poolManager;
 	

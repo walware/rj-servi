@@ -61,7 +61,7 @@ public class LocalNodeFactory implements NodeFactory {
 	}
 	
 	private static List<String> createSSLPropertyArgs() {
-		final List<String> args = new ArrayList<String>();
+		final List<String> args = new ArrayList<>();
 		copySystemPropertyPath("javax.net.ssl.keyStore", args);
 		copySystemProperty("javax.net.ssl.keyStorePassword", args);
 		copySystemPropertyPath("javax.net.ssl.trustStore", args);
@@ -70,8 +70,8 @@ public class LocalNodeFactory implements NodeFactory {
 	}
 	
 	private static class ProcessConfig {
-		final Map<String, String> addEnv = new HashMap<String, String>();
-		final List<String> command = new ArrayList<String>();
+		final Map<String, String> addEnv = new HashMap<>();
+		final List<String> command = new ArrayList<>();
 		int nameCommandIdx = -1;
 		String baseWd;
 		String authConfig;
@@ -385,7 +385,7 @@ public class LocalNodeFactory implements NodeFactory {
 					}
 				}
 			}
-			command = new ArrayList<String>(p.command.size() + 2);
+			command = new ArrayList<>(p.command.size() + 2);
 			command.addAll(p.command);
 			poolObj.address = new RMIAddress(registry.getAddress(), id);
 			command.set(p.nameCommandIdx, poolObj.address.toString());

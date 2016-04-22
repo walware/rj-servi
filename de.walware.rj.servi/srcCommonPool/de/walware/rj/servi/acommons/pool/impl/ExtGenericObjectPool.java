@@ -675,13 +675,13 @@ public class ExtGenericObjectPool implements ObjectPool {
 	
 	//-- data --
 	
-	private final ArrayList<Item> _completePool = new ArrayList<Item>();
+	private final ArrayList<Item> _completePool = new ArrayList<>();
 	
 	
 	/** My pool. */
 	private CursorableLinkedList<Item> _idlePool = null;
 	
-	private final ArrayList<Item> _evictionCheckList = new ArrayList<ExtGenericObjectPool.Item>();
+	private final ArrayList<Item> _evictionCheckList = new ArrayList<>();
 	
 	/** Eviction cursor - keeps track of idle object evictor position */
 	private CursorableLinkedList<Item>.Cursor _evictionCursor = null;
@@ -699,7 +699,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 	private Evictor evictor = null;
 	private ScheduledFuture<?> evictorFuture;
 	
-	private List<Item> _toDestroy = new ArrayList<Item>();
+	private List<Item> _toDestroy = new ArrayList<>();
 	
 	private Lock _clearLock = new ReentrantLock();
 	
@@ -779,7 +779,7 @@ public class ExtGenericObjectPool implements ObjectPool {
 		this._softMinEvictableIdleTimeMillis = softMinEvictableIdleTimeMillis;
 		this._testWhileIdle = testWhileIdle;
 		
-		this._idlePool = new CursorableLinkedList<Item>();
+		this._idlePool = new CursorableLinkedList<>();
 		
 		this.timer.register();
 		startEvictor(this._timeBetweenEvictionRunsMillis);

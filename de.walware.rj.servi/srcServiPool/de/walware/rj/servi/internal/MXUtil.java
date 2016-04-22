@@ -28,7 +28,7 @@ import de.walware.rj.servi.pool.PropertiesBean.ValidationMessage;
 public class MXUtil {
 	
 	public static boolean validate(final PropertiesBean bean) throws OperationsException {
-		final List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
+		final List<ValidationMessage> messages = new ArrayList<>();
 		if (bean.validate(messages)) {
 			return true;
 		}

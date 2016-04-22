@@ -120,6 +120,7 @@ public class GraphDemoView extends ViewPart {
 				if (plot instanceof IERGraphic) {
 					final IERGraphic erPlot = (IERGraphic) plot;
 					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							if (GraphDemoView.this.imageControl.isDisposed()) {
 								erPlot.close();

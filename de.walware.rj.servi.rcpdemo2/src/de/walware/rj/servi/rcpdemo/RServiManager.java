@@ -235,6 +235,7 @@ public class RServiManager implements IDisposable {
 		}
 	}
 	
+	@Override
 	public void dispose() {
 		this.config = new Config();
 		final RServiSession[] sessions;

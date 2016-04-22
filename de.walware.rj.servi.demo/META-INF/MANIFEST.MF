@@ -4,7 +4,7 @@ Bundle-Vendor: WalWare.de
 Bundle-Name: RJ RServi Demo
 Bundle-SymbolicName: de.walware.rj.servi.demo
 Bundle-Version: 2.1.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: de.walware.rj.data;bundle-version="1.1.0",
  de.walware.rj.servi;bundle-version="1.1.0",
  org.eclipse.swt;bundle-version="3.4.0"

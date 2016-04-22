@@ -744,7 +744,7 @@ class CursorableLinkedList<E> implements List<E>, Serializable {
         } else if(i == 0 && j == this._size) {
             return this;
         } else {
-            return new CursorableSubList<E>(this,i,j);
+            return new CursorableSubList<>(this,i,j);
         }
     }
 
@@ -761,7 +761,7 @@ class CursorableLinkedList<E> implements List<E>, Serializable {
     protected Listable<E> insertListable(Listable<E> before, Listable<E> after, E value) {
         this._modCount++;
         this._size++;
-        Listable<E> elt = new Listable<E>(before,after,value);
+        Listable<E> elt = new Listable<>(before,after,value);
         if(null != before) {
             before.setNext(elt);
         } else {
@@ -841,7 +841,7 @@ class CursorableLinkedList<E> implements List<E>, Serializable {
             }
         }
         
-        this._cursors.add( new WeakReference<Cursor>(cur) );
+        this._cursors.add( new WeakReference<>(cur) );
     }
 
     /**
@@ -950,8 +950,8 @@ class CursorableLinkedList<E> implements List<E>, Serializable {
         in.defaultReadObject();
         this._size = 0;
         this._modCount = 0;
-        this._cursors = new ArrayList<WeakReference<Cursor>>();
-        this._head = new Listable<E>(null,null,null);
+        this._cursors = new ArrayList<>();
+        this._head = new Listable<>(null,null,null);
         int size = in.readInt();
         for (int i=0;i<size;i++) {
             this.add((E) in.readObject());
@@ -975,7 +975,7 @@ class CursorableLinkedList<E> implements List<E>, Serializable {
      * {@link org.apache.commons.collections.CursorableLinkedList.Listable} 
      * is the first or last element in the list.
      */
-    protected transient Listable<E> _head = new Listable<E>(null,null,null);
+    protected transient Listable<E> _head = new Listable<>(null,null,null);
 
     /** Tracks the number of structural modifications to me. */
     protected transient int _modCount = 0;
@@ -984,7 +984,7 @@ class CursorableLinkedList<E> implements List<E>, Serializable {
      * A list of the currently {@link CursorableLinkedList.Cursor}s currently
      * open in this list.
      */
-    protected transient List<WeakReference<Cursor>> _cursors = new ArrayList<WeakReference<Cursor>>();
+    protected transient List<WeakReference<Cursor>> _cursors = new ArrayList<>();
 
     //--- inner classes ----------------------------------------------
 
@@ -1034,14 +1034,14 @@ class CursorableLinkedList<E> implements List<E>, Serializable {
 
         ListIter(int index) {
             if(index == 0) {
-                this._cur = new Listable<E>(null,CursorableLinkedList.this._head.next(),null);
+                this._cur = new Listable<>(null,CursorableLinkedList.this._head.next(),null);
                 this._nextIndex = 0;
             } else if(index == CursorableLinkedList.this._size) {
-                this._cur = new Listable<E>(CursorableLinkedList.this._head.prev(),null,null);
+                this._cur = new Listable<>(CursorableLinkedList.this._head.prev(),null,null);
                 this._nextIndex = CursorableLinkedList.this._size;
             } else {
                 Listable<E> temp = getListableAt(index);
-                this._cur = new Listable<E>(temp.prev(),temp,null);
+                this._cur = new Listable<>(temp.prev(),temp,null);
                 this._nextIndex = index;
             }
         }

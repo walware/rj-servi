@@ -64,9 +64,11 @@ public class RServiManager {
 	private EmbeddedRServiManager embeddedR;
 	
 	private final ISchedulingRule schedulingRule = new ISchedulingRule() {
+		@Override
 		public boolean contains(final ISchedulingRule rule) {
 			return (rule == this);
 		}
+		@Override
 		public boolean isConflicting(final ISchedulingRule rule) {
 			// if concurrent remote instances are desired, return false here
 			return (rule == this);
