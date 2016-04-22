@@ -202,31 +202,54 @@ public class RServiImpl implements RServi, Externalizable {
 	}
 	
 	@Override
-	public void evalVoid(final String command, final IProgressMonitor monitor) throws CoreException {
+	public void evalVoid(final String expression,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
-		this.rjs.evalVoid(command, null, monitor);
+		this.rjs.evalVoid(expression, null, monitor);
 	}
 	
 	@Override
-	public RObject evalData(final String command, final IProgressMonitor monitor) throws CoreException {
+	public void evalVoid(final String expression, final RObject envir,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
-		return this.rjs.evalData(command, null, null, 0, RService.DEPTH_INFINITE, monitor);
+		this.rjs.evalVoid(expression, envir, monitor);
 	}
 	
 	@Override
-	public RObject evalData(final String command, final String factoryId, final int options, final int depth, final IProgressMonitor monitor) throws CoreException {
+	public RObject evalData(final String expression,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
-		return this.rjs.evalData(command, null, factoryId, options, depth, monitor);
+		return this.rjs.evalData(expression, null, null, 0, RService.DEPTH_INFINITE, monitor);
 	}
 	
 	@Override
-	public RObject evalData(final RReference reference, final IProgressMonitor monitor) throws CoreException {
+	public RObject evalData(final String expression, final String factoryId, final int options, final int depth,
+			final IProgressMonitor monitor) throws CoreException {
+		if (this.rjsId == 0) {
+			init();
+		}
+		return this.rjs.evalData(expression, null, factoryId, options, depth, monitor);
+	}
+	
+	@Override
+	public RObject evalData(final String expression, final RObject envir,
+			final String factoryId, final int options, final int depth,
+			final IProgressMonitor monitor) throws CoreException {
+		if (this.rjsId == 0) {
+			init();
+		}
+		return this.rjs.evalData(expression, envir, factoryId, options, depth, monitor);
+	}
+	
+	@Override
+	public RObject evalData(final RReference reference,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
@@ -234,7 +257,8 @@ public class RServiImpl implements RServi, Externalizable {
 	}
 	
 	@Override
-	public RObject evalData(final RReference reference, final String factoryId, final int options, final int depth, final IProgressMonitor monitor) throws CoreException {
+	public RObject evalData(final RReference reference, final String factoryId, final int options, final int depth,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
@@ -242,7 +266,8 @@ public class RServiImpl implements RServi, Externalizable {
 	}
 	
 	@Override
-	public void assignData(final String expression, final RObject data, final IProgressMonitor monitor) throws CoreException {
+	public void assignData(final String expression, final RObject data,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
@@ -250,7 +275,8 @@ public class RServiImpl implements RServi, Externalizable {
 	}
 	
 	@Override
-	public void downloadFile(final OutputStream out, final String fileName, final int options, final IProgressMonitor monitor) throws CoreException {
+	public void downloadFile(final OutputStream out, final String fileName, final int options,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
@@ -258,7 +284,8 @@ public class RServiImpl implements RServi, Externalizable {
 	}
 	
 	@Override
-	public byte[] downloadFile(final String fileName, final int options, final IProgressMonitor monitor) throws CoreException {
+	public byte[] downloadFile(final String fileName, final int options,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}
@@ -266,7 +293,8 @@ public class RServiImpl implements RServi, Externalizable {
 	}
 	
 	@Override
-	public void uploadFile(final InputStream in, final long length, final String fileName, final int options, final IProgressMonitor monitor) throws CoreException {
+	public void uploadFile(final InputStream in, final long length, final String fileName, final int options,
+			final IProgressMonitor monitor) throws CoreException {
 		if (this.rjsId == 0) {
 			init();
 		}

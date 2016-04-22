@@ -129,6 +129,12 @@ public class RServiSession extends PlatformObject implements ITool {
 		}
 		
 		@Override
+		public void evalVoid(final String expression, final RObject envir,
+				final IProgressMonitor monitor) throws CoreException {
+			RServiSession.this.servi.evalVoid(expression, envir, monitor);
+		}
+		
+		@Override
 		public RObject evalData(final String expression,
 				final IProgressMonitor monitor) throws CoreException {
 			return RServiSession.this.servi.evalData(expression, monitor);
@@ -139,6 +145,13 @@ public class RServiSession extends PlatformObject implements ITool {
 				final String factoryId, final int options, final int depth,
 				final IProgressMonitor monitor) throws CoreException {
 			return RServiSession.this.servi.evalData(expression, factoryId, options, depth, monitor);
+		}
+		
+		@Override
+		public RObject evalData(final String expression, final RObject envir,
+				final String factoryId, final int options, final int depth,
+				final IProgressMonitor monitor) throws CoreException {
+			return RServiSession.this.servi.evalData(expression, envir, factoryId, options, depth, monitor);
 		}
 		
 		@Override
